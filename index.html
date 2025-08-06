@@ -319,11 +319,16 @@
                 display: none; /* در موبایل پنهان شود */
             }
             .search-form-mobile {
-                display: block; /* در موبایل نمایش داده شود */
+                display: block;
                 width: 100%;
                 margin: 1rem 0 0 0;
-                padding: 0 1.5rem;
-                justify-content: flex-end; /* برای RTL */
+                padding: 0; /* حذف پدینگ افقی از اینجا */
+                justify-content: flex-end;
+            }
+            .search-form-mobile .search-form { /* فرم داخلی را هدف قرار می‌دهیم */
+                width: 100%;
+                padding: 0 1.5rem; /* پدینگ را به فرم داخلی اعمال می‌کنیم */
+                box-sizing: border-box; /* اطمینان از اینکه پدینگ در محاسبه عرض لحاظ شود */
             }
             .search-form-mobile input {
                 flex-grow: 1;
@@ -376,8 +381,7 @@
         .faq-quote-telegram ul li {
             display: flex; /* برای قرار گرفتن آیکون و متن در یک خط */
             align-items: flex-start; /* هم‌ترازی آیتم‌ها از بالا */
-            justify-content: flex-end; /* هم‌ترازی راست */
-            flex-direction: row;
+            flex-direction: row; /* مطمئن می‌شویم که جهت از راست به چپ باشد */
             text-align: right;
             margin-bottom: 0.5rem; /* فاصله بین آیتم‌ها */
             padding-bottom: 0.5rem; /* پدینگ پایین برای بوردر */
@@ -499,20 +503,21 @@
                 font-size: 2.2rem;
             }
             .faq-quote-telegram ul li {
-                flex-direction: row-reverse !important; /* آیکون راست */
-                flex-wrap: wrap;
+                flex-direction: row; /* اطمینان از جهت از راست به چپ */
+                justify-content: flex-start; /* برای محتوای RTL، شروع از راست */
+                flex-wrap: wrap; /* برای شکستن خطوط متن */
                 text-align: right;
             }
             .faq-quote-telegram ul li i {
-                margin-left: 0 !important;
-                margin-right: 0.75rem !important;
+                margin-left: 0.75rem !important; /* فاصله آیکون از متن */
+                margin-right: 0 !important; /* حذف margin-right اضافی */
             }
             .faq-quote-telegram ul li strong {
-                margin-left: 0 !important;
-                margin-right: 0.5rem !important;
+                margin-left: 0.5rem !important;
+                margin-right: 0 !important;
             }
-            .faq-content.open {
-                max-height: 4000px !important;
+            .faq-quote-telegram ul li span {
+                text-align: right;
             }
         }
 
