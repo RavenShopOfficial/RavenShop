@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیران خرید و فروش اکانت | Gaming Store</title>
+    <meta name="description" content="بهترین ادمین‌های خرید و فروش اکانت بازی - خدمات مطمئن و سریع">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Gaming Theme Colors */
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #16213e;
+            --text-primary: #ffffff;
+            --text-secondary: #a8a8a8;
+            --accent-blue: #00d4ff;
+            --accent-purple: #9d4edd;
+            --accent-green: #00ff88;
+            --telegram: #0088cc;
+            --telegram-hover: #006699;
+            
+            /* Gradients */
+            --gradient-primary: linear-gradient(135deg, #00d4ff, #9d4edd);
+            --gradient-card: linear-gradient(145deg, #16213e, #1a1a2e);
+            --gradient-telegram: linear-gradient(135deg, #0088cc, #006699);
+            --gradient-gaming: linear-gradient(135deg, #00ff88, #00d4ff);
+            
+            /* Shadows */
+            --shadow-card: 0 20px 40px rgba(0, 212, 255, 0.1);
+            --shadow-glow: 0 0 40px rgba(157, 78, 221, 0.3);
+            --shadow-telegram: 0 10px 30px rgba(0, 136, 204, 0.4);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(157, 78, 221, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(0, 255, 136, 0.05) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header Section */
+        .header {
+            text-align: center;
+            padding: 60px 0;
+            margin-bottom: 40px;
+        }
+
+        .main-title {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: bold;
+            background: var(--gradient-gaming);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            text-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #d0ff00;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .gaming-icon {
+            font-size: 3rem;
+            color: var(--accent-green);
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Admin Cards Grid */
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .admin-card {
+            background: linear-gradient(145deg, rgba(22, 33, 62, 0.20), rgba(26, 26, 46, 0.20));
+            border-radius: 24px;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            border: 1px solid rgba(0, 212, 255, 0.18);
+            box-shadow: var(--shadow-card);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+        }
+
+        .admin-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .admin-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-glow);
+            border-color: rgba(157, 78, 221, 0.4);
+        }
+
+        .admin-card:hover::before {
+            opacity: 1;
+        }
+
+        .admin-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 20px;
+            border: 3px solid rgba(0, 212, 255, 0.3);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .admin-card:hover .admin-image {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        .admin-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
+        }
+
+        .admin-card:hover .admin-name {
+            color: var(--accent-blue);
+        }
+
+        .admin-description {
+            color: rgb(162, 250, 0);
+            line-height: 1.6;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        .telegram-btn {
+            background: var(--gradient-telegram);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: var(--shadow-telegram);
+            width: 100%;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .telegram-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(0, 136, 204, 0.5);
+        }
+
+        .telegram-btn i {
+            font-size: 1.2rem;
+        }
+
+        /* Gaming Elements */
+        .gaming-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--gradient-gaming);
+            color: var(--bg-primary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-text {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        .footer-icon {
+            color: var(--accent-blue);
+            font-size: 1.5rem;
+            margin-left: 10px;
+        }
+
+        /* Image Card Styles */
+        .image-card {
+            background: #2a0057; /* Example: purple card background */
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            padding: 24px;
+            max-width: 1100px;   /* Larger for desktop */
+            min-width: 400px;   /* Optional: prevents too small on big screens */
+            margin: 40px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-card img {
+            width: 100%;
+            max-width: 700px;   /* Larger for desktop */
+            height: auto;
+            border-radius: 18px;
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            .image-card {
+                padding: 12px;
+                max-width: 95vw;
+            }
+            .image-card img {
+                max-width: 90vw;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header {
+                padding: 40px 0;
+            }
+            
+            .admin-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .admin-card {
+                padding: 30px 20px;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+        }
+
+        /* Loading Animation */
+        .admin-card {
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+        }
+
+        .admin-card:nth-child(1) { animation-delay: 0.1s; }
+        .admin-card:nth-child(2) { animation-delay: 0.2s; }
+        .admin-card:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Gaming particles background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            animation: float-particles 6s linear infinite;
+        }
+
+        @keyframes float-particles {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated particles background -->
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="gaming-icon">
+                <i class="fas fa-crow"></i>
+            </div>
+            <h1 class="main-title">تنها ادمین های رسمی ریون شاپ</h1>
+            <div class="image-card">
+                <img src="../images/Alert.webp" alt="هشدار">
+            </div>
+        </header>
+
+        <!-- Admin Cards -->
+        <main class="admin-grid">
+            <div class="admin-card">
+                <div class="gaming-badge">
+                    <i class="fas fa-crow"></i> مالک
+                </div>
+                <img src="../images/Raven.webp" alt="مالک مجموعه" class="admin-image">
+                <h3 class="admin-name">ریون | Raven</h3>
+                <p class="admin-description">
+                    تنها مالک و بنیانگذار تیم ریون شاپ ,
+                    انجام کلیه واسطه های خرید و فروش اکانت , سفارشات خرید گلد , مشاوره و پشتیبانی ,
+                    تایین قیمت اکانت ها و سایر خدمات ...
+                </p>
+                <a href="https://t.me/Raven_2447" class="telegram-btn" target="_blank">
+                    <i class="fab fa-telegram-plane"></i>
+                    <span style="direction: ltr;">@Raven_2447</span>
+                </a>
+            </div>
+
+            <div class="admin-card">
+                <div class="gaming-badge">
+                    <i class="fas fa-star"></i> ادمین کلی
+                </div>
+                <img src="../images/Ali.webp" alt="مدیر دوم" class="admin-image">
+                <h3 class="admin-name">علی اسلیر | AliSlayer</h3>
+                <p class="admin-description">
+                    ادمین کلی مجموعه ریون شاپ ,
+                    انجام واسطه های خرید و فروش اکانت , سفارشات خرید گلد , مشاوره قیمت اکانت ,
+                    ثبت اگهی های اکانت , راهنمایی درباره بازی و پشتیبانی 24 ساعته
+                </p>
+                <a href="https://t.me/AliSlayer" class="telegram-btn" target="_blank">
+                    <i class="fab fa-telegram-plane"></i>
+                    <span style="direction: ltr;">@AliSlayer</span>
+                </a>
+            </div>
+
+            <div class="admin-card">
+                <div class="gaming-badge">
+                    <i class="fas fa-crown"></i> ادمین واسطه
+                </div>
+                <img src="../images/Arian.webp" alt="مدیر سوم" class="admin-image">
+                <h3 class="admin-name">آرین | ASD</h3>
+                <p class="admin-description">
+                 ادمین خدمات واسطه اکانت ها , راهنمایی درباره بازی ها , پشتیبانی قوی و رفع مشکلات , راهنمایی درباره قیمت اکانت ها و ...
+                </p>
+                <a href="https://t.me/OlAgHgOnDe" class="telegram-btn" target="_blank">
+                    <i class="fab fa-telegram-plane"></i>
+                    <span style="direction: ltr;">@OlAgHgOnDe</span>
+                </a>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p class="footer-text">
+                سوال یا نیاز به مشاوره دارید؟ با ما در ارتباط باشید
+            </p>
+            <div>
+                <i class="fab fa-telegram-plane footer-icon"></i>
+                <a href="https://t.me/RavenShopOfficial" target="_blank" style="color: #00d4ff; text-decoration: underline;">
+                    برای مشاهده چنل اصلی کلیک کنید
+                </a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Smooth scroll and hover effects
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            
+            // Add click animation to telegram buttons
+            const telegramBtns = document.querySelectorAll('.telegram-btn');
+            telegramBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.width = ripple.style.height = size + 'px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    ripple.classList.add('ripple');
+                    
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        });
+
+        // Gaming theme interactions
+        document.querySelectorAll('.admin-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px) rotateX(5deg)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) rotateX(0)';
+            });
+        });
+    </script>
+</body>
+</html>
