@@ -236,28 +236,6 @@
             margin-left: 10px;
         }
 
-        /* Image Card Styles */
-        .image-card {
-            background: #2a0057; /* Example: purple card background */
-            border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-            padding: 24px;
-            max-width: 1100px;   /* Larger for desktop */
-            min-width: 400px;   /* Optional: prevents too small on big screens */
-            margin: 40px auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .image-card img {
-            width: 100%;
-            max-width: 700px;   /* Larger for desktop */
-            height: auto;
-            border-radius: 18px;
-            display: block;
-        }
-
         @media (max-width: 600px) {
             .image-card {
                 padding: 12px;
@@ -358,9 +336,7 @@
                 <i class="fas fa-crow"></i>
             </div>
             <h1 class="main-title">تنها ادمین های رسمی ریون شاپ</h1>
-            <div class="image-card">
-                <img src="../images/Alert.webp" alt="هشدار">
-            </div>
+            <img src="../images/Alert.webp" alt="هشدار" style="width: 100%; max-width: 700px; display: block; margin: 40px auto; border-radius: 18px;">
         </header>
 
         <!-- Admin Cards -->
