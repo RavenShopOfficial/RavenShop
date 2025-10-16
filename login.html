@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ورود و ثبت‌نام | ریون شاپ</title>
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #141421 100%);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: rgba(20, 20, 30, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 2rem 3rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            position: relative; /* برای موقعیت‌دهی به فرم‌ها */
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: hsl(45deg, 93%, 47%);
+        }
+        .form-wrapper {
+            transition: opacity 0.4s ease-in-out;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        input[type="text"], input[type="password"], input[type="email"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        input:focus {
+            outline: none;
+            border-color: hsl(45deg, 93%, 47%);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+        }
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, hsl(45deg, 93%, 47%), hsl(45deg, 100%, 60%));
+            color: #000;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+        #message {
+            text-align: center;
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+        .success { background-color: rgba(34, 197, 94, 0.2); border: 1px solid rgba(34, 197, 94, 0.5); color: #22c55e; }
+        .error { background-color: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); color: #ef4444; }
+
+        /* استایل برای لینک جابجایی */
+        .form-toggle {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        .form-toggle a {
+            color: hsl(45deg, 93%, 47%);
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .form-toggle a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- فرم ثبت‌نام -->
+        <div id="register-wrapper" class="form-wrapper">
+            <h2>ثبت‌نام کاربر جدید</h2>
+            <form onsubmit="return false;">
+                <div class="form-group">
+                    <label for="reg-username">نام کاربری:</label>
+                    <input type="text" id="reg-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-email">ایمیل:</label>
+                    <input type="email" id="reg-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-password">رمز عبور:</label>
+                    <input type="password" id="reg-password" required>
+                </div>
+                <button onclick="registerUser()">ثبت‌نام کن</button>
+            </form>
+            <div class="form-toggle">
+                قبلاً حساب کاربری دارید؟ <a onclick="showLoginForm()">وارد شوید</a>
+            </div>
+        </div>
+
+        <!-- فرم ورود -->
+        <div id="login-wrapper" class="form-wrapper" style="display: none;">
+            <h2>ورود به حساب کاربری</h2>
+            <form onsubmit="return false;">
+                <div class="form-group">
+                    <label for="login-username">نام کاربری:</label>
+                    <input type="text" id="login-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">رمز عبور:</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <button onclick="loginUser()">ورود</button>
+            </form>
+            <div class="form-toggle">
+                حساب کاربری ندارید؟ <a onclick="showRegisterForm()">یکی بسازید</a>
+            </div>
+        </div>
+
+        <!-- اینجا پیام‌های موفقیت یا خطا نمایش داده می‌شه -->
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://ravenshoplogin.bloodstrike.workers.dev';
+
+        // تابع برای نمایش فرم ورود و مخفی کردن فرم ثبت‌نام
+        function showLoginForm() {
+            const registerWrapper = document.getElementById('register-wrapper');
+            const loginWrapper = document.getElementById('login-wrapper');
+            
+            registerWrapper.style.opacity = '0';
+            setTimeout(() => {
+                registerWrapper.style.display = 'none';
+                loginWrapper.style.display = 'block';
+                setTimeout(() => {
+                    loginWrapper.style.opacity = '1';
+                }, 50); // تاخیر کوچک برای اجرای انیمیشن
+            }, 400);
+            clearMessage();
+        }
+
+        // تابع برای نمایش فرم ثبت‌نام و مخفی کردن فرم ورود
+        function showRegisterForm() {
+            const registerWrapper = document.getElementById('register-wrapper');
+            const loginWrapper = document.getElementById('login-wrapper');
+
+            loginWrapper.style.opacity = '0';
+            setTimeout(() => {
+                loginWrapper.style.display = 'none';
+                registerWrapper.style.display = 'block';
+                setTimeout(() => {
+                    registerWrapper.style.opacity = '1';
+                }, 50);
+            }, 400);
+            clearMessage();
+        }
+
+        // تابع برای پاک کردن پیام‌ها
+        function clearMessage() {
+            document.getElementById('message').innerText = '';
+            document.getElementById('message').className = '';
+        }
+
+        // تابع برای نمایش پیام به کاربر
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.innerText = text;
+            messageEl.className = type; // 'success' یا 'error'
+        }
+
+        // تابع ثبت‌نام کاربر
+        async function registerUser() {
+            const username = document.getElementById('reg-username').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+
+            if (!username || !email || !password) {
+                showMessage('لطفا تمام فیلدها را پر کنید.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(data.message, 'success');
+                    // بعد از ثبت‌نام موفق، فرم ورود رو نمایش بده
+                    setTimeout(showLoginForm, 1500); 
+                } else {
+                    showMessage(data.error, 'error');
+                }
+            } catch (error) {
+                showMessage('خطا در ارتباط با سرور. لطفا دوباره تلاش کنید.', 'error');
+            }
+        }
+
+        // تابع ورود کاربر
+        async function loginUser() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            if (!username || !password) {
+                showMessage('لطفا نام کاربری و رمز عبور را وارد کنید.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(data.message, 'success');
+                    // در اینجا می‌تونید کاربر رو به صفحه دیگری هدایت کنید
+                    // مثلا: window.location.href = '/dashboard.html';
+                } else {
+                    showMessage(data.error, 'error');
+                }
+            } catch (error) {
+                showMessage('خطا در ارتباط با سرور. لطفا دوباره تلاش کنید.', 'error');
+            }
+        }
+    </script>
+
+</body>
+</html>
