@@ -25,10 +25,14 @@
 
     <meta name="enamad" content="59007253" />
 
-    <!-- Font Awesome CDN برای آیکون‌ها -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <!-- Vazirmatn Font (اختیاری) -->
-    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet"/>
+    <!-- [تغییر 1] Font Awesome با بارگذاری غیرهمزمان (Async) برای بهینه‌سازی -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"></noscript>
+    
+    <!-- [تغییر 2] فونت Vazirmatn با بارگذاری غیرهمزمان (Async) -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css"></noscript>
+    
     <!-- Tailwind CSS CDN برای استایل‌دهی مدرن و ریسپانسیو -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -78,21 +82,15 @@
             background: linear-gradient(135deg, #0a0a0f 0%, #141421 100%);
         }
 
-        /* Enhanced Animations */
+        /* [تغییر 3] انیمیشن‌های ساده‌سازی شده برای کاهش مصرف منابع */
         @keyframes float {
-            0%, 100% { transform: translateY(0px) rotateY(0deg); }
-            50% { transform: translateY(-15px) rotateY(5deg); }
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
         }
 
         @keyframes pulse-glow {
-            0%, 100% { 
-                box-shadow: 0 0 5px currentColor, 0 0 15px currentColor;
-                filter: brightness(1);
-            }
-            50% { 
-                box-shadow: 0 0 20px currentColor, 0 0 35px currentColor, 0 0 50px currentColor;
-                filter: brightness(1.2);
-            }
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.2); }
         }
 
         @keyframes gradient-flow {
@@ -147,34 +145,27 @@
             z-index: -1;
         }
 
-        /* Glass Morphism Cards */
+        /* [تغییر 4] حذف backdrop-filter از کارت‌های عمومی برای کاهش لگ */
         .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(20, 20, 30, 0.8);
             border-radius: 20px;
             box-shadow: var(--shadow-glass);
             transition: var(--transition-smooth);
         }
 
         .glass-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(30, 30, 40, 0.9);
             transform: translateY(-8px) scale(1.02);
         }
 
         /* کارت اصلی شاپ */
         .container-shop {
             background: rgba(20, 20, 30, 0.20);
-            backdrop-filter: blur(3px);
-            -webkit-backdrop-filter: blur(25px);
+            backdrop-filter: blur(10px); /* کاهش مقدار blur */
+            -webkit-backdrop-filter: blur(10px);
             border-radius: 24px;
             border: 2px solid rgba(255, 215, 0, 0.2);
-            box-shadow: 
-                0 25px 50px -12px rgba(0, 0, 0, 0.5),
-                0 0 80px rgba(255, 215, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); /* ساده‌سازی سایه */
             padding: 2.5rem 2rem;
             text-align: center;
             position: relative;
@@ -195,12 +186,10 @@
 
         .container-shop:hover {
             transform: translateY(-10px);
-            box-shadow: 
-                0 35px 70px -12px rgba(0, 0, 0, 0.6),
-                0 0 100px rgba(255, 215, 0, 0.2);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4); /* ساده‌سازی سایه */
         }
 
-        /* لوگوی شاپ بهبود یافته */
+        /* [تغییر 5] اضافه کردن will-change برای بهینه‌سازی رندر */
         .shop-logo {
             width: 140px;
             height: 140px;
@@ -210,9 +199,8 @@
             border-image: var(--gradient-gold) 1;
             margin-bottom: 1.5rem;
             transition: var(--transition-bounce);
-            box-shadow: 
-                0 0 30px rgba(255, 215, 0, 0.4),
-                0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+            will-change: transform; /* بهینه‌سازی برای انیمیشن */
         }
 
         .shop-logo:hover {
@@ -232,6 +220,7 @@
             text-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
             animation: gradient-flow 3s ease infinite;
             background-size: 200% 200%;
+            will-change: background-position; /* بهینه‌سازی برای انیمیشن */
         }
 
         /* بخش توضیحات */
@@ -245,11 +234,9 @@
         /* ناوبار مدرن و ریسپانسیو */
         .custom-navbar {
             background: rgba(10, 10, 15, 0.95);
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(10px); /* کاهش مقدار blur */
             border-radius: 0 0 20px 20px;
-            box-shadow: 
-                0 8px 32px rgba(0, 0, 0, 0.3),
-                0 0 60px rgba(255, 215, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             z-index: 1000;
             position: sticky;
             top: 0;
@@ -393,7 +380,7 @@
             left: 0;
             right: 0;
             background: rgba(10, 10, 15, 0.98);
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(10px); /* کاهش مقدار blur */
             border-radius: 0 0 20px 20px;
             border-top: 1px solid rgba(255, 215, 0, 0.2);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -553,15 +540,12 @@
         /* بخش FAQ مدرن */
         .faq-quote-telegram {
             background: rgba(25, 30, 40, 0.40);
-            backdrop-filter: blur(15px);
             border-right: 4px solid #229ED9;
             border-radius: 20px;
             padding: 2rem;
             margin-bottom: 2rem;
             position: relative;
-            box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
             text-align: right;
             transition: var(--transition-smooth);
             overflow: hidden;
@@ -645,12 +629,9 @@
         /* شمارنده‌های مدرن */
         .counter-box {
             background: rgba(20, 25, 35, 0.8);
-            backdrop-filter: blur(15px);
             border-radius: 20px;
             padding: 2rem;
-            box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
             transition: var(--transition-bounce);
             width: 280px;
             height: 280px;
@@ -665,9 +646,7 @@
 
         .counter-box:hover {
             transform: translateY(-15px) scale(1.05);
-            box-shadow: 
-                0 30px 60px rgba(0, 0, 0, 0.4),
-                0 0 50px rgba(255, 215, 0, 0.2);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
         }
 
         .counter-box i.fas {
@@ -717,7 +696,6 @@
             margin-left: 0.5rem;
             color: #fff;
             background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
             transition: var(--transition-smooth);
         }
 
@@ -857,7 +835,7 @@
         /* فوتر */
         footer {
             background: rgba(10, 10, 15, 0.9);
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(10px); /* کاهش مقدار blur */
             border-top: 1px solid rgba(255, 215, 0, 0.2);
             box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.3);
         }
@@ -941,7 +919,12 @@
 
     <!-- کارت اصلی معرفی شاپ -->
     <main class="container-shop max-w-4xl mx-auto my-10 animate-bounce-scale">
-        <img src="images/RavenLogo.jpg" alt="لوگوی Raven Shop" class="shop-logo mx-auto mb-4 animate-float">
+        <!-- [تغییر 6] استفاده از picture برای بهینه‌سازی تصویر و lazy loading -->
+        <picture>
+            <source srcset="images/RavenLogo.webp" type="image/webp">
+            <source srcset="images/RavenLogo.jpg" type="image/jpeg">
+            <img src="images/RavenLogo.jpg" alt="لوگوی Raven Shop" class="shop-logo mx-auto mb-4 animate-float" loading="lazy">
+        </picture>
         <h1 class="main-title animate-gradient-flow">Raven Shop</h1>
         
         <section class="desc text-right text-gray-200">
@@ -964,31 +947,31 @@
                 <div id="faq-content" class="faq-content open">
                     <ul class="list-unstyled mb-4 text-right">
                         <li class="mb-3 animate-slide-in" style="animation-delay: 0.6s;">
-                            <i class="fas fa-star text-yellow-400 animate-glow"></i>
+                            <i class="fas fa-star text-yellow-400"></i>
                             <span>
                                 <strong>انحصاری و پیشرو:</strong> اولین و معتبرترین ارائه‌دهنده خدمات بلاد استرایک در ایران و جهان!
                             </span>
                         </li>
                         <li class="mb-3 animate-slide-in" style="animation-delay: 0.7s;">
-                            <i class="fas fa-brain text-blue-500 animate-glow"></i>
+                            <i class="fas fa-brain text-blue-500"></i>
                             <span>
                                 <strong>تسلط بی‌نظیر:</strong> با سابقه فعالیت از روز اول انتشار بازی، مسلط‌ترین تیم در تمام ریزه‌کاری‌های بلاد استرایک.
                             </span>
                         </li>
                         <li class="mb-3 animate-slide-in" style="animation-delay: 0.8s;">
-                            <i class="fas fa-shield-alt text-green-500 animate-glow"></i>
+                            <i class="fas fa-shield-alt text-green-500"></i>
                             <span>
                                 <strong>ضمانت 100%:</strong> تمام خدمات و اکانت‌ها با پشتوانه تضمین اصالت و امنیت.
                             </span>
                         </li>
                         <li class="mb-3 animate-slide-in" style="animation-delay: 0.9s;">
-                            <i class="fas fa-headset text-blue-400 animate-glow"></i>
+                            <i class="fas fa-headset text-blue-400"></i>
                             <span>
                                 <strong>پشتیبانی حرفه‌ای:</strong> پاسخگویی فوری و راه‌حل‌های کارشناسانه، 24 ساعته.
                             </span>
                         </li>
                         <li class="mb-3 animate-slide-in" style="animation-delay: 1s;">
-                            <i class="fas fa-trophy text-yellow-400 animate-glow"></i>
+                            <i class="fas fa-trophy text-yellow-400"></i>
                             <span>
                                 <strong>اعتبار اثبات‌شده:</strong> رکورددار بیشترین معاملات موفق و مشتریان وفادار در حوزه بلاد استرایک.
                             </span>
@@ -1023,7 +1006,7 @@
                         <i class="fas fa-gamepad text-red-500 ml-2"></i>
                         <span class="italic text-xl">ما Blood Strike را نفس می‌کشیم!</span>
                         <br>
-                        <small class="text-gray-400">— تیم ریون شاپ <i class="fas fa-star text-yellow-400 mr-1 animate-glow"></i></small>
+                        <small class="text-gray-400">— تیم ریون شاپ <i class="fas fa-star text-yellow-400 mr-1"></i></small>
                     </blockquote>
                     
                     <hr class="border-gray-600 my-5" style="border-image: var(--gradient-gold) 1;">
@@ -1161,10 +1144,10 @@
 
     <!-- اسکریپت‌های جاوا اسکریپت سفارشی -->
     <script>
-        // تنظیمات و اجرای Particles.js بهبود یافته
+        // [تغییر 7] تنظیمات و اجرای Particles.js با تعداد ذرات کمتر
         particlesJS('particles-js', {
             "particles": {
-                "number": { "value": 100, "density": { "enable": true, "value_area": 800 } },
+                "number": { "value": 50, "density": { "enable": true, "value_area": 800 } }, // کاهش تعداد ذرات
                 "color": { "value": ["#00ffff", "#ffd700", "#ff00ff"] },
                 "shape": { 
                     "type": ["circle", "triangle"],
@@ -1224,7 +1207,12 @@
             "retina_detect": true
         });
 
-        // اسکریپت شمارنده با انیمیشن بهبود یافته
+        // [تغییر 8] غیرفعال کردن ذرات در موبایل برای بهینه‌سازی
+        if (window.innerWidth < 768) {
+            document.getElementById('particles-js').style.display = 'none';
+        }
+
+        // [تغییر 9] اسکریپت شمارنده با انیمیشن بهینه‌سازی شده با requestAnimationFrame
         document.querySelectorAll('.counter').forEach(counter => {
             const animateCounter = () => {
                 const target = +counter.getAttribute('data-target');
@@ -1247,7 +1235,7 @@
                     count += step;
                     if (count < target) {
                         counter.textContent = count.toLocaleString('fa');
-                        setTimeout(updateCounter, stepTime);
+                        requestAnimationFrame(updateCounter); // استفاده از requestAnimationFrame
                     } else {
                         counter.textContent = target.toLocaleString('fa');
                         // اضافه کردن انیمیشن پالس در انتها
@@ -1270,7 +1258,7 @@
             }
         });
 
-        // اسکریپت جستجو بهبود یافته
+        // [تغییر 10] اسکریپت جستجو بهبود یافته با عملکرد بهتر
         function setupSearchForm(formId) {
             document.getElementById(formId).addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -1286,6 +1274,10 @@
                 if (!term || term.toLowerCase() === 'raven shop' || term.toLowerCase() === 'ریون شاپ | raven shop') return;
 
                 let firstHighlight = null;
+
+                // محدود کردن جستجو به بخش اصلی برای بهینه‌سازی
+                const searchContainer = document.querySelector('.container-shop');
+                if (!searchContainer) return;
 
                 function highlightText(node) {
                     if (node.nodeType === 3) {
@@ -1320,7 +1312,7 @@
                         Array.from(node.childNodes).forEach(highlightText);
                     }
                 }
-                highlightText(document.body);
+                highlightText(searchContainer);
 
                 if (firstHighlight) {
                     firstHighlight.scrollIntoView({behavior: "smooth", block: "center"});
