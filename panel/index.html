@@ -73,7 +73,7 @@
    ----------------------- */
 
 // Cloudflare Worker URL - این را با آدرس Worker خود جایگزین کنید
-const API_BASE = 'https://ravenshoppanel.bloodstrike.workers.dev/';
+const API_BASE = 'https://ravenshoppanel.bloodstrike.workers.dev';
 
 class RavenPanel {
   constructor(){
@@ -154,8 +154,12 @@ class RavenPanel {
       config.body = JSON.stringify(data);
     }
 
-    const response = await fetch(`${API_BASE}${endpoint}`, config);
-    
+    // Build URL safely
+    const url = new URL(endpoint, API_BASE).toString();
+    console.debug('[apiCall] Fetching', method, url);
+
+    const response = await fetch(url, config);
+
     if(response.status === 401){
       localStorage.removeItem('raven_token');
       this.state.token = null;
@@ -167,6 +171,7 @@ class RavenPanel {
 
     if(!response.ok){
       const error = await response.json().catch(() => ({}));
+      console.debug('[apiCall] Response error', response.status, error);
       throw new Error(error.error || error.message || `HTTP ${response.status}`);
     }
 
