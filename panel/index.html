@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Raven Panel - مدیریت حساب‌های بازی</title>
+    <!-- Tailwind فقط برای ظاهر سریع (اختیاری) -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root{
+            --primary:#6366f1;
+            --primary-dark:#4f46e5;
+            --background:#0f172a;
+            --surface:#1e293b;
+            --border:#334155;
+            --text:#f1f5f9;
+            --text-muted:#94a3b8;
+            --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        }
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{
+            font-family: 'Segoe UI', Tahoma, Roboto, "Vazirmatn", sans-serif;
+            background:var(--background);
+            color:var(--text);
+            min-height:100vh;
+            direction:rtl;
+            -webkit-font-smoothing:antialiased;
+        }
+        .glass-effect{
+            background:rgba(30,41,59,0.75);
+            border:1px solid var(--border);
+            border-radius:1rem;
+            backdrop-filter: blur(6px);
+        }
+        .gradient-bg{background:var(--gradient)}
+        .input-field{
+            background:transparent;border:1px solid var(--border);color:var(--text);
+            padding:0.75rem 1rem;border-radius:0.5rem;width:100%;
+        }
+        .input-field:focus{outline:none;box-shadow:0 0 0 3px rgba(99,102,241,0.12)}
+        .btn-primary{
+            background:var(--primary);color:white;padding:.75rem 1rem;border-radius:.6rem;border:0;font-weight:700;
+            cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+        }
+        .btn-primary[disabled]{opacity:.5;cursor:not-allowed}
+        .server-badge{padding:.25rem .75rem;border-radius:999px;font-weight:700}
+        .status-online{width:.75rem;height:.75rem;border-radius:50%;background:#10b981}
+        .status-offline{width:.75rem;height:.75rem;border-radius:50%;background:#6b7280}
+        .user-card{transition:all .18s ease;cursor:pointer}
+        .user-card:hover{transform:translateY(-6px);box-shadow:0 10px 30px rgba(0,0,0,.6)}
+        .loading-spinner{border:2px solid transparent;border-top:2px solid currentColor;border-radius:50%;width:1.25rem;height:1.25rem;animation:spin 1s linear infinite}
+        @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+        .fade-in{animation:fadeIn .28s ease}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+        .count-badge{background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:999px;font-weight:700}
+        @media (max-width:960px){ .layout { padding:18px } }
+    </style>
+</head>
+<body>
+<!--
+  Raven Panel - single file
+  NOTE: set your backend URL here:
+  const API_BASE = 'https://YOUR-WORKER-URL.workers.dev'
+  The frontend will call endpoints described in the API contract at the bottom of this file.
+-->
+<div id="app"></div>
+
+<script>
+/* -----------------------
+   Raven Panel (vanilla JS)
+   - Fixed: submit disabled behavior
+   - Fixed: input/change handlers to update state immediately
+   - Fallback: localStorage when API unreachable
+   - API_BASE configurable below
+   ----------------------- */
+
+const API_BASE = 'https://YOUR-WORKER-URL.workers.dev'; // <<-- set your worker URL here
+
+class RavenPanel {
+  constructor(){
+    this.state = {
+      isLogin: true,
+      showPassword: false,
+      isLoggedIn: false,
+      currentUser: null,
+      users: [],
+      selectedServer: 'all',
+      selectedUser: null,
+      loading: false,
+      formData: {
+        username: '',
+        email: '',
+        gameId: '',
+        server: 'ASIA',
+        level: 1,
+        rank: 'Bronze',
+        password: ''
+      }
+    };
+
+    this.servers = [
+      { id: 'ASIA', name: 'ASIA', color:'#ef4444' },
+      { id: 'EU-MENA', name: 'EU-MENA', color:'#3b82f6' },
+      { id: 'AMERICAS', name:'AMERICAS', color:'#10b981' },
+    ];
+
+    this.ranks = ['Bronze','Silver','Gold','Platinum','Diamond','Master','Legend','Mythic'];
+
+    this.init();
+  }
+
+  init(){
+    this.loadFromLocalStorage();
+    this.render();
+    this.setupEventListeners();
+  }
+
+  /* ---------- storage ---------- */
+  loadFromLocalStorage(){
+    const s = localStorage.getItem('gameUsers');
+    if(s){
+      try{ this.state.users = JSON.parse(s); }catch(e){ this.state.users = []; }
+    } else {
+      const demo = [
+        { id: 1, username:'SkyStriker', email:'sky@example.com', gameId:'SKY001', server:'ASIA', level:47, rank:'Diamond', joinDate:'2023-01-15', lastActive:'2024-01-20', status:'online' },
+        { id: 2, username:'ShadowRaven', email:'shadow@example.com', gameId:'SHD002', server:'EU-MENA', level:41, rank:'Master', joinDate:'2023-02-20', lastActive:'2024-01-19', status:'offline' },
+        { id: 3, username:'GreenBlade', email:'green@example.com', gameId:'GRN003', server:'AMERICAS', level:44, rank:'Platinum', joinDate:'2023-03-10', lastActive:'2024-01-18', status:'online' }
+      ];
+      this.state.users = demo;
+      localStorage.setItem('gameUsers', JSON.stringify(demo));
+    }
+  }
+
+  saveUsersToLocal(users){
+    try{
+      localStorage.setItem('gameUsers', JSON.stringify(users));
+    }catch(e){ console.warn('Could not save to localStorage', e); }
+  }
+
+  /* ---------- events ---------- */
+  setupEventListeners(){
+    // Delegated clicks for data-action
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-action]');
+      if(!btn) return;
+      e.preventDefault();
+      const action = btn.dataset.action;
+      this.handleAction(action, e);
+    });
+
+    // input (for text/number) and change (for select)
+    document.addEventListener('input', (e) => {
+      if(e.target && e.target.matches('[data-input]')) {
+        const key = e.target.dataset.input;
+        this.handleInput(key, e.target.value, e.target);
+      }
+    });
+    document.addEventListener('change', (e) => {
+      if(e.target && e.target.matches('[data-input]')) {
+        const key = e.target.dataset.input;
+        this.handleInput(key, e.target.value, e.target);
+      }
+    });
+
+    // submit (form)
+    document.addEventListener('submit', (e) => {
+      if(e.target && e.target.matches('#auth-form')){
+        e.preventDefault();
+        this.handleSubmit();
+      }
+    });
+  }
+
+  handleAction(action, event){
+    switch(action){
+      case 'toggle-auth':
+        this.state.isLogin = !this.state.isLogin;
+        // clear password when switching for safety
+        this.state.formData.password = '';
+        this.render();
+        break;
+      case 'toggle-password':
+        this.state.showPassword = !this.state.showPassword;
+        this.render();
+        break;
+      case 'logout':
+        this.state.isLoggedIn = false;
+        this.state.currentUser = null;
+        this.render();
+        break;
+      case 'select-server':
+        const srv = event.currentTarget.dataset.server;
+        this.state.selectedServer = srv || 'all';
+        this.fetchUsers();
+        break;
+      case 'view-user':
+        const id = parseInt(event.currentTarget.dataset.userId);
+        this.viewUser(id);
+        break;
+      case 'back-to-users':
+        this.state.selectedUser = null;
+        this.render();
+        break;
+      default:
+        console.warn('Unknown action', action);
+    }
+  }
+
+  handleInput(key, value){
+    if(!key) return;
+    if(key === 'level'){
+      const n = parseInt(value) || 1;
+      this.state.formData.level = Math.min(50, Math.max(1, n));
+    } else {
+      this.state.formData[key] = value;
+    }
+  }
+
+  /* ---------- submit (login/register) ---------- */
+  async handleSubmit(){
+    // basic client validation
+    if(!this.state.formData.username || !this.state.formData.password){
+      alert('لطفاً نام کاربری/ایمیل و رمز را وارد کنید.');
+      return;
+    }
+    if(!this.state.isLogin && !this.validateEmail(this.state.formData.email)){
+      alert('لطفاً یک ایمیل معتبر وارد کنید.');
+      return;
+    }
+    if(!this.state.isLogin && this.state.formData.password.length < 6){
+      alert('رمز عبور باید حداقل 6 کاراکتر باشد.');
+      return;
+    }
+
+    this.state.loading = true;
+    this.render();
+
+    const endpoint = this.state.isLogin ? '/api/login' : '/api/register';
+    const payload = this.state.isLogin
+      ? { identifier: this.state.formData.username, password: this.state.formData.password }
+      : {
+          username: this.state.formData.username,
+          email: this.state.formData.email,
+          accountId: this.state.formData.gameId,
+          server: this.state.formData.server,
+          password: this.state.formData.password
+        };
+
+    try {
+      const res = await fetch(`${API_BASE}${endpoint}`, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if(!res.ok){
+        // try to read error JSON
+        let err = null;
+        try{ err = await res.json(); }catch(e){}
+        const msg = (err && (err.error || err.message)) ? (err.error||err.message) : `خطا: ${res.status}`;
+        alert(msg);
+        // if server unreachable (5xx) fallback to local
+        if(res.status >= 500) throw new Error('server error');
+        this.state.loading = false;
+        this.render();
+        return;
+      }
+
+      const data = await res.json();
+      if(data && data.success){
+        // store token if provided (demo: localStorage)
+        if(data.token){
+          localStorage.setItem('raven_token', data.token);
+        }
+        // set current user from response or build from form
+        this.state.currentUser = data.user || {
+          id: Date.now(),
+          username: this.state.formData.username,
+          email: this.state.formData.email,
+          gameId: this.state.formData.gameId,
+          server: this.state.formData.server,
+          level: this.state.formData.level,
+          rank: this.state.formData.rank
+        };
+        this.state.isLoggedIn = true;
+        // if register, add to local fallback storage
+        if(!this.state.isLogin) this.addUserToLocalStorage();
+      } else {
+        alert(data && (data.error || data.message) ? (data.error || data.message) : 'عملیات با خطا مواجه شد.');
+      }
+    } catch(err){
+      console.warn('API failed, using fallback local mode', err);
+      // fallback: add user locally and login
+      if(!this.state.isLogin) this.addUserToLocalStorage();
+      this.state.currentUser = {
+        id: Date.now(),
+        username: this.state.formData.username,
+        email: this.state.formData.email,
+        gameId: this.state.formData.gameId,
+        server: this.state.formData.server,
+        level: this.state.formData.level,
+        rank: this.state.formData.rank
+      };
+      this.state.isLoggedIn = true;
+      // TODO: provide a non-blocking UI notice to the user about offline mode
+      console.info('Running in offline/demo mode (localStorage).');
+    } finally {
+      this.state.loading = false;
+      this.render();
+    }
+  }
+
+  addUserToLocalStorage(){
+    const newUser = {
+      id: Date.now(),
+      username: this.state.formData.username,
+      email: this.state.formData.email || '',
+      gameId: this.state.formData.gameId || '',
+      server: this.state.formData.server || 'ASIA',
+      level: this.state.formData.level || 1,
+      rank: this.state.formData.rank || 'Bronze',
+      joinDate: new Date().toISOString().split('T')[0],
+      lastActive: new Date().toISOString().split('T')[0],
+      status: 'online'
+    };
+    const s = localStorage.getItem('gameUsers');
+    const all = s ? JSON.parse(s) : [];
+    all.unshift(newUser);
+    this.saveUsersToLocal(all);
+    this.state.users = all;
+  }
+
+  /* ---------- fetch users (with fallback) ---------- */
+  async fetchUsers(){
+    this.state.loading = true;
+    this.render();
+    try{
+      const q = this.state.selectedServer && this.state.selectedServer !== 'all' ? `?server=${encodeURIComponent(this.state.selectedServer)}` : '';
+      const res = await fetch(`${API_BASE}/api/users${q}`, { headers:{ 'Content-Type':'application/json' }});
+      if(!res.ok) throw new Error('network');
+      const data = await res.json();
+      if(data && data.success){
+        this.state.users = data.users;
+      } else {
+        throw new Error('invalid response');
+      }
+    }catch(err){
+      console.warn('fetchUsers failed, using local fallback', err);
+      const s = localStorage.getItem('gameUsers');
+      const all = s ? JSON.parse(s) : [];
+      if(this.state.selectedServer && this.state.selectedServer !== 'all'){
+        this.state.users = all.filter(u => (u.server === this.state.selectedServer));
+      } else {
+        this.state.users = all;
+      }
+    } finally {
+      this.state.loading = false;
+      this.render();
+    }
+  }
+
+  viewUser(id){
+    const u = this.state.users.find(x => parseInt(x.id) === parseInt(id));
+    if(u){
+      this.state.selectedUser = u;
+      this.updateUserLastActive(id);
+      this.render();
+    } else {
+      alert('پروفایل پیدا نشد.');
+    }
+  }
+
+  updateUserLastActive(userId){
+    const s = localStorage.getItem('gameUsers');
+    if(!s) return;
+    let all = JSON.parse(s);
+    const idx = all.findIndex(x => parseInt(x.id) === parseInt(userId));
+    if(idx !== -1){
+      all[idx].lastActive = new Date().toISOString().split('T')[0];
+      all[idx].status = 'online';
+      this.saveUsersToLocal(all);
+      this.state.users = all;
+    }
+  }
+
+  /* ---------- rendering ---------- */
+  sanitizeClassName(str){
+    return (str || '').toString().toLowerCase().replace(/[^a-z0-9]+/g,'-');
+  }
+
+  render(){
+    const app = document.getElementById('app');
+    if(this.state.selectedUser){
+      app.innerHTML = this.renderUserProfile();
+    } else if(this.state.isLoggedIn){
+      app.innerHTML = this.renderDashboard();
+    } else {
+      app.innerHTML = this.renderAuth();
+    }
+
+    // recreate icons
+    if(typeof lucide !== 'undefined') lucide.createIcons();
+
+    // ensure submit button disabled state matches loading (safety)
+    const submitBtn = document.querySelector('#app button[type="submit"]');
+    if(submitBtn) submitBtn.disabled = !!this.state.loading;
+  }
+
+  renderAuth(){
+    const showPwd = this.state.showPassword;
+    return `
+      <div class="min-h-screen flex items-center justify-center p-6 fade-in layout">
+        <div class="w-full max-w-md">
+          <div class="text-center mb-6">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center gradient-bg">
+              <i data-lucide="gamepad-2" class="w-8 h-8 text-white"></i>
+            </div>
+            <h1 class="text-3xl font-bold mb-2">Raven Panel</h1>
+            <p class="text-gray-400">مدیریت حساب‌های بازی</p>
+          </div>
+
+          <div class="glass-effect p-6">
+            <div class="flex mb-4 rounded-lg p-1">
+              <button data-action="toggle-auth" class="flex-1 py-2 px-4 rounded-md font-medium"
+                style="background:${this.state.isLogin ? 'var(--primary)' : 'transparent'}; color:${this.state.isLogin ? '#fff' : 'var(--text-muted)'}">
+                ورود
+              </button>
+              <button data-action="toggle-auth" class="flex-1 py-2 px-4 rounded-md font-medium"
+                style="background:${!this.state.isLogin ? 'var(--primary)' : 'transparent'}; color:${!this.state.isLogin ? '#fff' : 'var(--text-muted)'}">
+                ثبت‌نام
+              </button>
+            </div>
+
+            <form id="auth-form" class="space-y-4">
+              ${ this.state.isLogin ? this.renderLoginFields() : this.renderRegisterFields() }
+
+              <div>
+                <label class="block text-sm mb-2" for="password">رمز عبور</label>
+                <div style="position:relative">
+                  <input
+                    id="password"
+                    type="${ showPwd ? 'text' : 'password' }"
+                    name="password"
+                    data-input="password"
+                    value="${this.escapeHtml(this.state.formData.password)}"
+                    class="input-field pr-10"
+                    placeholder="رمز عبور خود را وارد کنید"
+                    required
+                  />
+                  <button type="button" data-action="toggle-password" style="position:absolute;left:.5rem;top:.4rem;border:0;background:transparent;color:var(--text-muted);">
+                    <i data-lucide="${ showPwd ? 'eye-off' : 'eye' }" class="w-5 h-5"></i>
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <button type="submit" ${ this.state.loading ? 'disabled' : '' } class="btn-primary w-full">
+                  ${ this.state.loading ? '<span class="loading-spinner"></span>' : '' }
+                  <span>${ this.state.isLogin ? 'ورود' : 'ثبت‌نام' }</span>
+                </button>
+              </div>
+            </form>
+
+            <div class="mt-4 text-center">
+              <p class="text-gray-400">
+                ${ this.state.isLogin ? 'حساب کاربری ندارید؟' : 'قبلاً ثبت‌نام کرده‌اید؟' }
+                <button data-action="toggle-auth" class="font-medium mr-2" style="color:var(--primary)">${ this.state.isLogin ? 'ایجاد کنید' : 'وارد شوید' }</button>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  renderLoginFields(){
+    return `
+      <div>
+        <label class="block text-sm mb-2">ایمیل یا نام کاربری</label>
+        <div style="position:relative">
+          <input type="text" name="username" data-input="username" value="${this.escapeHtml(this.state.formData.username)}" class="input-field" placeholder="نام کاربری یا ایمیل خود را وارد کنید" required />
+        </div>
+      </div>
+    `;
+  }
+
+  renderRegisterFields(){
+    // build options with selected attribute for server and rank
+    const serverOptions = this.servers.map(s => `<option value="${s.id}" ${ s.id === this.state.formData.server ? 'selected' : '' }>${s.name}</option>`).join('');
+    const rankOptions = this.ranks.map(r => `<option value="${r}" ${ r === this.state.formData.rank ? 'selected' : '' }>${r}</option>`).join('');
+    return `
+      <div>
+        <label class="block text-sm mb-2">نام کاربری</label>
+        <input type="text" name="username" data-input="username" value="${this.escapeHtml(this.state.formData.username)}" class="input-field" placeholder="نام کاربری" required />
+      </div>
+      <div>
+        <label class="block text-sm mb-2">ایمیل</label>
+        <input type="email" name="email" data-input="email" value="${this.escapeHtml(this.state.formData.email)}" class="input-field" placeholder="ایمیل" required />
+      </div>
+      <div>
+        <label class="block text-sm mb-2">شناسه بازی</label>
+        <input type="text" name="gameId" data-input="gameId" value="${this.escapeHtml(this.state.formData.gameId)}" class="input-field" placeholder="شناسه بازی" required />
+      </div>
+      <div>
+        <label class="block text-sm mb-2">سرور</label>
+        <select name="server" data-input="server" class="input-field">
+          ${serverOptions}
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm mb-2">سطح</label>
+        <input type="number" name="level" data-input="level" min="1" max="50" value="${this.escapeHtml(this.state.formData.level)}" class="input-field" />
+      </div>
+      <div>
+        <label class="block text-sm mb-2">رنک</label>
+        <select name="rank" data-input="rank" class="input-field">
+          ${rankOptions}
+        </select>
+      </div>
+    `;
+  }
+
+  renderDashboard(){
+    const serverButtons = this.servers.map(s => {
+      const active = this.state.selectedServer === s.id;
+      return `<button data-action="select-server" data-server="${s.id}" class="server-badge" style="margin-left:.5rem;background:${active ? s.color : 'transparent'};color:${active ? '#fff' : s.color}">${s.name}</button>`;
+    }).join('');
+    return `
+      <div class="min-h-screen p-4 fade-in layout">
+        <header class="glass-effect p-4 mb-6">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="display:flex;gap:1rem;align-items:center">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center gradient-bg"><i data-lucide="gamepad-2" class="w-6 h-6 text-white"></i></div>
+              <div>
+                <h1 class="text-2xl font-bold">Raven Panel</h1>
+                <p class="text-gray-400">مدیریت حساب‌های بازی</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:1rem;align-items:center">
+              <div style="text-align:left">
+                <p class="text-sm text-gray-400">خوش آمدید</p>
+                <p class="font-medium">${ this.state.currentUser ? this.escapeHtml(this.state.currentUser.username) : 'کاربر' }</p>
+              </div>
+              <button data-action="logout" class="btn-primary">خروج</button>
+            </div>
+          </div>
+        </header>
+
+        <main>
+          <div class="glass-effect p-6 mb-6" style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <h2 class="text-xl font-bold">لیست حساب‌ها</h2>
+              <p class="text-gray-400">فیلتر بر اساس سرور</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:.6rem">
+              ${serverButtons}
+              <button data-action="select-server" data-server="all" class="server-badge" style="background:${this.state.selectedServer === 'all' ? 'var(--primary)' : 'transparent'}; color:${this.state.selectedServer === 'all' ? '#fff' : 'var(--primary)'}">همه</button>
+              <div class="count-badge" style="margin-right:.8rem">${this.state.users.length}</div>
+            </div>
+          </div>
+
+          ${ this.state.loading ? `<div style="display:flex;justify-content:center;align-items:center;height:160px"><div class="loading-spinner" style="width:3rem;height:3rem"></div></div>` : `
+            <div class="user-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              ${ this.state.users.map(u => this.renderUserCard(u)).join('') }
+            </div>
+          `}
+        </main>
+      </div>
+    `;
+  }
+
+  renderUserCard(user){
+    const serverClass = this.sanitizeClassName(user.server || 'unknown');
+    const rankClass = this.sanitizeClassName(user.rank || 'bronze');
+    return `
+      <div class="user-card glass-effect p-5" data-action="view-user" data-user-id="${user.id}">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:.75rem">
+          <div style="display:flex;gap:.75rem;align-items:center">
+            <div class="w-12 h-12 rounded-full gradient-bg flex items-center justify-center"><i data-lucide="user" class="w-5 h-5 text-white"></i></div>
+            <div>
+              <div style="font-weight:800">${this.escapeHtml(user.username)}</div>
+              <div style="color:var(--text-muted);font-size:.9rem">${this.escapeHtml(user.email || '')}</div>
+            </div>
+          </div>
+          <div style="text-align:left">
+            <div class="${user.status === 'online' ? 'status-online' : 'status-offline'}"></div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:.5rem">
+          <div style="display:flex;justify-content:space-between;color:var(--text-muted)"><span>سرور:</span><span class="server-badge">${this.escapeHtml(user.server)}</span></div>
+          <div style="display:flex;justify-content:space-between;color:var(--text-muted)"><span>سطح:</span><span>Lv.${this.escapeHtml(user.level)}</span></div>
+          <div style="display:flex;justify-content:space-between;color:var(--text-muted)"><span>رنک:</span><span class="${rankClass}">${this.escapeHtml(user.rank)}</span></div>
+          <div style="display:flex;justify-content:space-between;color:var(--text-muted)"><span>آخرین فعالیت:</span><span>${this.escapeHtml(user.lastActive || '')}</span></div>
+        </div>
+
+        <button data-action="view-user" data-user-id="${user.id}" class="btn-primary w-full" style="margin-top:.8rem">مشاهده پروفایل</button>
+      </div>
+    `;
+  }
+
+  renderUserProfile(){
+    const u = this.state.selectedUser;
+    if(!u) return '<div>کاربر پیدا نشد</div>';
+    return `
+      <div class="min-h-screen p-4 fade-in layout">
+        <header class="glass-effect p-4 mb-6">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="display:flex;gap:1rem;align-items:center">
+              <button data-action="back-to-users" class="btn-primary"><i data-lucide="arrow-right" class="w-4 h-4"></i>بازگشت</button>
+              <div>
+                <h1 class="text-2xl font-bold">پروفایل کاربر</h1>
+                <p class="text-gray-400">${this.escapeHtml(u.username)}</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:1rem;align-items:center">
+              <div style="text-align:left"><p class="text-sm text-gray-400">خوش آمدید</p><p class="font-medium">${this.state.currentUser ? this.escapeHtml(this.state.currentUser.username) : 'کاربر'}</p></div>
+              <button data-action="logout" class="btn-primary">خروج</button>
+            </div>
+          </div>
+        </header>
+
+        <main class="max-w-4xl mx-auto">
+          <div class="glass-effect p-6">
+            <div style="display:flex;gap:1rem;flex-direction:column">
+              <div style="display:flex;gap:1.5rem;align-items:center">
+                <div style="width:96px;height:96px;border-radius:999px" class="gradient-bg flex items-center justify-center"><i data-lucide="user" class="w-12 h-12 text-white"></i></div>
+                <div>
+                  <div style="font-weight:800;font-size:1.2rem">${this.escapeHtml(u.username)}</div>
+                  <div style="color:var(--text-muted)">${this.escapeHtml(u.email || '')}</div>
+                </div>
+              </div>
+
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem">
+                <div>
+                  <div style="color:var(--text-muted)">شناسه بازی</div><div style="font-weight:700">${this.escapeHtml(u.gameId)}</div>
+                </div>
+                <div>
+                  <div style="color:var(--text-muted)">سرور</div><div style="font-weight:700">${this.escapeHtml(u.server)}</div>
+                </div>
+                <div>
+                  <div style="color:var(--text-muted)">سطح</div><div style="font-weight:700">Lv.${this.escapeHtml(u.level)}</div>
+                </div>
+                <div>
+                  <div style="color:var(--text-muted)">رنک</div><div style="font-weight:700">${this.escapeHtml(u.rank)}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    `;
+  }
+
+  escapeHtml(s){
+    if(s === undefined || s === null) return '';
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  validateEmail(email){
+    if(!email) return false;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+}
+
+/* Initialize app */
+document.addEventListener('DOMContentLoaded', () => {
+  new RavenPanel();
+});
+</script>
+
+<!--
+  --------------------------
+  API CONTRACT (copy this to your worker implementation)
+  --------------------------
+  Base: API_BASE (see top of script)
+
+  1) POST /api/register
+    Request JSON:
+      {
+        "username": "string",
+        "email": "string",
+        "accountId": "string",
+        "server": "EU-MENA|ASIA|AMERICAS",
+        "password": "string"
+      }
+    Responses:
+      201 Created
+      {
+        "success": true,
+        "user": {
+          "id":"string",
+          "username":"string",
+          "email":"string",
+          "accountId":"string",
+          "server":"string",
+          "createdAt":"ISO8601"
+        },
+        "token":"string" // optional
+      }
+      400 Bad Request -> { "success":false, "error":"validation message" }
+      409 Conflict -> { "success":false, "error":"username/email/accountId exists" }
+
+  2) POST /api/login
+    Request JSON:
+      {
+        "identifier": "username-or-email",
+        "password": "string"
+      }
+    Responses:
+      200 OK
+      {
+        "success": true,
+        "user": { "id":"", "username":"", "email":"", "accountId":"", "server":"", "createdAt":"" },
+        "token":"string"
+      }
+      401 Unauthorized -> { "success":false, "error":"invalid credentials" }
+
+  3) GET /api/users?server={server}&q={query}
+    Response 200:
+      {
+        "success": true,
+        "total": 123,
+        "users": [
+          { "id":"", "username":"", "email":"", "accountId":"", "server":"", "createdAt":"" }
+        ]
+      }
+
+  4) GET /api/users/{id}
+    200 -> { "success":true, "user":{...} }
+    404 -> { "success":false, "error":"not found" }
+
+  5) POST /api/logout
+    200 -> { "success": true }
+
+  SQL schema (D1 compatible):
+    CREATE TABLE users (
+      id TEXT PRIMARY KEY,
+      username TEXT UNIQUE NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      accountId TEXT UNIQUE NOT NULL,
+      server TEXT NOT NULL,
+      passwordHash TEXT NOT NULL,
+      createdAt TEXT NOT NULL
+    );
+
+  Example curl:
+    curl -X POST "$API_BASE/register" -H "Content-Type: application/json" -d '{"username":"Ali","email":"a@mail.test","accountId":"ALI01","server":"ASIA","password":"secret"}'
+    curl -X POST "$API_BASE/login" -H "Content-Type: application/json" -d '{"identifier":"Ali","password":"secret"}'
+    curl "$API_BASE/users?server=ASIA&q=ali"
+
+  Security notes:
+    - Hash passwords SERVER-SIDE (bcrypt) before storing in D1.
+    - Use HTTPS and prefer httpOnly secure cookies for tokens in production.
+    - Add CORS headers appropriate for your frontend origin.
+-->
+
+</body>
+</html>
