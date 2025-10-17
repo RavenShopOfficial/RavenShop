@@ -1,659 +1,933 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Raven Panel - مدیریت حساب‌های بازی</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raven Panel | Gaming Community Portal</title>
+    <!-- Using Inter font for modern aesthetic -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root{
-            --primary:#6366f1;
-            --primary-dark:#4f46e5;
-            --background:#0f172a;
-            --surface:#1e293b;
-            --border:#334155;
-            --text:#f1f5f9;
-            --text-muted:#94a3b8;
-            --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        /* --- GLOBAL STYLES & RESET --- */
+        :root {
+            --color-dark-bg: #0d0d15; /* Deeper dark background */
+            --color-card-bg: #1c1c27;
+            --color-primary-accent: #00ff66; /* Lime Green */
+            --color-primary-glow: rgba(0, 255, 102, 0.7); /* Stronger glow */
+            --color-text-light: #e0e0e0;
+            --color-text-subtle: #888899;
+            --transition-speed: 0.4s;
         }
-        *{box-sizing:border-box;margin:0;padding:0}
-        body{
-            font-family: 'Segoe UI', Tahoma, Roboto, "Vazirmatn", sans-serif;
-            background:var(--background);
-            color:var(--text);
-            min-height:100vh;
-            direction:rtl;
-            -webkit-font-smoothing:antialiased;
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
         }
-        .glass-effect{
-            background:rgba(30,41,59,0.75);
-            border:1px solid var(--border);
-            border-radius:1rem;
-            backdrop-filter: blur(6px);
+
+        body {
+            background-color: var(--color-dark-bg);
+            color: var(--color-text-light);
+            min-height: 100vh;
+            /* CRITICAL FIX: PERFECT VERTICAL AND HORIZONTAL CENTERING */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            transition: background-color var(--transition-speed);
         }
-        .gradient-bg{background:var(--gradient)}
-        .input-field{
-            background:transparent;border:1px solid var(--border);color:var(--text);
-            padding:0.75rem 1rem;border-radius:0.5rem;width:100%;
+
+        /* --- UTILITY CLASSES --- */
+        .hidden {
+            display: none !important;
         }
-        .input-field:focus{outline:none;box-shadow:0 0 0 3px rgba(99,102,241,0.12)}
-        .btn-primary{
-            background:var(--primary);color:white;padding:.75rem 1rem;border-radius:.6rem;border:0;font-weight:700;
-            cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+        
+        .fade-out {
+            opacity: 0 !important;
+            transform: scale(0.95);
+            pointer-events: none;
         }
-        .btn-primary[disabled]{opacity:.5;cursor:not-allowed}
-        .server-badge{padding:.25rem .75rem;border-radius:999px;font-weight:700}
-        .status-online{width:.75rem;height:.75rem;border-radius:50%;background:#10b981}
-        .status-offline{width:.75rem;height:.75rem;border-radius:50%;background:#6b7280}
-        .user-card{transition:all .18s ease;cursor:pointer}
-        .user-card:hover{transform:translateY(-6px);box-shadow:0 10px 30px rgba(0,0,0,.6)}
-        .loading-spinner{border:2px solid transparent;border-top:2px solid currentColor;border-radius:50%;width:1.25rem;height:1.25rem;animation:spin 1s linear infinite}
-        @keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
-        .fade-in{animation:fadeIn .28s ease}
-        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-        .count-badge{background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:999px;font-weight:700}
-        .notification{
-            position:fixed;top:20px;left:20px;z-index:9999;padding:12px 20px;border-radius:8px;
-            color:white;font-weight:500;animation:slideIn 0.3s ease;max-width:300px;
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
         }
-        .notification.success{background:#10b981}
-        .notification.error{background:#ef4444}
-        .notification.info{background:#3b82f6}
-        @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-        @media (max-width:960px){ .layout { padding:18px } }
+
+        /* --- AUTH CONTAINER (Login/Register Box) --- */
+        #auth-section {
+            background-color: var(--color-card-bg);
+            padding: 40px;
+            border-radius: 16px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 255, 102, 0.2);
+            max-width: 480px;
+            width: 100%;
+            transition: all 0.5s ease-in-out;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        #auth-section:hover {
+            border-color: var(--color-primary-accent);
+            box-shadow: 0 0 40px var(--color-primary-glow);
+        }
+
+        .raven-logo {
+            font-size: 3rem;
+            text-align: center;
+            color: var(--color-primary-accent);
+            text-shadow: 0 0 15px var(--color-primary-glow);
+            margin-bottom: 25px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--color-primary-accent);
+            font-weight: 800;
+            text-shadow: 0 0 5px rgba(0, 255, 102, 0.5);
+        }
+
+        /* --- FORM STYLING --- */
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #333;
+            background-color: #1a1a24;
+            color: var(--color-text-light);
+            border-radius: 8px;
+            transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--color-primary-accent);
+            outline: none;
+            box-shadow: 0 0 10px var(--color-primary-glow);
+        }
+
+        /* Password Toggle Icon positioning for LTR */
+        .password-toggle {
+            position: absolute;
+            right: 12px; /* Position on the right for LTR */
+            top: 50%;
+            transform: translateY(15%);
+            cursor: pointer;
+            color: var(--color-text-subtle);
+            font-size: 1.1em;
+            transition: color var(--transition-speed);
+        }
+
+        .password-toggle:hover {
+            color: var(--color-primary-accent);
+        }
+
+        /* --- BUTTON STYLING --- */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary-accent);
+            color: var(--color-dark-bg);
+            margin-top: 25px;
+            box-shadow: 0 8px 30px var(--color-primary-glow);
+        }
+
+        .btn-primary:hover {
+            background-color: #33ff99;
+            box-shadow: 0 10px 40px var(--color-primary-glow);
+            transform: translateY(-3px);
+        }
+
+        .btn-link {
+            background: none;
+            color: var(--color-primary-accent);
+            font-size: 0.95em;
+            margin-top: 20px;
+            opacity: 0.9;
+        }
+
+        .btn-link:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+        
+        /* --- MAIN PANEL & HEADER --- */
+        #panel-section {
+            width: 100%;
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px 30px;
+            background-color: var(--color-card-bg);
+            border-radius: 12px;
+            border-bottom: 3px solid var(--color-primary-accent);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .panel-header h1 {
+            font-size: 2.5em;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+        }
+
+        .raven-mark {
+            font-size: 1.2em;
+            color: var(--color-primary-accent);
+            margin-right: 10px; /* Space between mark and text in LTR */
+            text-shadow: 0 0 8px var(--color-primary-glow);
+        }
+
+        .panel-header .btn-icon {
+            width: auto;
+            background: none;
+            border: 2px solid var(--color-primary-accent);
+            color: var(--color-primary-accent);
+            padding: 10px 20px;
+            font-size: 1em;
+            border-radius: 8px;
+        }
+
+        .panel-header .btn-icon:hover {
+            background-color: var(--color-primary-accent);
+            color: var(--color-dark-bg);
+            box-shadow: 0 0 15px var(--color-primary-glow);
+            transform: translateY(-2px);
+        }
+
+        /* --- SERVER FILTERS --- */
+        .filter-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .filter-buttons .btn {
+            width: auto;
+            padding: 10px 25px;
+            background-color: #222233;
+            color: var(--color-text-subtle);
+            border: 1px solid #444;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .filter-buttons .btn.active {
+            background-color: var(--color-primary-accent);
+            color: var(--color-dark-bg);
+            font-weight: 800;
+            border-color: var(--color-primary-accent);
+            box-shadow: 0 0 15px var(--color-primary-glow);
+            transform: translateY(-2px);
+        }
+
+        .filter-buttons .btn:hover:not(.active) {
+            color: var(--color-primary-accent);
+            border-color: var(--color-primary-accent);
+            background-color: #2a3a33;
+            transform: scale(1.02);
+        }
+
+        /* --- USER LIST & CARDS --- */
+        #user-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .user-card {
+            background-color: var(--color-card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+            position: relative;
+        }
+
+        .user-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--color-primary-accent);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7), 0 0 20px var(--color-primary-glow);
+        }
+
+        .user-card h3 {
+            color: var(--color-primary-accent);
+            font-size: 1.3em;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .online-badge {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--color-primary-accent);
+            box-shadow: 0 0 8px var(--color-primary-glow);
+            margin-left: 10px; /* Position on the left of the name in LTR */
+            animation: pulse 1.5s infinite;
+        }
+
+        .user-card p {
+            font-size: 0.95em;
+            color: var(--color-text-subtle);
+            margin-bottom: 7px;
+        }
+        
+        .server-tag {
+            display: inline-block;
+            padding: 6px 12px;
+            margin-top: 15px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 600;
+            color: var(--color-dark-bg);
+            text-shadow: 0 0 2px var(--color-dark-bg);
+            /* Dynamic background set via JS */
+        }
+
+        /* --- MY ACCOUNT SECTION --- */
+        #account-section {
+            background-color: var(--color-card-bg);
+            padding: 40px;
+            border-radius: 16px;
+            max-width: 600px;
+            width: 100%;
+            transition: all 0.5s ease-out;
+            animation: fadeIn 0.5s ease-out;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+            margin: 5vh auto; /* Center with margin for account view */
+        }
+
+        .account-info div {
+            padding: 12px 0;
+            border-bottom: 1px dashed #333;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .account-info span:first-child {
+            font-weight: 600;
+            color: var(--color-primary-accent);
+        }
+        
+        /* --- ANIMATIONS & KEYFRAMES --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 102, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 255, 102, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 102, 0); }
+        }
+
+        /* --- RESPONSIVENESS --- */
+        @media (min-width: 768px) {
+            .panel-header {
+                padding: 20px 50px;
+            }
+
+            .filter-buttons {
+                gap: 20px;
+            }
+        }
     </style>
 </head>
 <body>
-<div id="app"></div>
 
-<script>
-/* -----------------------
-   Raven Panel - GitHub Pages + Cloudflare Workers + D1
-   ----------------------- */
+    <div class="container" id="main-content">
 
-// Cloudflare Worker URL - این را با آدرس Worker خود جایگزین کنید
-const API_BASE = 'https://ravenshoppanel.bloodstrike.workers.dev';
-
-class RavenPanel {
-  constructor(){
-    this.state = {
-      isLogin: true,
-      showPassword: false,
-      isLoggedIn: false,
-      currentUser: null,
-      users: [],
-      selectedServer: 'all',
-      selectedUser: null,
-      loading: false,
-      token: localStorage.getItem('raven_token') || null,
-      formData: {
-        username: '',
-        email: '',
-        gameId: '',
-        server: 'ASIA',
-        level: 1,
-        rank: 'Bronze',
-        password: ''
-      }
-    };
-
-    this.servers = [
-      { id: 'ASIA', name: 'ASIA', color:'#ef4444' },
-      { id: 'EU-MENA', name: 'EU-MENA', color:'#3b82f6' },
-      { id: 'AMERICAS', name:'AMERICAS', color:'#10b981' },
-    ];
-
-    this.ranks = ['Bronze','Silver','Gold','Platinum','Diamond','Master','Legend','Mythic'];
-
-    this.init();
-  }
-
-  init(){
-    this.checkAuthStatus();
-    this.render();
-    this.setupEventListeners();
-  }
-
-  /* ---------- authentication ---------- */
-  async checkAuthStatus(){
-    const token = this.state.token;
-    if(!token) return;
-
-    try {
-      const res = await this.apiCall('/api/auth/me', 'GET');
-      if(res.success){
-        this.state.currentUser = res.user;
-        this.state.isLoggedIn = true;
-        await this.fetchUsers();
-      } else {
-        localStorage.removeItem('raven_token');
-        this.state.token = null;
-      }
-    } catch(err){
-      console.warn('Token validation failed:', err);
-      localStorage.removeItem('raven_token');
-      this.state.token = null;
-    }
-  }
-
-  /* ---------- API calls ---------- */
-  async apiCall(endpoint, method = 'GET', data = null){
-    const config = {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    };
-
-    if(this.state.token){
-      config.headers['Authorization'] = `Bearer ${this.state.token}`;
-    }
-
-    if(data){
-      config.body = JSON.stringify(data);
-    }
-
-    // Build URL safely
-    const url = new URL(endpoint, API_BASE).toString();
-    console.debug('[apiCall] Fetching', method, url);
-
-    const response = await fetch(url, config);
-
-    if(response.status === 401){
-      localStorage.removeItem('raven_token');
-      this.state.token = null;
-      this.state.isLoggedIn = false;
-      this.state.currentUser = null;
-      this.render();
-      throw new Error('Unauthorized');
-    }
-
-    if(!response.ok){
-      const error = await response.json().catch(() => ({}));
-      console.debug('[apiCall] Response error', response.status, error);
-      throw new Error(error.error || error.message || `HTTP ${response.status}`);
-    }
-
-    return response.json();
-  }
-
-  /* ---------- events ---------- */
-  setupEventListeners(){
-    document.addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-action]');
-      if(!btn) return;
-      e.preventDefault();
-      const action = btn.dataset.action;
-      this.handleAction(action, e);
-    });
-
-    document.addEventListener('input', (e) => {
-      if(e.target && e.target.matches('[data-input]')) {
-        const key = e.target.dataset.input;
-        this.handleInput(key, e.target.value, e.target);
-      }
-    });
-    
-    document.addEventListener('change', (e) => {
-      if(e.target && e.target.matches('[data-input]')) {
-        const key = e.target.dataset.input;
-        this.handleInput(key, e.target.value, e.target);
-      }
-    });
-
-    document.addEventListener('submit', (e) => {
-      if(e.target && e.target.matches('#auth-form')){
-        e.preventDefault();
-        this.handleSubmit();
-      }
-    });
-  }
-
-  handleAction(action, event){
-    switch(action){
-      case 'toggle-auth':
-        this.state.isLogin = !this.state.isLogin;
-        this.state.formData.password = '';
-        this.render();
-        break;
-      case 'toggle-password':
-        this.state.showPassword = !this.state.showPassword;
-        this.render();
-        break;
-      case 'logout':
-        this.logout();
-        break;
-      case 'select-server':
-        const srv = event.currentTarget.dataset.server;
-        this.state.selectedServer = srv || 'all';
-        this.fetchUsers();
-        break;
-      case 'view-user':
-        const id = parseInt(event.currentTarget.dataset.userId);
-        this.viewUser(id);
-        break;
-      case 'back-to-users':
-        this.state.selectedUser = null;
-        this.render();
-        break;
-      default:
-        console.warn('Unknown action', action);
-    }
-  }
-
-  handleInput(key, value){
-    if(!key) return;
-    if(key === 'level'){
-      const n = parseInt(value) || 1;
-      this.state.formData.level = Math.min(50, Math.max(1, n));
-    } else {
-      this.state.formData[key] = value;
-    }
-  }
-
-  /* ---------- submit (login/register) ---------- */
-  async handleSubmit(){
-    if(!this.state.formData.username || !this.state.formData.password){
-      this.showNotification('لطفاً نام کاربری/ایمیل و رمز را وارد کنید.', 'error');
-      return;
-    }
-    if(!this.state.isLogin && !this.validateEmail(this.state.formData.email)){
-      this.showNotification('لطفاً یک ایمیل معتبر وارد کنید.', 'error');
-      return;
-    }
-    if(!this.state.isLogin && this.state.formData.password.length < 6){
-      this.showNotification('رمز عبور باید حداقل 6 کاراکتر باشد.', 'error');
-      return;
-    }
-
-    this.state.loading = true;
-    this.render();
-
-    try {
-      const endpoint = this.state.isLogin ? '/api/auth/login' : '/api/auth/register';
-      const payload = this.state.isLogin
-        ? { identifier: this.state.formData.username, password: this.state.formData.password }
-        : {
-            username: this.state.formData.username,
-            email: this.state.formData.email,
-            accountId: this.state.formData.gameId,
-            server: this.state.formData.server,
-            password: this.state.formData.password
-          };
-
-      const data = await this.apiCall(endpoint, 'POST', payload);
-      
-      if(data.success){
-        if(data.token){
-          this.state.token = data.token;
-          localStorage.setItem('raven_token', data.token);
-        }
-        
-        this.state.currentUser = data.user;
-        this.state.isLoggedIn = true;
-        this.showNotification(this.state.isLogin ? 'خوش آمدید!' : 'ثبت‌نام با موفقیت انجام شد!', 'success');
-        await this.fetchUsers();
-      } else {
-        this.showNotification(data.error || 'عملیات با خطا مواجه شد.', 'error');
-      }
-    } catch(err){
-      console.error('Auth error:', err);
-      this.showNotification(err.message || 'خطا در ارتباط با سرور', 'error');
-    } finally {
-      this.state.loading = false;
-      this.render();
-    }
-  }
-
-  /* ---------- fetch users ---------- */
-  async fetchUsers(){
-    this.state.loading = true;
-    this.render();
-    
-    try {
-      const params = new URLSearchParams();
-      if(this.state.selectedServer && this.state.selectedServer !== 'all'){
-        params.append('server', this.state.selectedServer);
-      }
-      
-      const data = await this.apiCall(`/api/users?${params}`);
-      if(data.success){
-        this.state.users = data.users;
-      }
-    } catch(err){
-      console.error('Fetch users error:', err);
-      this.showNotification('خطا در دریافت لیست کاربران', 'error');
-    } finally {
-      this.state.loading = false;
-      this.render();
-    }
-  }
-
-  viewUser(id){
-    const u = this.state.users.find(x => parseInt(x.id) === parseInt(id));
-    if(u){
-      this.state.selectedUser = u;
-      this.updateUserLastActive(id);
-      this.render();
-    } else {
-      this.showNotification('پروفایل پیدا نشد.', 'error');
-    }
-  }
-
-  async updateUserLastActive(userId){
-    try {
-      await this.apiCall(`/api/users/${userId}/last-active`, 'POST');
-    } catch(err){
-      console.warn('Failed to update last active:', err);
-    }
-  }
-
-  logout(){
-    localStorage.removeItem('raven_token');
-    this.state.token = null;
-    this.state.isLoggedIn = false;
-    this.state.currentUser = null;
-    this.state.selectedUser = null;
-    this.state.users = [];
-    this.showNotification('با موفقیت خارج شدید.', 'success');
-    this.render();
-  }
-
-  /* ---------- notifications ---------- */
-  showNotification(message, type = 'info'){
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-      notification.style.animation = 'slideIn 0.3s ease reverse';
-      setTimeout(() => notification.remove(), 300);
-    }, 3000);
-  }
-
-  /* ---------- rendering ---------- */
-  sanitizeClassName(str){
-    return (str || '').toString().toLowerCase().replace(/[^a-z0-9]+/g,'-');
-  }
-
-  render(){
-    const app = document.getElementById('app');
-    if(this.state.selectedUser){
-      app.innerHTML = this.renderUserProfile();
-    } else if(this.state.isLoggedIn){
-      app.innerHTML = this.renderDashboard();
-    } else {
-      app.innerHTML = this.renderAuth();
-    }
-
-    if(typeof lucide !== 'undefined') lucide.createIcons();
-
-    const submitBtn = document.querySelector('#app button[type="submit"]');
-    if(submitBtn) submitBtn.disabled = !!this.state.loading;
-  }
-
-  renderAuth(){
-    const showPwd = this.state.showPassword;
-    return `
-      <div class="min-h-screen flex items-center justify-center p-6 fade-in layout">
-        <div class="w-full max-w-md">
-          <div class="text-center mb-6">
-            <div class="w-20 h-20 mx-auto mb-4 rounded-2xl flex items-center justify-center gradient-bg">
-              <i data-lucide="gamepad-2" class="w-8 h-8 text-white"></i>
+        <!-- 1. LOGIN / REGISTER SECTION (Perfectly Centered) -->
+        <section id="auth-section">
+            <div class="raven-logo">
+                <span class="raven-mark">𝕽</span>
+                Raven Panel
             </div>
-            <h1 class="text-3xl font-bold mb-2">Raven Panel</h1>
-            <p class="text-gray-400">مدیریت حساب‌های بازی</p>
-          </div>
-
-          <div class="glass-effect p-6">
-            <div class="flex mb-4 rounded-lg p-1">
-              <button data-action="toggle-auth" class="flex-1 py-2 px-4 rounded-md font-medium"
-                style="background:${this.state.isLogin ? 'var(--primary)' : 'transparent'}; color:${this.state.isLogin ? '#fff' : 'var(--text-muted)'}">
-                ورود
-              </button>
-              <button data-action="toggle-auth" class="flex-1 py-2 px-4 rounded-md font-medium"
-                style="background:${!this.state.isLogin ? 'var(--primary)' : 'transparent'}; color:${!this.state.isLogin ? '#fff' : 'var(--text-muted)'}">
-                ثبت‌نام
-              </button>
-            </div>
-
-            <form id="auth-form" class="space-y-4">
-              ${ this.state.isLogin ? this.renderLoginFields() : this.renderRegisterFields() }
-
-              <div>
-                <label class="block text-sm mb-2" for="password">رمز عبور</label>
-                <div style="position:relative">
-                  <input
-                    id="password"
-                    type="${ showPwd ? 'text' : 'password' }"
-                    name="password"
-                    data-input="password"
-                    value="${this.escapeHtml(this.state.formData.password)}"
-                    class="input-field pr-10"
-                    placeholder="رمز عبور خود را وارد کنید"
-                    required
-                  />
-                  <button type="button" data-action="toggle-password" style="position:absolute;left:.5rem;top:.4rem;border:0;background:transparent;color:var(--text-muted);">
-                    <i data-lucide="${ showPwd ? 'eye-off' : 'eye' }" class="w-5 h-5"></i>
-                  </button>
+            
+            <!-- Login Form -->
+            <form id="login-form">
+                <h2>Login to Raven Panel</h2>
+                <div class="form-group">
+                    <label for="login-user-identifier">Username or Email</label>
+                    <input type="text" id="login-user-identifier" required>
                 </div>
-              </div>
-
-              <div>
-                <button type="submit" ${ this.state.loading ? 'disabled' : '' } class="btn-primary w-full">
-                  ${ this.state.loading ? '<span class="loading-spinner"></span>' : '' }
-                  <span>${ this.state.isLogin ? 'ورود' : 'ثبت‌نام' }</span>
-                </button>
-              </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" required>
+                    <span class="password-toggle" onclick="togglePassword(this)">👁️</span>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
             </form>
 
-            <div class="mt-4 text-center">
-              <p class="text-gray-400">
-                ${ this.state.isLogin ? 'حساب کاربری ندارید؟' : 'قبلاً ثبت‌نام کرده‌اید؟' }
-                <button data-action="toggle-auth" class="font-medium mr-2" style="color:var(--primary)">${ this.state.isLogin ? 'ایجاد کنید' : 'وارد شوید' }</button>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
-  renderLoginFields(){
-    return `
-      <div>
-        <label class="block text-sm mb-2">ایمیل یا نام کاربری</label>
-        <div style="position:relative">
-          <input type="text" name="username" data-input="username" value="${this.escapeHtml(this.state.formData.username)}" class="input-field" placeholder="نام کاربری یا ایمیل خود را وارد کنید" required />
-        </div>
-      </div>
-    `;
-  }
-
-  renderRegisterFields(){
-    const serverOptions = this.servers.map(s => `<option value="${s.id}" ${ s.id === this.state.formData.server ? 'selected' : '' }>${s.name}</option>`).join('');
-    const rankOptions = this.ranks.map(r => `<option value="${r}" ${ r === this.state.formData.rank ? 'selected' : '' }>${r}</option>`).join('');
-    return `
-      <div>
-        <label class="block text-sm mb-2">نام کاربری</label>
-        <input type="text" name="username" data-input="username" value="${this.escapeHtml(this.state.formData.username)}" class="input-field" placeholder="نام کاربری" required />
-      </div>
-      <div>
-        <label class="block text-sm mb-2">ایمیل</label>
-        <input type="email" name="email" data-input="email" value="${this.escapeHtml(this.state.formData.email)}" class="input-field" placeholder="ایمیل" required />
-      </div>
-      <div>
-        <label class="block text-sm mb-2">شناسه بازی</label>
-        <input type="text" name="gameId" data-input="gameId" value="${this.escapeHtml(this.state.formData.gameId)}" class="input-field" placeholder="شناسه بازی" required />
-      </div>
-      <div>
-        <label class="block text-sm mb-2">سرور</label>
-        <select name="server" data-input="server" class="input-field">
-          ${serverOptions}
-        </select>
-      </div>
-      <div>
-        <label class="block text-sm mb-2">سطح</label>
-        <input type="number" name="level" data-input="level" min="1" max="50" value="${this.escapeHtml(this.state.formData.level)}" class="input-field" />
-      </div>
-      <div>
-        <label class="block text-sm mb-2">رنک</label>
-        <select name="rank" data-input="rank" class="input-field">
-          ${rankOptions}
-        </select>
-      </div>
-    `;
-  }
-
-  renderDashboard(){
-    const serverButtons = this.servers.map(s => {
-      const active = this.state.selectedServer === s.id;
-      return `<button data-action="select-server" data-server="${s.id}" class="server-badge" style="margin-left:.5rem;background:${active ? s.color : 'transparent'};color:${active ? '#fff' : s.color}">${s.name}</button>`;
-    }).join('');
-    return `
-      <div class="min-h-screen p-4 fade-in layout">
-        <header class="glass-effect p-4 mb-6">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div style="display:flex;gap:1rem;align-items:center">
-              <div class="w-12 h-12 rounded-xl flex items-center justify-center gradient-bg"><i data-lucide="gamepad-2" class="w-6 h-6 text-white"></i></div>
-              <div>
-                <h1 class="text-2xl font-bold">Raven Panel</h1>
-                <p class="text-gray-400">مدیریت حساب‌های بازی</p>
-              </div>
-            </div>
-            <div style="display:flex;gap:1rem;align-items:center">
-              <div style="text-align:left">
-                <p class="text-sm text-gray-400">خوش آمدید</p>
-                <p class="font-medium">${ this.state.currentUser ? this.escapeHtml(this.state.currentUser.username) : 'کاربر' }</p>
-              </div>
-              <button data-action="logout" class="btn-primary">خروج</button>
-            </div>
-          </div>
-        </header>
-
-        <main>
-          <div class="glass-effect p-6 mb-6" style="display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <h2 class="text-xl font-bold">لیست حساب‌ها</h2>
-              <p class="text-gray-400">فیلتر بر اساس سرور</p>
-            </div>
-            <div style="display:flex;align-items:center;gap:.6rem">
-              ${serverButtons}
-              <button data-action="select-server" data-server="all" class="server-badge" style="background:${this.state.selectedServer === 'all' ? 'var(--primary)' : 'transparent'}; color:${this.state.selectedServer === 'all' ? '#fff' : 'var(--primary)'}">همه</button>
-              <div class="count-badge" style="margin-right:.8rem">${this.state.users.length}</div>
-            </div>
-          </div>
-
-          ${ this.state.loading ? `<div style="display:flex;justify-content:center;align-items:center;height:160px"><div class="loading-spinner" style="width:3rem;height:3rem"></div></div>` : `
-            <div class="user-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              ${ this.state.users.map(u => this.renderUserCard(u)).join('') }
-            </div>
-          `}
-        </main>
-      </div>
-    `;
-  }
-
-  renderUserCard(user){
-    const serverClass = this.sanitizeClassName(user.server || 'unknown');
-    const rankClass = this.sanitizeClassName(user.rank || 'bronze');
-    return `
-      <div class="user-card glass-effect p-5" data-action="view-user" data-user-id="${user.id}">
-        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:.75rem">
-          <div style="display:flex;gap:.75rem;align-items:center">
-            <div class="w-12 h-12 rounded-full gradient-bg flex items-center justify-center"><i data-lucide="user" class="w-5 h-5 text-white"></i></div>
-            <div>
-              <div style="font-weight:800">${this.escapeHtml(user.username)}</div>
-              <div style="color:var(--text-muted);font-size:.9rem">${this.escapeHtml(user.email || '')}</div>
-            </div>
-          </div>
-          <div style="text-align:left">
-            <div class="${user.status === 'online' ? 'status-online' : 'status-offline'}"></div>
-          </div>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:.5rem">
-          <div style="display:flex;justify-content:space-between;color:var(--text-muted)"><span>سرور:</span><span class="server-badge">${this.escapeHtml(user.server)}</span></div>
-          <div style="display:flex;justify-content:space-between;color:var(--text-muted)"><span>سطح:</span><span>Lv.${this.escapeHtml(user.level || 1)}</span></div>
-          <div style="display:flex;justify-content:space-between;color:var(--text-muted)"><span>رنک:</span><span class="${rankClass}">${this.escapeHtml(user.rank || 'Bronze')}</span></div>
-          <div style="display:flex;justify-content:space-between;color:var(--text-muted)"><span>آخرین فعالیت:</span><span>${this.escapeHtml(user.lastActive || 'نامشخص')}</span></div>
-        </div>
-
-        <button data-action="view-user" data-user-id="${user.id}" class="btn-primary w-full" style="margin-top:.8rem">مشاهده پروفایل</button>
-      </div>
-    `;
-  }
-
-  renderUserProfile(){
-    const u = this.state.selectedUser;
-    if(!u) return '<div>کاربر پیدا نشد</div>';
-    return `
-      <div class="min-h-screen p-4 fade-in layout">
-        <header class="glass-effect p-4 mb-6">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div style="display:flex;gap:1rem;align-items:center">
-              <button data-action="back-to-users" class="btn-primary"><i data-lucide="arrow-right" class="w-4 h-4"></i>بازگشت</button>
-              <div>
-                <h1 class="text-2xl font-bold">پروفایل کاربر</h1>
-                <p class="text-gray-400">${this.escapeHtml(u.username)}</p>
-              </div>
-            </div>
-            <div style="display:flex;gap:1rem;align-items:center">
-              <div style="text-align:left"><p class="text-sm text-gray-400">خوش آمدید</p><p class="font-medium">${this.state.currentUser ? this.escapeHtml(this.state.currentUser.username) : 'کاربر'}</p></div>
-              <button data-action="logout" class="btn-primary">خروج</button>
-            </div>
-          </div>
-        </header>
-
-        <main class="max-w-4xl mx-auto">
-          <div class="glass-effect p-6">
-            <div style="display:flex;gap:1rem;flex-direction:column">
-              <div style="display:flex;gap:1.5rem;align-items:center">
-                <div style="width:96px;height:96px;border-radius:999px" class="gradient-bg flex items-center justify-center"><i data-lucide="user" class="w-12 h-12 text-white"></i></div>
-                <div>
-                  <div style="font-weight:800;font-size:1.2rem">${this.escapeHtml(u.username)}</div>
-                  <div style="color:var(--text-muted)">${this.escapeHtml(u.email || '')}</div>
+            <!-- Register Form (Hidden by Default) -->
+            <form id="register-form" class="hidden">
+                <h2>Create Raven Account</h2>
+                
+                <div class="form-group">
+                    <label for="register-username">Username</label>
+                    <input type="text" id="register-username" required>
                 </div>
-              </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-account-id">Account ID (Gamer Tag)</label>
+                    <input type="text" id="register-account-id" required>
+                </div>
 
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem">
-                <div>
-                  <div style="color:var(--text-muted)">شناسه بازی</div><div style="font-weight:700">${this.escapeHtml(u.accountId || '')}</div>
+                <!-- Server and Rank Dropdowns -->
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label for="register-server">Server Region</label>
+                        <select id="register-server" required>
+                            <option value="EU-MENA">EU-MENA</option>
+                            <option value="ASIA">ASIA</option>
+                            <option value="AMERICAS">AMERICAS</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label for="register-rank">Current Rank</label>
+                        <select id="register-rank" required>
+                            <option value="Bronze">Bronze</option>
+                            <option value="Silver">Silver</option>
+                            <option value="Gold">Gold</option>
+                            <option value="Platinum">Platinum</option>
+                            <option value="Diamond">Diamond</option>
+                            <option value="Master">Master</option>
+                            <option value="Legend">Legend</option>
+                            <option value="Mythic">Mythic</option>
+                        </select>
+                    </div>
                 </div>
-                <div>
-                  <div style="color:var(--text-muted)">سرور</div><div style="font-weight:700">${this.escapeHtml(u.server)}</div>
+
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" required>
+                    <span class="password-toggle" onclick="togglePassword(this)">👁️</span>
                 </div>
-                <div>
-                  <div style="color:var(--text-muted)">سطح</div><div style="font-weight:700">Lv.${this.escapeHtml(u.level || 1)}</div>
-                </div>
-                <div>
-                  <div style="color:var(--text-muted)">رنک</div><div style="font-weight:700">${this.escapeHtml(u.rank || 'Bronze')}</div>
-                </div>
-              </div>
+                <button type="submit" class="btn btn-primary">Register</button>
+            </form>
+
+            <button class="btn btn-link" id="auth-toggle-btn" onclick="toggleAuthForm()">
+                Don't have an account? Register Here
+            </button>
+
+            <!-- Message Box for API responses -->
+            <div id="auth-message" style="color: var(--color-primary-accent); margin-top: 20px; text-align: center; font-size: 0.9em;"></div>
+
+        </section>
+
+
+        <!-- 2. MAIN PANEL SECTION (Hidden by Default) -->
+        <section id="panel-section" class="hidden fade-out">
+            <header class="panel-header">
+                <h1 style="align-items: center;">
+                    <span class="raven-mark">𝕽</span>
+                    Raven Panel 
+                    <span style="font-size: 0.5em; color: var(--color-text-subtle); margin-left: 10px;">| Social Feed</span>
+                </h1>
+                <button class="btn btn-icon" onclick="loadMyAccount()">My Account</button>
+            </header>
+
+            <!-- Server Filter Buttons -->
+            <div class="filter-buttons" id="server-filters">
+                <button class="btn" data-server="EU-MENA">EU-MENA</button>
+                <button class="btn" data-server="ASIA">ASIA</button>
+                <button class="btn" data-server="AMERICAS">AMERICAS</button>
             </div>
-          </div>
-        </main>
-      </div>
-    `;
-  }
 
-  escapeHtml(s){
-    if(s === undefined || s === null) return '';
-    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  }
+            <!-- User List Container -->
+            <div id="user-list">
+                <!-- User cards will be injected here by JavaScript -->
+            </div>
+            
+            <!-- Message Box for Panel/Error responses -->
+            <div id="panel-message" style="color: var(--color-text-light); margin-top: 30px; text-align: center;"></div>
+        </section>
 
-  validateEmail(email){
-    if(!email) return false;
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
-}
 
-/* Initialize app */
-document.addEventListener('DOMContentLoaded', () => {
-  new RavenPanel();
-});
-</script>
+        <!-- 3. MY ACCOUNT SECTION (Hidden by Default) -->
+        <section id="account-section" class="hidden">
+            <h2>My Raven Profile</h2>
+            <div class="account-info" id="my-account-details">
+                <!-- Account details will be injected here -->
+            </div>
+            <button class="btn btn-primary" onclick="showView('panel')" style="margin-top: 35px;">Back to Panel</button>
+            <button class="btn btn-link" onclick="handleLogout()" style="width: auto;">Logout</button>
+        </section>
+        
+
+    </div>
+
+
+    <script>
+        // --- API CONFIGURATION ---
+        // 🚨 IMPORTANT: REPLACE THIS WITH YOUR CLOUDFLARE WORKER'S DEPLOYED URL!
+        const API_BASE = "REPLACE_WITH_YOUR_CLOUDFLARE_WORKER_URL";
+        // -------------------------
+
+        // --- GLOBAL STATE & DOM REFERENCES ---
+        let IS_LOGGED_IN = false;
+        let USER_SESSION = null; 
+        const ONLINE_THRESHOLD_MS = 30000; // 30 seconds for "Online Now" status
+
+        const $authSection = document.getElementById('auth-section');
+        const $panelSection = document.getElementById('panel-section');
+        const $accountSection = document.getElementById('account-section');
+        const $loginForm = document.getElementById('login-form');
+        const $registerForm = document.getElementById('register-form');
+        const $authToggleBtn = document.getElementById('auth-toggle-btn');
+        const $authMessage = document.getElementById('auth-message');
+        const $panelMessage = document.getElementById('panel-message');
+        const $userList = document.getElementById('user-list');
+        const $serverFilters = document.getElementById('server-filters');
+
+        // --- UTILITY FUNCTIONS ---
+        
+        /**
+         * Converts a standard Date object to the required Tehran timezone format.
+         * Displays in English (en-US locale) but with the specified time zone.
+         * @param {Date | string} dateInput - Date object or timestamp string.
+         * @returns {string} Formatted date/time string.
+         */
+        function formatTehranDateTime(dateInput) {
+            const date = (typeof dateInput === 'string' || typeof dateInput === 'number') 
+                ? new Date(dateInput) 
+                : dateInput;
+            
+            if (isNaN(date)) return '---';
+
+            const options = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+                timeZone: 'Asia/Tehran'
+            };
+
+            // Format example: 10/17/25, 20:00 (or similar LTR)
+            return date.toLocaleString('en-US', options).replace(',', ' - ');
+        }
+        
+        /**
+         * Wrapper around fetch to handle API calls with exponential backoff.
+         * @param {string} url - The full API URL.
+         * @param {Object} options - Fetch options (method, headers, body, etc.).
+         * @param {number} retries - Current retry count.
+         * @returns {Promise<Object>} JSON response data.
+         */
+        async function fetchWithBackoff(url, options, retries = 3) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`API Error ${response.status}: ${errorText}`);
+                    }
+                    return response.json();
+                } catch (error) {
+                    if (i === retries - 1) throw error; // Re-throw if last attempt failed
+                    const delay = Math.pow(2, i) * 1000; // Exponential delay: 1s, 2s, 4s...
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+        }
+
+
+        // --- CORE NAVIGATION & UI FUNCTIONS ---
+
+        /**
+         * Hides all main sections and shows only the requested one with transitions.
+         * @param {string} viewId - 'login', 'panel', or 'account'
+         */
+        function showView(viewId) {
+            // Apply fade-out class to current visible section before hiding
+            if (viewId === 'panel' && !$authSection.classList.contains('hidden')) {
+                $authSection.classList.add('fade-out');
+                setTimeout(() => {
+                    $authSection.classList.add('hidden');
+                    $authSection.classList.remove('fade-out');
+                    $panelSection.classList.remove('hidden');
+                    $panelSection.classList.remove('fade-out');
+                }, 500); // Wait for fade-out transition (0.5s)
+            } else {
+                $authSection.classList.add('hidden');
+                $panelSection.classList.add('hidden');
+                $accountSection.classList.add('hidden');
+                
+                // Show current view
+                switch (viewId) {
+                    case 'login':
+                        $authSection.classList.remove('hidden');
+                        $authSection.classList.remove('fade-out'); // Ensure it's ready for login view
+                        $loginForm.classList.remove('hidden');
+                        $registerForm.classList.add('hidden');
+                        $authToggleBtn.textContent = "Don't have an account? Register Here";
+                        break;
+                    case 'panel':
+                        $panelSection.classList.remove('hidden');
+                        loadUsers('EU-MENA');
+                        break;
+                    case 'account':
+                        $accountSection.classList.remove('hidden');
+                        break;
+                }
+            }
+        }
+
+        /**
+         * Toggles between the Login and Register forms within the auth section.
+         */
+        function toggleAuthForm() {
+            $authMessage.textContent = ''; 
+            const isLoginFormVisible = !$loginForm.classList.contains('hidden');
+
+            if (isLoginFormVisible) {
+                $loginForm.classList.add('hidden');
+                $registerForm.classList.remove('hidden');
+                $authToggleBtn.textContent = "Already have an account? Login Here";
+            } else {
+                $registerForm.classList.add('hidden');
+                $loginForm.classList.remove('hidden');
+                $authToggleBtn.textContent = "Don't have an account? Register Here";
+            }
+        }
+
+        /**
+         * Toggles the input type for password fields between 'password' and 'text'.
+         */
+        function togglePassword(icon) {
+            const input = icon.previousElementSibling;
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            icon.textContent = isPassword ? '🙈' : '👁️';
+        }
+
+        // --- API INTEGRATION & AUTH LOGIC ---
+        
+        /**
+         * Updates the 'last online' timestamp via API.
+         */
+        async function updateLastOnline(username) {
+            const data = { username, lastOnline: new Date().toISOString() };
+            // --- CLOUDFLARE API: POST /api/last-online ---
+            try {
+                // This is a crucial API call that runs silently upon login.
+                await fetchWithBackoff(`${API_BASE}/api/last-online`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                console.log('Last online timestamp updated.');
+            } catch (error) {
+                console.error('Failed to update last online:', error.message);
+            }
+            // --- END CLOUDFLARE API ---
+        }
+
+        /**
+         * Handles user registration submission.
+         */
+        async function handleRegister(event) {
+            event.preventDefault();
+            $authMessage.textContent = 'Registering...';
+            $authMessage.style.color = 'var(--color-primary-accent)';
+
+            const data = {
+                username: document.getElementById('register-username').value,
+                email: document.getElementById('register-email').value,
+                accountId: document.getElementById('register-account-id').value,
+                server: document.getElementById('register-server').value,
+                rank: document.getElementById('register-rank').value,
+                password: document.getElementById('register-password').value,
+            };
+
+            // --- CLOUDFLARE API: POST /api/register ---
+            try {
+                // NOTE: API should return the newly created user object upon success
+                // const result = await fetchWithBackoff(`${API_BASE}/api/register`, { ... });
+                
+                // SIMULATE SUCCESS: Wait a moment and show success message
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                $authMessage.textContent = 'Registration successful! Logging in...';
+                
+                // After registration, automatically log in and fetch updated data (Requirement 5)
+                await handleLoginSuccess({ 
+                    username: data.username, 
+                    email: data.email, 
+                    accountId: data.accountId, 
+                    server: data.server, 
+                    rank: data.rank,
+                    lastOnline: new Date().toISOString() 
+                }, data.username);
+                
+            } catch (error) {
+                console.error('Registration failed:', error.message);
+                $authMessage.textContent = 'Registration failed. Please try again.';
+                $authMessage.style.color = '#ff6666';
+            }
+            // --- END CLOUDFLARE API ---
+        }
+
+        /**
+         * Handles user login submission.
+         */
+        async function handleLogin(event) {
+            event.preventDefault();
+            $authMessage.textContent = 'Logging in...';
+            $authMessage.style.color = 'var(--color-primary-accent)';
+
+            const identifier = document.getElementById('login-user-identifier').value;
+            const data = {
+                identifier: identifier,
+                password: document.getElementById('login-password').value,
+            };
+
+            // --- CLOUDFLARE API: POST /api/login ---
+            try {
+                // NOTE: API should return user details and a session token
+                // const result = await fetchWithBackoff(`${API_BASE}/api/login`, { ... });
+
+                // SIMULATE SUCCESS 
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                const mockUser = { username: identifier, email: identifier + '@example.com', accountId: 'R4V3N-001', server: 'EU-MENA', rank: 'Mythic', lastOnline: new Date().toISOString() };
+                await handleLoginSuccess(mockUser, identifier);
+
+            } catch (error) {
+                console.error('Login failed:', error.message);
+                $authMessage.textContent = 'Login failed. Invalid credentials.';
+                $authMessage.style.color = '#ff6666';
+            }
+            // --- END CLOUDFLARE API ---
+        }
+        
+        /**
+         * Common logic executed after successful login or registration.
+         */
+        async function handleLoginSuccess(userData, username) {
+            USER_SESSION = userData;
+            IS_LOGGED_IN = true;
+            
+            // Update last online timestamp (Requirement 7)
+            await updateLastOnline(username);
+            
+            $authMessage.textContent = ''; 
+            showView('panel');
+        }
+
+
+        /**
+         * Logs the user out.
+         */
+        function handleLogout() {
+            IS_LOGGED_IN = false;
+            USER_SESSION = null;
+            $panelMessage.textContent = 'You have been logged out.';
+            showView('login');
+        }
+
+        /**
+         * Fetches and displays current user details.
+         */
+        async function loadMyAccount() {
+            const $detailsContainer = document.getElementById('my-account-details');
+            $detailsContainer.innerHTML = '<p style="text-align: center;">Loading profile details...</p>';
+            
+            // --- CLOUDFLARE API: GET /api/me ---
+            try {
+                // Fetch current user data (can use USER_SESSION for quick display, or refetch for freshness)
+                /*
+                const user = await fetchWithBackoff(`${API_BASE}/api/me`, { 
+                    headers: { 'Authorization': `Bearer ${sessionToken}` } 
+                });
+                */
+                const user = USER_SESSION; // Use local session for simulation
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                if (user) {
+                    $detailsContainer.innerHTML = `
+                        <div><span>Username:</span><span>${user.username}</span></div>
+                        <div><span>Email:</span><span>${user.email}</span></div>
+                        <div><span>Account ID:</span><span>${user.accountId}</span></div>
+                        <div><span>Server Region:</span><span>${user.server}</span></div>
+                        <div><span>Rank:</span><span>${user.rank}</span></div>
+                    `;
+                    showView('account');
+                } else {
+                    $detailsContainer.innerHTML = '<p style="color: #ff6666;">Failed to load account information.</p>';
+                }
+            } catch (error) {
+                console.error('Failed to load user account:', error.message);
+                $detailsContainer.innerHTML = '<p style="color: #ff6666;">Connection error. Please try again.</p>';
+            }
+            // --- END CLOUDFLARE API ---
+        }
+        
+        // --- PANEL LOGIC ---
+
+        /**
+         * Fetches users for a given server region and updates the UI.
+         */
+        async function loadUsers(serverRegion) {
+            // 6. Do not show any users by default until data is fetched
+            $userList.innerHTML = ''; 
+            $panelMessage.textContent = `Loading players for ${serverRegion}...`;
+            
+            // 10. Highlight the active filter button
+            document.querySelectorAll('#server-filters .btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.server === serverRegion) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // --- CLOUDFLARE API: GET /api/users?server=... ---
+            let users = [];
+            try {
+                // Fetch data from your Cloudflare Worker:
+                // users = await fetchWithBackoff(`${API_BASE}/api/users?server=${serverRegion}`, { ... });
+
+                // SIMULATE DATA: Generating mock data 
+                await new Promise(resolve => setTimeout(resolve, 800));
+                
+                const ranks = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Master', 'Legend', 'Mythic'];
+                
+                // Add the current user to the list if they match the server
+                let mockUsers = [];
+                if (USER_SESSION && USER_SESSION.server === serverRegion) {
+                     mockUsers.push({
+                        username: USER_SESSION.username,
+                        accountId: USER_SESSION.accountId,
+                        server: USER_SESSION.server,
+                        rank: USER_SESSION.rank,
+                        lastOnline: USER_SESSION.lastOnline,
+                        isCurrentUser: true
+                     });
+                }
+
+                for (let i = 0; i < 10; i++) {
+                     // Simulate random last online time, mostly recent
+                    const lastOnlineDate = new Date();
+                    lastOnlineDate.setSeconds(lastOnlineDate.getSeconds() - (Math.random() * 600) - 1); // 1 to 600 seconds ago
+                    
+                    mockUsers.push({
+                        username: `${serverRegion}_Player_${i + 1}`,
+                        accountId: `RVP-${Math.floor(1000 + Math.random() * 8999)}`,
+                        server: serverRegion,
+                        rank: ranks[Math.floor(Math.random() * ranks.length)],
+                        lastOnline: lastOnlineDate.toISOString()
+                    });
+                }
+                
+                // Remove duplicates and set simulated users
+                users = [...new Map(mockUsers.map(item => [item.accountId, item])).values()];
+                
+                // Sort the current user to the top
+                users.sort((a, b) => (a.isCurrentUser === b.isCurrentUser) ? 0 : a.isCurrentUser ? -1 : 1);
+
+
+                $panelMessage.textContent = ''; 
+
+            } catch (error) {
+                console.error('Failed to load users:', error.message);
+                $panelMessage.textContent = 'Error fetching player data. Check API connection.';
+                $panelMessage.style.color = '#ff6666';
+                return;
+            }
+            // --- END CLOUDFLARE API ---
+
+            renderUserCards(users);
+        }
+
+        /**
+         * Renders the user list into the panel.
+         */
+        function renderUserCards(users) {
+            $userList.innerHTML = users.length === 0 
+                ? '<p style="grid-column: 1 / -1; text-align: center; color: var(--color-text-subtle);">No players found in this region.</p>'
+                : users.map(user => {
+                
+                // 11. Server color tags
+                const serverColor = {
+                    'EU-MENA': '#00ff66',  // Lime
+                    'ASIA': '#66ccff',     // Cyan
+                    'AMERICAS': '#ff66cc'  // Pink
+                }[user.server] || '#ccc';
+                
+                const lastOnlineTime = new Date(user.lastOnline).getTime();
+                const currentTime = new Date().getTime();
+                const isOnline = (currentTime - lastOnlineTime) <= ONLINE_THRESHOLD_MS;
+                
+                // 8. Add glowing "online now" badge
+                const onlineBadge = isOnline ? '<div class="online-badge" title="Online Now"></div>' : '';
+                
+                // 7. Display formatted last online time (Tehran Timezone)
+                const formattedTime = formatTehranDateTime(user.lastOnline);
+
+                return `
+                    <div class="user-card">
+                        <h3>
+                            ${user.username}
+                            ${onlineBadge}
+                        </h3>
+                        <p>Account ID: ${user.accountId}</p>
+                        <p>Rank: <span style="font-weight: 600; color: ${serverColor};">${user.rank}</span></p>
+                        <p style="font-size: 0.8em; color: #aaa;">Last Online (Tehran Time): ${formattedTime}</p>
+                        <span class="server-tag" style="background-color: ${serverColor}; color: var(--color-dark-bg); box-shadow: 0 0 5px ${serverColor}70;">${user.server}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- INITIALIZATION ---
+
+        window.onload = function() {
+            // Set up form submission handlers
+            $loginForm.addEventListener('submit', handleLogin);
+            $registerForm.addEventListener('submit', handleRegister);
+
+            // Set up server filter buttons
+            $serverFilters.addEventListener('click', (event) => {
+                if (event.target.tagName === 'BUTTON' && event.target.dataset.server) {
+                    loadUsers(event.target.dataset.server);
+                }
+            });
+
+            // Initial view
+            showView('login');
+        };
+    </script>
 </body>
 </html>
