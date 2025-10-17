@@ -3,541 +3,1034 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>پنل کاربری جامعه بازی</title>
+    <title>پنل Raven | ورود و مدیریت اکانت‌ها</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;900&display=swap');
+
+        :root {
+            --primary-lime: #32cd32;
+            --lime-light: #7fff00;
+            --lime-dark: #228b22;
+            --dark-bg: #0a0a0a;
+            --dark-secondary: #1a1a1a;
+            --dark-tertiary: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --border-color: #333333;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --shadow-lime: 0 0 30px rgba(50, 205, 50, 0.3);
+            --shadow-dark: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        :root {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #1a1a1a;
-            --bg-card: rgba(26, 26, 26, 0.8);
-            --accent-lime: #a6f34d;
-            --accent-lime-light: #c9ff7f;
-            --text-primary: #ffffff;
-            --text-secondary: #b0b0b0;
-            --border-color: rgba(166, 243, 77, 0.2);
-            --error: #ff4444;
-            --success: #44ff44;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            font-family: 'Vazirmatn', sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, var(--dark-secondary) 50%, var(--dark-tertiary) 100%);
             color: var(--text-primary);
             min-height: 100vh;
-            line-height: 1.6;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background particles */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(50, 205, 50, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(127, 255, 0, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(50, 205, 50, 0.08) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(1deg); }
+            66% { transform: translateY(10px) rotate(-1deg); }
         }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding: 20px 0;
+        /* Login Container */
+        .login-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 48px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: var(--shadow-dark);
+            position: relative;
+            overflow: hidden;
+            animation: slideUp 0.6s ease-out;
         }
 
-        .logo {
-            display: inline-flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 10px;
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary-lime), var(--lime-light), var(--primary-lime));
+            border-radius: 24px;
+            z-index: -1;
+            opacity: 0.3;
+            animation: glow 3s ease-in-out infinite alternate;
         }
 
-        .logo svg {
-            width: 50px;
-            height: 50px;
-            fill: var(--accent-lime);
+        @keyframes glow {
+            from { opacity: 0.3; }
+            to { opacity: 0.6; }
         }
 
-        .logo h1 {
-            font-size: 2rem;
-            background: linear-gradient(135deg, var(--accent-lime), var(--accent-lime-light));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .main-layout {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-
-        @media (max-width: 768px) {
-            .main-layout {
-                grid-template-columns: 1fr;
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        .auth-section {
-            background: var(--bg-card);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border-color);
-            border-radius: 15px;
-            padding: 30px;
-            transition: all 0.3s ease;
+        /* Raven Logo */
+        .raven-logo {
+            text-align: center;
+            margin-bottom: 32px;
+            animation: fadeIn 1s ease-out;
         }
 
-        .auth-section.hidden {
-            display: none;
+        .raven-logo svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 16px;
+            filter: drop-shadow(0 0 20px rgba(50, 205, 50, 0.5));
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .raven-logo h1 {
+            font-size: 28px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary-lime), var(--lime-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .raven-logo p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 300;
+        }
+
+        /* Form Styles */
+        .auth-form {
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .form-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .form-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 32px;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            position: relative;
         }
 
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
+            color: var(--primary-lime);
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .input-wrapper {
+            position: relative;
         }
 
         .form-group input,
         .form-group select {
             width: 100%;
-            padding: 12px 15px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
+            padding: 16px 20px;
+            padding-left: 50px;
+            background: var(--glass-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
             color: var(--text-primary);
-            font-size: 1rem;
+            font-size: 16px;
             transition: all 0.3s ease;
+            outline: none;
         }
 
         .form-group input:focus,
         .form-group select:focus {
-            outline: none;
-            border-color: var(--accent-lime);
-            box-shadow: 0 0 0 3px rgba(166, 243, 77, 0.1);
+            border-color: var(--primary-lime);
+            box-shadow: var(--shadow-lime);
+            background: rgba(50, 205, 50, 0.05);
         }
 
-        .password-wrapper {
-            position: relative;
+        .form-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 18px;
+            transition: color 0.3s ease;
+        }
+
+        .form-group input:focus + .input-icon {
+            color: var(--primary-lime);
         }
 
         .password-toggle {
             position: absolute;
-            left: 15px;
+            left: 20px;
             top: 50%;
             transform: translateY(-50%);
             background: none;
             border: none;
-            color: var(--text-secondary);
+            color: var(--text-muted);
             cursor: pointer;
-            padding: 5px;
+            font-size: 18px;
+            transition: color 0.3s ease;
+            padding: 8px;
         }
 
+        .password-toggle:hover {
+            color: var(--primary-lime);
+        }
+
+        /* Custom Select */
+        .custom-select {
+            position: relative;
+        }
+
+        .custom-select select {
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .custom-select::after {
+            content: '\f078';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+            transition: color 0.3s ease;
+        }
+
+        .custom-select:focus-within::after {
+            color: var(--primary-lime);
+        }
+
+        /* Buttons */
         .btn {
-            padding: 12px 24px;
-            background: linear-gradient(135deg, var(--accent-lime), var(--accent-lime-light));
-            color: var(--bg-primary);
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary-lime), var(--lime-light));
             border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
+            border-radius: 12px;
+            color: var(--dark-bg);
+            font-size: 16px;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
             width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(166, 243, 77, 0.3);
+            box-shadow: 0 10px 30px rgba(50, 205, 50, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
         }
 
         .btn-secondary {
             background: transparent;
-            color: var(--accent-lime);
-            border: 1px solid var(--accent-lime);
+            border: 2px solid var(--primary-lime);
+            color: var(--primary-lime);
         }
 
         .btn-secondary:hover {
-            background: var(--accent-lime);
-            color: var(--bg-primary);
+            background: var(--primary-lime);
+            color: var(--dark-bg);
         }
 
-        .toggle-link {
+        /* Form Toggle */
+        .form-toggle {
             text-align: center;
-            margin-top: 20px;
             color: var(--text-secondary);
+            font-size: 14px;
         }
 
-        .toggle-link button {
-            background: none;
-            border: none;
-            color: var(--accent-lime);
+        .form-toggle a {
+            color: var(--primary-lime);
+            text-decoration: none;
+            font-weight: 600;
             cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .form-toggle a:hover {
+            color: var(--lime-light);
             text-decoration: underline;
-            font-size: 0.9rem;
         }
 
-        .dashboard-section {
-            background: var(--bg-card);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border-color);
-            border-radius: 15px;
-            padding: 30px;
+        /* Panel Styles */
+        .panel-container {
+            display: none;
+            width: 100%;
+            max-width: 1200px;
+            animation: fadeIn 0.8s ease-out;
         }
 
-        .dashboard-header {
+        .panel-header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 16px;
         }
 
-        .welcome-pill {
-            background: linear-gradient(135deg, var(--accent-lime), var(--accent-lime-light));
-            color: var(--bg-primary);
-            padding: 8px 16px;
-            border-radius: 20px;
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-lime), var(--lime-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark-bg);
+            box-shadow: var(--shadow-lime);
+        }
+
+        .user-details h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-lime);
+            margin-bottom: 4px;
+        }
+
+        .user-details p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn-header {
+            padding: 12px 24px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            text-decoration: none;
             font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-header:hover {
+            background: var(--primary-lime);
+            color: var(--dark-bg);
+            border-color: var(--primary-lime);
+        }
+
+        .btn-logout {
+            background: linear-gradient(135deg, #ff4444, #ff6666);
+            border: none;
+            color: white;
+        }
+
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #ff6666, #ff8888);
+        }
+
+        /* Filter Buttons */
+        .filter-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 32px;
+        }
+
+        .filter-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-lime);
+            margin-bottom: 16px;
+            text-align: center;
         }
 
         .filter-buttons {
             display: flex;
-            gap: 10px;
+            gap: 12px;
+            justify-content: center;
             flex-wrap: wrap;
         }
 
         .filter-btn {
-            padding: 8px 16px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
+            padding: 12px 24px;
+            background: var(--glass-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
             color: var(--text-secondary);
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
         }
 
+        .filter-btn:hover {
+            border-color: var(--primary-lime);
+            color: var(--primary-lime);
+            transform: translateY(-2px);
+        }
+
         .filter-btn.active {
-            background: linear-gradient(135deg, var(--accent-lime), var(--accent-lime-light));
-            color: var(--bg-primary);
-            border-color: var(--accent-lime);
+            background: linear-gradient(135deg, var(--primary-lime), var(--lime-light));
+            color: var(--dark-bg);
+            border-color: var(--primary-lime);
         }
 
-        .filter-btn .count {
-            background: var(--bg-primary);
-            color: var(--accent-lime);
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-            margin-right: 5px;
+        .filter-count {
+            background: var(--dark-tertiary);
+            color: var(--primary-lime);
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin-right: 8px;
         }
 
+        .filter-btn.active .filter-count {
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--dark-bg);
+        }
+
+        /* User Cards */
         .users-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            max-height: 600px;
-            overflow-y: auto;
-            padding-right: 10px;
-        }
-
-        .users-grid::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .users-grid::-webkit-scrollbar-track {
-            background: var(--bg-secondary);
-            border-radius: 4px;
-        }
-
-        .users-grid::-webkit-scrollbar-thumb {
-            background: var(--accent-lime);
-            border-radius: 4px;
+            gap: 24px;
+            margin-bottom: 32px;
         }
 
         .user-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 24px;
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .user-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-lime), var(--lime-light));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .user-card:hover::before {
+            transform: scaleX(1);
         }
 
         .user-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(166, 243, 77, 0.2);
-            border-color: var(--accent-lime);
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-dark);
+            border-color: var(--primary-lime);
         }
 
-        .user-card h3 {
-            color: var(--accent-lime);
-            margin-bottom: 10px;
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
         }
 
-        .user-card .info {
+        .card-username {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-lime);
+        }
+
+        .card-server {
+            background: var(--dark-tertiary);
+            color: var(--lime-light);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .card-info {
             display: flex;
             flex-direction: column;
-            gap: 5px;
-            margin-bottom: 15px;
+            gap: 8px;
+            margin-bottom: 16px;
         }
 
-        .user-card .info span {
+        .card-info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             color: var(--text-secondary);
-            font-size: 0.9rem;
+            font-size: 14px;
         }
 
-        .profile-view {
-            background: var(--bg-card);
-            backdrop-filter: blur(10px);
+        .card-info-item i {
+            color: var(--primary-lime);
+            width: 16px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-card {
+            flex: 1;
+            padding: 10px;
+            background: var(--glass-bg);
             border: 1px solid var(--border-color);
-            border-radius: 15px;
-            padding: 30px;
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-card:hover {
+            background: var(--primary-lime);
+            color: var(--dark-bg);
+            border-color: var(--primary-lime);
+        }
+
+        /* Profile View */
+        .profile-view {
+            display: none;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 32px;
+            max-width: 600px;
+            margin: 0 auto;
+            animation: slideUp 0.6s ease-out;
         }
 
         .profile-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 32px;
+        }
+
+        .profile-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-lime);
         }
 
         .profile-info {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
         }
 
-        .profile-info .info-item {
-            background: var(--bg-secondary);
-            padding: 15px;
-            border-radius: 8px;
+        .profile-item {
+            background: var(--glass-bg);
             border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .profile-info .info-item label {
-            display: block;
+        .profile-label {
             color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-bottom: 5px;
+            font-weight: 500;
         }
 
-        .profile-info .info-item span {
+        .profile-value {
             color: var(--text-primary);
             font-weight: 600;
         }
 
-        .error-message,
-        .success-message,
-        .info-message {
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+        /* Empty State */
+        .empty-state {
             text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
         }
 
-        .error-message {
+        .empty-state i {
+            font-size: 64px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        /* Messages */
+        .message {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            text-align: center;
+            font-weight: 500;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.success {
+            background: rgba(50, 205, 50, 0.1);
+            border: 1px solid var(--primary-lime);
+            color: var(--primary-lime);
+        }
+
+        .message.error {
             background: rgba(255, 68, 68, 0.1);
-            border: 1px solid var(--error);
-            color: var(--error);
+            border: 1px solid #ff4444;
+            color: #ff4444;
         }
 
-        .success-message {
-            background: rgba(68, 255, 68, 0.1);
-            border: 1px solid var(--success);
-            color: var(--success);
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .login-container {
+                padding: 32px 24px;
+            }
+
+            .raven-logo h1 {
+                font-size: 24px;
+            }
+
+            .panel-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .users-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-buttons {
+                flex-direction: column;
+            }
+
+            .filter-btn {
+                width: 100%;
+            }
         }
 
-        .info-message {
-            background: rgba(166, 243, 77, 0.1);
-            border: 1px solid var(--accent-lime);
-            color: var(--accent-lime);
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--primary-lime);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
         }
 
-        .hidden {
-            display: none !important;
-        }
-
-        .fade-in {
-            animation: fadeIn 0.3s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .server-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            background: var(--bg-primary);
-            border-radius: 4px;
-            font-size: 0.8rem;
-            color: var(--accent-lime);
-            border: 1px solid var(--accent-lime);
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header class="header">
-            <div class="logo">
+        <!-- Login Section -->
+        <div id="loginSection" class="login-container">
+            <div class="raven-logo">
                 <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M50 10 L60 30 L80 25 L70 40 L85 55 L65 50 L60 70 L50 55 L40 70 L35 50 L15 55 L30 40 L20 25 L40 30 Z"/>
-                    <circle cx="50" cy="50" r="8" fill="#0a0a0a"/>
+                    <defs>
+                        <linearGradient id="ravenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#32cd32;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#7fff00;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <!-- Raven Body -->
+                    <ellipse cx="50" cy="45" rx="25" ry="20" fill="url(#ravenGradient)" opacity="0.9"/>
+                    <!-- Raven Head -->
+                    <circle cx="50" cy="30" r="15" fill="url(#ravenGradient)"/>
+                    <!-- Raven Wings -->
+                    <path d="M25 40 Q15 35, 10 45 Q15 50, 25 45" fill="url(#ravenGradient)" opacity="0.8"/>
+                    <path d="M75 40 Q85 35, 90 45 Q85 50, 75 45" fill="url(#ravenGradient)" opacity="0.8"/>
+                    <!-- Raven Eye -->
+                    <circle cx="45" cy="28" r="2" fill="#0a0a0a"/>
+                    <circle cx="55" cy="28" r="2" fill="#0a0a0a"/>
+                    <!-- Raven Beak -->
+                    <path d="M50 32 L48 35 L52 35 Z" fill="#ffa500"/>
                 </svg>
-                <h1>جامعه بازی</h1>
+                <h1>Raven Panel</h1>
+                <p>پنل مدیریت اکانت‌های بازی</p>
             </div>
-        </header>
 
-        <div class="main-layout">
-            <!-- Authentication Section -->
-            <section class="auth-section" id="authSection">
-                <div id="messageContainer"></div>
+            <div id="messageContainer"></div>
+
+            <!-- Login Form -->
+            <div id="loginForm" class="auth-form">
+                <h2 class="form-title">ورود به حساب کاربری</h2>
+                <p class="form-subtitle">خوش آمدید! لطفاً وارد حساب خود شوید</p>
                 
-                <!-- Login Form -->
-                <div id="loginForm" class="auth-form">
-                    <h2 style="margin-bottom: 20px; color: var(--accent-lime);">ورود</h2>
-                    <form id="loginFormElement">
-                        <div class="form-group">
-                            <label for="loginIdentifier">نام کاربری یا ایمیل</label>
-                            <input type="text" id="loginIdentifier" name="identifier" required>
+                <form onsubmit="return false;">
+                    <div class="form-group">
+                        <label for="loginIdentifier">نام کاربری یا ایمیل</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="loginIdentifier" placeholder="نام کاربری یا ایمیل خود را وارد کنید" required>
+                            <i class="fas fa-user input-icon"></i>
                         </div>
-                        <div class="form-group">
-                            <label for="loginPassword">رمز عبور</label>
-                            <div class="password-wrapper">
-                                <input type="password" id="loginPassword" name="password" required>
-                                <button type="button" class="password-toggle" onclick="togglePassword('loginPassword', this)">👁️</button>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn">ورود</button>
-                    </form>
-                    <div class="toggle-link">
-                        حساب کاربری نداری؟ <button onclick="toggleForm('register')">ثبت‌نام کن</button>
                     </div>
-                </div>
 
-                <!-- Register Form -->
-                <div id="registerForm" class="auth-form hidden">
-                    <h2 style="margin-bottom: 20px; color: var(--accent-lime);">ثبت‌نام</h2>
-                    <form id="registerFormElement">
-                        <div class="form-group">
-                            <label for="registerUsername">نام کاربری</label>
-                            <input type="text" id="registerUsername" name="username" required>
+                    <div class="form-group">
+                        <label for="loginPassword">رمز عبور</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="loginPassword" placeholder="رمز عبور خود را وارد کنید" required>
+                            <i class="fas fa-lock input-icon"></i>
+                            <button type="button" class="password-toggle" onclick="togglePassword('loginPassword')">
+                                <i class="fas fa-eye"></i>
+                            </button>
                         </div>
-                        <div class="form-group">
-                            <label for="registerEmail">ایمیل</label>
-                            <input type="email" id="registerEmail" name="email" required>
+                    </div>
+
+                    <button type="button" class="btn" onclick="handleLogin()">
+                        <i class="fas fa-sign-in-alt"></i> ورود
+                    </button>
+                </form>
+
+                <div class="form-toggle">
+                    حساب کاربری نداری؟ <a onclick="toggleForm('register')">ثبت‌نام کن</a>
+                </div>
+            </div>
+
+            <!-- Register Form -->
+            <div id="registerForm" class="auth-form" style="display: none;">
+                <h2 class="form-title">ثبت‌نام در سیستم</h2>
+                <p class="form-subtitle">حساب کاربری جدید بسازید</p>
+                
+                <form onsubmit="return false;">
+                    <div class="form-group">
+                        <label for="regUsername">Username</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="regUsername" placeholder="نام کاربری خود را وارد کنید" required>
+                            <i class="fas fa-user input-icon"></i>
                         </div>
-                        <div class="form-group">
-                            <label for="registerAccountId">شناسه حساب</label>
-                            <input type="text" id="registerAccountId" name="accountId" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regEmail">Email</label>
+                        <div class="input-wrapper">
+                            <input type="email" id="regEmail" placeholder="ایمیل خود را وارد کنید" required>
+                            <i class="fas fa-envelope input-icon"></i>
                         </div>
-                        <div class="form-group">
-                            <label for="registerServer">سرور</label>
-                            <select id="registerServer" name="server" required>
-                                <option value="">انتخاب سرور</option>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regAccountId">Account ID</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="regAccountId" placeholder="شناسه اکانت بازی خود را وارد کنید" required>
+                            <i class="fas fa-gamepad input-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regServer">سرور اکانت شما؟</label>
+                        <div class="input-wrapper custom-select">
+                            <select id="regServer" required>
+                                <option value="">سرور خود را انتخاب کنید</option>
                                 <option value="EU-MENA">EU-MENA</option>
                                 <option value="ASIA">ASIA</option>
                                 <option value="AMERICAS">AMERICAS</option>
                             </select>
+                            <i class="fas fa-server input-icon"></i>
                         </div>
-                        <div class="form-group">
-                            <label for="registerPassword">رمز عبور</label>
-                            <div class="password-wrapper">
-                                <input type="password" id="registerPassword" name="password" required>
-                                <button type="button" class="password-toggle" onclick="togglePassword('registerPassword', this)">👁️</button>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn">ثبت‌نام</button>
-                    </form>
-                    <div class="toggle-link">
-                        قبلا حساب داری؟ <button onclick="toggleForm('login')">وارد شو</button>
                     </div>
-                </div>
-            </section>
 
-            <!-- Dashboard Section -->
-            <section class="dashboard-section" id="dashboardSection">
-                <div class="dashboard-header">
-                    <div>
-                        <div class="welcome-pill hidden" id="welcomePill">خوش آمدی</div>
-                        <button class="btn btn-secondary hidden" id="logoutBtn" onclick="logout()" style="margin-top: 10px; width: auto;">خروج</button>
-                        <button class="btn btn-secondary hidden" id="accountBtn" onclick="showMyProfile()" style="margin-top: 10px; width: auto; margin-right: 10px;">حساب کاربری</button>
+                    <div class="form-group">
+                        <label for="regPassword">Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="regPassword" placeholder="رمز عبور خود را وارد کنید" required>
+                            <i class="fas fa-lock input-icon"></i>
+                            <button type="button" class="password-toggle" onclick="togglePassword('regPassword')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
-                    <div class="filter-buttons" id="filterButtons">
-                        <button class="filter-btn active" data-server="ALL" onclick="filterUsers('ALL')">
-                            <span class="count" id="countALL">0</span>همه
-                        </button>
-                        <button class="filter-btn" data-server="EU-MENA" onclick="filterUsers('EU-MENA')">
-                            <span class="count" id="countEU-MENA">0</span>EU-MENA
-                        </button>
-                        <button class="filter-btn" data-server="ASIA" onclick="filterUsers('ASIA')">
-                            <span class="count" id="countASIA">0</span>ASIA
-                        </button>
-                        <button class="filter-btn" data-server="AMERICAS" onclick="filterUsers('AMERICAS')">
-                            <span class="count" id="countAMERICAS">0</span>AMERICAS
-                        </button>
-                    </div>
+
+                    <button type="button" class="btn" onclick="handleRegister()">
+                        <i class="fas fa-user-plus"></i> ثبت‌نام کن
+                    </button>
+                </form>
+
+                <div class="form-toggle">
+                    قبلاً حساب داری؟ <a onclick="toggleForm('login')">وارد شو</a>
                 </div>
-                <div id="dashboardMessage"></div>
-                <div class="users-grid" id="usersGrid">
-                    <!-- User cards will be inserted here -->
-                </div>
-            </section>
+            </div>
         </div>
 
-        <!-- Profile View Section -->
-        <section class="profile-view hidden" id="profileView">
+        <!-- Panel Section -->
+        <div id="panelSection" class="panel-container">
+            <header class="panel-header">
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <div class="user-details">
+                        <h3 id="userUsername">...</h3>
+                        <p id="userEmail">...</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-header" onclick="showProfile()">
+                        <i class="fas fa-user"></i> حساب کاربری
+                    </button>
+                    <button class="btn-header btn-logout" onclick="handleLogout()">
+                        <i class="fas fa-sign-out-alt"></i> خروج
+                    </button>
+                </div>
+            </header>
+
+            <section class="filter-section">
+                <h3 class="filter-title">
+                    <i class="fas fa-filter"></i> فیلتر کاربران بر اساس سرور
+                </h3>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-server="ALL" onclick="filterUsers('ALL')">
+                        <span class="filter-count" id="countALL">0</span>همه
+                    </button>
+                    <button class="filter-btn" data-server="EU-MENA" onclick="filterUsers('EU-MENA')">
+                        <span class="filter-count" id="countEU-MENA">0</span>EU-MENA
+                    </button>
+                    <button class="filter-btn" data-server="ASIA" onclick="filterUsers('ASIA')">
+                        <span class="filter-count" id="countASIA">0</span>ASIA
+                    </button>
+                    <button class="filter-btn" data-server="AMERICAS" onclick="filterUsers('AMERICAS')">
+                        <span class="filter-count" id="countAMERICAS">0</span>AMERICAS
+                    </button>
+                </div>
+            </section>
+
+            <main>
+                <div id="usersGrid" class="users-grid">
+                    <!-- User cards will be dynamically added here -->
+                </div>
+                
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <i class="fas fa-users"></i>
+                    <h3>کاربری یافت نشد</h3>
+                    <p>در حال حاضر کاربری در این دسته‌بندی وجود ندارد</p>
+                </div>
+            </main>
+        </div>
+
+        <!-- Profile View -->
+        <div id="profileView" class="profile-view">
             <div class="profile-header">
-                <h2 style="color: var(--accent-lime);">پروفایل کاربر</h2>
-                <button class="btn btn-secondary" onclick="backToDashboard()">بازگشت</button>
+                <h2 class="profile-title">
+                    <i class="fas fa-user-circle"></i> پروفایل کاربری
+                </h2>
+                <button class="btn-header" onclick="backToPanel()">
+                    <i class="fas fa-arrow-right"></i> بازگشت به پنل
+                </button>
             </div>
-            <div id="profileMessage"></div>
-            <div class="profile-info" id="profileInfo">
-                <!-- Profile information will be inserted here -->
+            
+            <div class="profile-info">
+                <div class="profile-item">
+                    <span class="profile-label">
+                        <i class="fas fa-user"></i> نام کاربری
+                    </span>
+                    <span class="profile-value" id="profileUsername">...</span>
+                </div>
+                
+                <div class="profile-item">
+                    <span class="profile-label">
+                        <i class="fas fa-envelope"></i> ایمیل
+                    </span>
+                    <span class="profile-value" id="profileEmail">...</span>
+                </div>
+                
+                <div class="profile-item">
+                    <span class="profile-label">
+                        <i class="fas fa-gamepad"></i> Account ID
+                    </span>
+                    <span class="profile-value" id="profileAccountId">...</span>
+                </div>
+                
+                <div class="profile-item">
+                    <span class="profile-label">
+                        <i class="fas fa-server"></i> سرور
+                    </span>
+                    <span class="profile-value" id="profileServer">...</span>
+                </div>
+                
+                <div class="profile-item">
+                    <span class="profile-label">
+                        <i class="fas fa-calendar"></i> تاریخ عضویت
+                    </span>
+                    <span class="profile-value" id="profileCreatedAt">...</span>
+                </div>
             </div>
-        </section>
+        </div>
     </div>
 
     <script>
-        // ==================== CONFIGURATION ====================
-        const API_BASE = 'https://ravenshoppanel.bloodstrike.workers.dev/'; // set your API base URL here
-        // Example: const API_BASE = 'https://your-worker.your-subdomain.workers.dev';
+        // Constants and State
+        const API_BASE = 'https://ravenshoplogin.bloodstrike.workers.dev';
+        const LS_USERS = 'raven_users_v1';
+        const LS_CURRENT = 'raven_current_v1';
         
-        // ==================== STATE MANAGEMENT ====================
         let currentUser = null;
         let authToken = null;
         let allUsers = [];
         let currentFilter = 'ALL';
-        let isOfflineMode = false;
 
-        // ==================== INITIALIZATION ====================
+        // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
-            // Check for existing session
+            checkAuthStatus();
+        });
+
+        // Check if user is already logged in
+        function checkAuthStatus() {
             const savedToken = localStorage.getItem('authToken');
             const savedUser = localStorage.getItem('currentUser');
             
             if (savedToken && savedUser) {
                 authToken = savedToken;
                 currentUser = JSON.parse(savedUser);
-                showDashboard();
+                showPanel();
+            } else {
+                showLogin();
             }
+        }
 
-            // Setup form listeners
-            document.getElementById('loginFormElement').addEventListener('submit', handleLogin);
-            document.getElementById('registerFormElement').addEventListener('submit', handleRegister);
-
-            // Load initial users
-            loadUsers();
-        });
-
-        // ==================== AUTHENTICATION FUNCTIONS ====================
+        // Form toggle functions
         function toggleForm(formType) {
             const loginForm = document.getElementById('loginForm');
             const registerForm = document.getElementById('registerForm');
@@ -546,228 +1039,352 @@
             messageContainer.innerHTML = '';
             
             if (formType === 'register') {
-                loginForm.classList.add('hidden');
-                registerForm.classList.remove('hidden');
-                registerForm.classList.add('fade-in');
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+                registerForm.style.animation = 'fadeIn 0.5s ease-out';
             } else {
-                registerForm.classList.add('hidden');
-                loginForm.classList.remove('hidden');
-                loginForm.classList.add('fade-in');
+                registerForm.style.display = 'none';
+                loginForm.style.display = 'block';
+                loginForm.style.animation = 'fadeIn 0.5s ease-out';
             }
         }
 
-        function togglePassword(inputId, button) {
+        // Password toggle
+        function togglePassword(inputId) {
             const input = document.getElementById(inputId);
+            const button = input.nextElementSibling;
+            const icon = button.querySelector('i');
+            
             if (input.type === 'password') {
                 input.type = 'text';
-                button.textContent = '🙈';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
             } else {
                 input.type = 'password';
-                button.textContent = '👁️';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
             }
         }
 
-        async function handleLogin(e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData);
+        // Message functions
+        function showMessage(text, type) {
+            const messageContainer = document.getElementById('messageContainer');
+            messageContainer.innerHTML = `<div class="message ${type}">${text}</div>`;
             
-            clearMessages();
-            
-            // Client-side validation
-            if (!data.identifier || !data.password) {
-                showMessage('لطفاً تمام فیلدها را پر کنید', 'error', 'messageContainer');
+            setTimeout(() => {
+                messageContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        // Registration function
+        async function handleRegister() {
+            const username = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const accountId = document.getElementById('regAccountId').value.trim();
+            const server = document.getElementById('regServer').value;
+            const password = document.getElementById('regPassword').value;
+
+            // Validation
+            if (!username || !email || !accountId || !server || !password) {
+                showMessage('لطفاً تمام فیلدها را پر کنید', 'error');
                 return;
             }
 
-            if (data.password.length < 6) {
-                showMessage('رمز عبور باید حداقل ۶ کاراکتر باشد', 'error', 'messageContainer');
+            if (password.length < 6) {
+                showMessage('رمز عبور باید حداقل ۶ کاراکتر باشد', 'error');
+                return;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showMessage('ایمیل معتبر نیست', 'error');
                 return;
             }
 
             try {
-                const response = await fetch(`${API_BASE}/api/login`, {
+                // Call API
+                const response = await fetch(`${API_BASE}/api/auth/register`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify({
+                        username,
+                        email,
+                        in_game_id: accountId,
+                        telegram_username: '@',
+                        password
+                    })
                 });
 
-                const result = await response.json();
+                const data = await response.json();
 
-                if (response.ok && result.success) {
-                    // Store auth data
-                    authToken = result.token;
-                    currentUser = result.user;
+                if (response.ok) {
+                    showMessage('ثبت‌نام با موفقیت انجام شد! لطفاً وارد شوید', 'success');
+                    
+                    // Clear form
+                    document.getElementById('regUsername').value = '';
+                    document.getElementById('regEmail').value = '';
+                    document.getElementById('regAccountId').value = '';
+                    document.getElementById('regServer').value = '';
+                    document.getElementById('regPassword').value = '';
+                    
+                    // Switch to login form
+                    setTimeout(() => toggleForm('login'), 2000);
+                } else {
+                    showMessage(data.error || 'خطا در ثبت‌نام', 'error');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                // Fallback to localStorage
+                fallbackRegister(username, email, accountId, server, password);
+            }
+        }
+
+        // Login function
+        async function handleLogin() {
+            const identifier = document.getElementById('loginIdentifier').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!identifier || !password) {
+                showMessage('لطفاً نام کاربری/ایمیل و رمز عبور را وارد کنید', 'error');
+                return;
+            }
+
+            try {
+                // Call API
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        identifier,
+                        password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    authToken = data.token;
+                    currentUser = data.user;
+                    
+                    // Save to localStorage
                     localStorage.setItem('authToken', authToken);
                     localStorage.setItem('currentUser', JSON.stringify(currentUser));
                     
-                    showMessage('ورود با موفقیت انجام شد!', 'success', 'messageContainer');
+                    showMessage('ورود با موفقیت انجام شد!', 'success');
                     
-                    setTimeout(() => {
-                        showDashboard();
-                        loadUsers();
-                    }, 1000);
+                    setTimeout(() => showPanel(), 1000);
                 } else {
-                    showMessage(result.error || 'خطا در ورود', 'error', 'messageContainer');
+                    showMessage(data.error || 'نام کاربری یا رمز عبور اشتباه است', 'error');
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                // Fallback to localStorage demo mode
-                fallbackLogin(data);
+                // Fallback to localStorage
+                fallbackLogin(identifier, password);
             }
         }
 
-        async function handleRegister(e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData);
+        // Fallback functions for demo mode
+        function fallbackRegister(username, email, accountId, server, password) {
+            const users = getUsersFromStorage();
             
-            clearMessages();
+            // Check for duplicates
+            if (users.some(u => u.username === username || u.email === email)) {
+                showMessage('نام کاربری یا ایمیل تکراری است', 'error');
+                return;
+            }
+
+            // Create new user
+            const newUser = {
+                id: 'u_' + Date.now(),
+                username,
+                email,
+                accountId,
+                server,
+                passwordHash: btoa(password), // Simple encoding for demo
+                createdAt: new Date().toISOString()
+            };
+
+            users.push(newUser);
+            saveUsersToStorage(users);
             
-            // Client-side validation
-            if (!data.username || !data.email || !data.accountId || !data.server || !data.password) {
-                showMessage('لطفاً تمام فیلدها را پر کنید', 'error', 'messageContainer');
-                return;
-            }
+            showMessage('ثبت‌نام با موفقیت انجام شد (حالت دمو)!', 'success');
+            
+            setTimeout(() => toggleForm('login'), 2000);
+        }
 
-            if (!validateEmail(data.email)) {
-                showMessage('ایمیل معتبر نیست', 'error', 'messageContainer');
-                return;
-            }
+        function fallbackLogin(identifier, password) {
+            const users = getUsersFromStorage();
+            const user = users.find(u => 
+                (u.username === identifier || u.email === identifier) && 
+                u.passwordHash === btoa(password)
+            );
 
-            if (data.password.length < 6) {
-                showMessage('رمز عبور باید حداقل ۶ کاراکتر باشد', 'error', 'messageContainer');
-                return;
+            if (user) {
+                currentUser = user;
+                authToken = 'demo_token_' + Date.now();
+                
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                localStorage.setItem('authToken', authToken);
+                
+                showMessage('ورود با موفقیت انجام شد (حالت دمو)!', 'success');
+                
+                setTimeout(() => showPanel(), 1000);
+            } else {
+                showMessage('نام کاربری یا رمز عبور اشتباه است', 'error');
             }
+        }
 
+        // Storage functions
+        function getUsersFromStorage() {
             try {
-                const response = await fetch(`${API_BASE}/api/register`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-
-                if (response.ok && result.success) {
-                    // Store auth data
-                    authToken = result.token;
-                    currentUser = result.user;
-                    localStorage.setItem('authToken', authToken);
-                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                    
-                    showMessage('ثبت‌نام با موفقیت انجام شد!', 'success', 'messageContainer');
-                    
-                    setTimeout(() => {
-                        showDashboard();
-                        loadUsers();
-                    }, 1000);
-                } else {
-                    showMessage(result.error || 'خطا در ثبت‌نام', 'error', 'messageContainer');
-                }
+                const users = localStorage.getItem(LS_USERS);
+                return users ? JSON.parse(users) : [];
             } catch (error) {
-                console.error('Register error:', error);
-                // Fallback to localStorage demo mode
-                fallbackRegister(data);
+                return [];
             }
         }
 
-        function logout() {
-            // Call logout API if available
-            if (authToken && !isOfflineMode) {
-                fetch(`${API_BASE}/api/logout`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`,
-                        'Content-Type': 'application/json',
-                    }
-                }).catch(error => console.log('Logout API call failed:', error));
-            }
+        function saveUsersToStorage(users) {
+            localStorage.setItem(LS_USERS, JSON.stringify(users));
+        }
+
+        // View switching functions
+        function showLogin() {
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('panelSection').style.display = 'none';
+            document.getElementById('profileView').style.display = 'none';
+        }
+
+        function showPanel() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('panelSection').style.display = 'block';
+            document.getElementById('profileView').style.display = 'none';
             
-            // Clear local data
-            authToken = null;
-            currentUser = null;
+            // Update user info
+            updateUserDisplay();
+            
+            // Load users
+            loadUsers();
+        }
+
+        function showProfile() {
+            document.getElementById('panelSection').style.display = 'none';
+            document.getElementById('profileView').style.display = 'block';
+            
+            // Update profile info
+            document.getElementById('profileUsername').textContent = currentUser.username;
+            document.getElementById('profileEmail').textContent = currentUser.email;
+            document.getElementById('profileAccountId').textContent = currentUser.accountId;
+            document.getElementById('profileServer').textContent = currentUser.server;
+            document.getElementById('profileCreatedAt').textContent = new Date(currentUser.createdAt).toLocaleDateString('fa-IR');
+        }
+
+        function backToPanel() {
+            showPanel();
+        }
+
+        // Logout function
+        function handleLogout() {
             localStorage.removeItem('authToken');
             localStorage.removeItem('currentUser');
             
-            // Reset UI
-            document.getElementById('authSection').classList.remove('hidden');
-            document.getElementById('welcomePill').classList.add('hidden');
-            document.getElementById('logoutBtn').classList.add('hidden');
-            document.getElementById('accountBtn').classList.add('hidden');
-            document.getElementById('usersGrid').innerHTML = '';
+            authToken = null;
+            currentUser = null;
             
-            // Reset forms
-            document.getElementById('loginFormElement').reset();
-            document.getElementById('registerFormElement').reset();
+            showMessage('با موفقیت خارج شدید', 'success');
             
-            showMessage('با موفقیت خارج شدید', 'info', 'dashboardMessage');
+            setTimeout(() => showLogin(), 1000);
         }
 
-        // ==================== DASHBOARD FUNCTIONS ====================
-        function showDashboard() {
-            document.getElementById('authSection').classList.add('hidden');
-            document.getElementById('welcomePill').textContent = `خوش آمدی — ${currentUser.username}`;
-            document.getElementById('welcomePill').classList.remove('hidden');
-            document.getElementById('logoutBtn').classList.remove('hidden');
-            document.getElementById('accountBtn').classList.remove('hidden');
+        // Update user display
+        function updateUserDisplay() {
+            if (currentUser) {
+                document.getElementById('userAvatar').textContent = currentUser.username.charAt(0).toUpperCase();
+                document.getElementById('userUsername').textContent = currentUser.username;
+                document.getElementById('userEmail').textContent = currentUser.email;
+            }
         }
 
+        // Load users
         async function loadUsers() {
             try {
-                const url = `${API_BASE}/api/users${currentFilter !== 'ALL' ? '?server=' + currentFilter : ''}`;
-                const headers = authToken ? { 'Authorization': `Bearer ${authToken}` } : {};
-                
-                const response = await fetch(url, { headers });
-                const result = await response.json();
+                // Try API first
+                const response = await fetch(`${API_BASE}/api/users`, {
+                    headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
+                });
 
-                if (response.ok && result.success) {
-                    allUsers = result.users;
-                    isOfflineMode = false;
+                if (response.ok) {
+                    const data = await response.json();
+                    allUsers = data.users || [];
                 } else {
-                    throw new Error('API call failed');
+                    throw new Error('API failed');
                 }
             } catch (error) {
-                console.error('Load users error:', error);
+                console.error('Failed to load users from API:', error);
                 // Fallback to localStorage
                 allUsers = getUsersFromStorage();
-                isOfflineMode = true;
-                showMessage('حالت آفلاین/دمو: داده‌ها از localStorage بارگذاری شدند', 'info', 'dashboardMessage');
             }
-            
+
             displayUsers();
             updateFilterCounts();
         }
 
+        // Display users
         function displayUsers() {
-            const grid = document.getElementById('usersGrid');
-            const filteredUsers = currentFilter === 'ALL' 
-                ? allUsers 
-                : allUsers.filter(user => user.server === currentFilter);
+            const usersGrid = document.getElementById('usersGrid');
+            const emptyState = document.getElementById('emptyState');
             
+            let filteredUsers = allUsers;
+            
+            if (currentFilter !== 'ALL') {
+                filteredUsers = allUsers.filter(user => user.server === currentFilter);
+            }
+
             if (filteredUsers.length === 0) {
-                grid.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">کاربری یافت نشد</p>';
+                usersGrid.innerHTML = '';
+                emptyState.style.display = 'block';
                 return;
             }
 
-            grid.innerHTML = filteredUsers.map(user => `
-                <div class="user-card fade-in">
-                    <h3>${user.username}</h3>
-                    <div class="info">
-                        <span>📧 ${user.email}</span>
-                        <span>🎮 ${user.accountId}</span>
-                        <span>🌍 <span class="server-badge">${user.server}</span></span>
-                        <span>📅 ${new Date(user.createdAt).toLocaleString('fa-IR')}</span>
+            emptyState.style.display = 'none';
+            
+            usersGrid.innerHTML = filteredUsers.map(user => `
+                <div class="user-card">
+                    <div class="card-header">
+                        <div class="card-username">${user.username}</div>
+                        <div class="card-server">${user.server}</div>
                     </div>
-                    <button class="btn btn-secondary" onclick="showUserProfile('${user.id}')">نمایش</button>
+                    <div class="card-info">
+                        <div class="card-info-item">
+                            <i class="fas fa-envelope"></i>
+                            <span>${user.email}</span>
+                        </div>
+                        <div class="card-info-item">
+                            <i class="fas fa-gamepad"></i>
+                            <span>${user.accountId}</span>
+                        </div>
+                        <div class="card-info-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>${new Date(user.createdAt).toLocaleDateString('fa-IR')}</span>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn-card" onclick="viewUserProfile('${user.id}')">
+                            <i class="fas fa-eye"></i> مشاهده
+                        </button>
+                        <button class="btn-card" onclick="contactUser('${user.id}')">
+                            <i class="fas fa-comment"></i> تماس
+                        </button>
+                    </div>
                 </div>
             `).join('');
         }
 
+        // Filter users
         function filterUsers(server) {
             currentFilter = server;
             
@@ -782,6 +1399,7 @@
             displayUsers();
         }
 
+        // Update filter counts
         function updateFilterCounts() {
             const counts = {
                 'ALL': allUsers.length,
@@ -798,317 +1416,22 @@
             });
         }
 
-        // ==================== PROFILE FUNCTIONS ====================
-        function showUserProfile(userId) {
+        // View user profile
+        function viewUserProfile(userId) {
             const user = allUsers.find(u => u.id === userId);
-            if (!user) {
-                showMessage('کاربر یافت نشد', 'error', 'profileMessage');
-                return;
-            }
-
-            document.getElementById('dashboardSection').classList.add('hidden');
-            document.getElementById('profileView').classList.remove('hidden');
-            
-            document.getElementById('profileInfo').innerHTML = `
-                <div class="info-item">
-                    <label>نام کاربری</label>
-                    <span>${user.username}</span>
-                </div>
-                <div class="info-item">
-                    <label>ایمیل</label>
-                    <span>${user.email}</span>
-                </div>
-                <div class="info-item">
-                    <label>شناسه حساب</label>
-                    <span>${user.accountId}</span>
-                </div>
-                <div class="info-item">
-                    <label>سرور</label>
-                    <span class="server-badge">${user.server}</span>
-                </div>
-                <div class="info-item">
-                    <label>تاریخ عضویت</label>
-                    <span>${new Date(user.createdAt).toLocaleString('fa-IR')}</span>
-                </div>
-            `;
-        }
-
-        function showMyProfile() {
-            if (!currentUser) {
-                showMessage('لطفاً ابتدا وارد شوید', 'error', 'dashboardMessage');
-                return;
-            }
-            showUserProfile(currentUser.id);
-        }
-
-        function backToDashboard() {
-            document.getElementById('profileView').classList.add('hidden');
-            document.getElementById('dashboardSection').classList.remove('hidden');
-            clearMessages();
-        }
-
-        // ==================== UTILITY FUNCTIONS ====================
-        function validateEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email);
-        }
-
-        function showMessage(message, type, containerId) {
-            const container = document.getElementById(containerId);
-            const messageClass = type === 'error' ? 'error-message' : 
-                               type === 'success' ? 'success-message' : 'info-message';
-            
-            container.innerHTML = `<div class="${messageClass} fade-in">${message}</div>`;
-            
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-                const msg = container.querySelector(`.${messageClass}`);
-                if (msg) msg.remove();
-            }, 5000);
-        }
-
-        function clearMessages() {
-            document.getElementById('messageContainer').innerHTML = '';
-            document.getElementById('dashboardMessage').innerHTML = '';
-            document.getElementById('profileMessage').innerHTML = '';
-        }
-
-        // ==================== LOCALSTORAGE FALLBACK FUNCTIONS ====================
-        function getUsersFromStorage() {
-            const users = localStorage.getItem('demoUsers');
-            return users ? JSON.parse(users) : getDemoUsers();
-        }
-
-        function saveUsersToStorage(users) {
-            localStorage.setItem('demoUsers', JSON.stringify(users));
-        }
-
-        function getDemoUsers() {
-            const demoUsers = [
-                {
-                    id: 'u_demo1',
-                    username: 'ShadowRaven',
-                    email: 'raven@mail.test',
-                    accountId: 'RVN001',
-                    server: 'EU-MENA',
-                    createdAt: new Date().toISOString()
-                },
-                {
-                    id: 'u_demo2',
-                    username: 'SkyStriker',
-                    email: 'sky@mail.test',
-                    accountId: 'SKY22',
-                    server: 'ASIA',
-                    createdAt: new Date().toISOString()
-                },
-                {
-                    id: 'u_demo3',
-                    username: 'GreenBlade',
-                    email: 'blade@mail.test',
-                    accountId: 'GB999',
-                    server: 'AMERICAS',
-                    createdAt: new Date().toISOString()
-                }
-            ];
-            saveUsersToStorage(demoUsers);
-            return demoUsers;
-        }
-
-        function fallbackLogin(data) {
-            const users = getUsersFromStorage();
-            const user = users.find(u => 
-                (u.username === data.identifier || u.email === data.identifier)
-            );
-            
             if (user) {
-                // In demo mode, accept any password
-                authToken = 'demo-token-' + Date.now();
                 currentUser = user;
-                localStorage.setItem('authToken', authToken);
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                
-                showMessage('ورود با موفقیت انجام شد (حالت دمو)!', 'success', 'messageContainer');
-                isOfflineMode = true;
-                
-                setTimeout(() => {
-                    showDashboard();
-                    loadUsers();
-                }, 1000);
-            } else {
-                showMessage('کاربری با این اطلاعات یافت نشد', 'error', 'messageContainer');
+                showProfile();
             }
         }
 
-        function fallbackRegister(data) {
-            const users = getUsersFromStorage();
-            
-            // Check for duplicates
-            if (users.find(u => u.username === data.username || 
-                              u.email === data.email || 
-                              u.accountId === data.accountId)) {
-                showMessage('نام کاربری، ایمیل یا شناسه حساب تکراری است', 'error', 'messageContainer');
-                return;
+        // Contact user (placeholder function)
+        function contactUser(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (user) {
+                showMessage(`در حال توسعه: ارسال پیام به ${user.username}`, 'success');
             }
-            
-            // Create new user
-            const newUser = {
-                id: 'u_' + Date.now(),
-                username: data.username,
-                email: data.email,
-                accountId: data.accountId,
-                server: data.server,
-                createdAt: new Date().toISOString()
-            };
-            
-            users.push(newUser);
-            saveUsersToStorage(users);
-            
-            authToken = 'demo-token-' + Date.now();
-            currentUser = newUser;
-            localStorage.setItem('authToken', authToken);
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            
-            showMessage('ثبت‌نام با موفقیت انجام شد (حالت دمو)!', 'success', 'messageContainer');
-            isOfflineMode = true;
-            
-            setTimeout(() => {
-                showDashboard();
-                loadUsers();
-            }, 1000);
         }
     </script>
-
-    <!-- ==================== API CONTRACT DOCUMENTATION ====================
-         IMPORTANT: This is the exact API contract that your Cloudflare Worker 
-         must implement. The frontend expects these exact endpoints and response formats.
-         
-         Replace API_BASE at the top of the script with your Worker URL.
-         
-         SECURITY NOTES:
-         - Passwords MUST be hashed server-side with bcrypt (never on client)
-         - Use HTTPS for all API calls in production
-         - Consider httpOnly secure cookies for tokens instead of localStorage
-         - Implement proper rate limiting and input validation
-    -->
-
-    <!-- 
-        ==================== API ENDPOINTS ====================
-        
-        1) POST /api/register
-        Request:
-        {
-          "username": "string",
-          "email": "string", 
-          "accountId": "string",
-          "server": "EU-MENA|ASIA|AMERICAS",
-          "password": "string"
-        }
-        
-        Responses:
-        201 Created
-        {
-          "success": true,
-          "user": {
-            "id": "string",
-            "username": "string", 
-            "email": "string",
-            "accountId": "string",
-            "server": "string",
-            "createdAt": "ISO8601"
-          },
-          "token": "string"
-        }
-        
-        400 Bad Request
-        { "success": false, "error": "validation message" }
-        
-        409 Conflict
-        { "success": false, "error": "username/email/accountId exists" }
-        
-        Example curl:
-        curl -X POST "$API_BASE/api/register" \
-          -H "Content-Type: application/json" \
-          -d '{"username":"Ali","email":"a@mail.test","accountId":"ALI01","server":"ASIA","password":"secret"}'
-        
-        2) POST /api/login
-        Request:
-        {
-          "identifier": "username-or-email",
-          "password": "string"
-        }
-        
-        Responses:
-        200 OK
-        {
-          "success": true,
-          "user": { "id":"","username":"","email":"","accountId":"","server":"","createdAt":"" },
-          "token": "string"
-        }
-        
-        401 Unauthorized
-        { "success": false, "error": "invalid credentials" }
-        
-        Example curl:
-        curl -X POST "$API_BASE/api/login" \
-          -H "Content-Type: application/json" \
-          -d '{"identifier":"Ali","password":"secret"}'
-        
-        3) GET /api/users?server={server}&q={query}
-        Query params:
-        - server: EU-MENA|ASIA|AMERICAS|ALL (default ALL)
-        - q: search by username/accountId/email partial match (optional)
-        
-        Response 200 OK:
-        {
-          "success": true,
-          "total": 123,
-          "users": [
-            { "id":"","username":"","email":"","accountId":"","server":"","createdAt":"" }
-          ]
-        }
-        
-        Example curl:
-        curl "$API_BASE/api/users?server=ASIA&q=ali"
-        
-        4) GET /api/users/{id}
-        Response 200 OK:
-        { "success": true, "user": { ... } }
-        
-        404 Not Found:
-        { "success": false, "error": "user not found" }
-        
-        5) POST /api/logout
-        200 OK:
-        { "success": true }
-        
-        ==================== SQL SCHEMA FOR D1 ====================
-        
-        CREATE TABLE users (
-          id TEXT PRIMARY KEY,
-          username TEXT UNIQUE NOT NULL,
-          email TEXT UNIQUE NOT NULL, 
-          accountId TEXT UNIQUE NOT NULL,
-          server TEXT NOT NULL,
-          passwordHash TEXT NOT NULL,
-          createdAt TEXT NOT NULL
-        );
-        
-        ==================== SAMPLE SEED DATA ====================
-        
-        INSERT INTO users (id, username, email, accountId, server, passwordHash, createdAt) VALUES
-        ('u_demo1', 'ShadowRaven', 'raven@mail.test', 'RVN001', 'EU-MENA', '', datetime('now')),
-        ('u_demo2', 'SkyStriker', 'sky@mail.test', 'SKY22', 'ASIA', '', datetime('now')),
-        ('u_demo3', 'GreenBlade', 'blade@mail.test', 'GB999', 'AMERICAS', '', datetime('now'));
-        
-        Note: passwordHash left empty for demo; server-side worker must enforce hashing with bcrypt.
-        
-        ==================== CORS HEADERS ====================
-        
-        All responses must include:
-        Content-Type: application/json
-        Access-Control-Allow-Origin: * (or your specific domain)
-        Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
-        Access-Control-Allow-Headers: Content-Type, Authorization
-    -->
 </body>
 </html>
