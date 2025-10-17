@@ -491,8 +491,8 @@
 
     <script>
         // --- API CONFIGURATION ---
-        // 🚨 IMPORTANT: REPLACE THIS WITH YOUR CLOUDFLARE WORKER'S DEPLOYED URL!
-        const API_BASE = "REPLACE_WITH_YOUR_CLOUDFLARE_WORKER_URL";
+        // 🚨 IMPORTANT: This is your deployed Cloudflare Worker's URL.
+        const API_BASE = "https://ravenshoppanel.bloodstrike.workers.dev";
         // -------------------------
 
         // --- GLOBAL STATE & DOM REFERENCES ---
@@ -553,7 +553,13 @@
                     const response = await fetch(url, options);
                     if (!response.ok) {
                         const errorText = await response.text();
-                        throw new Error(`API Error ${response.status}: ${errorText}`);
+                        // Attempt to parse JSON error message if available
+                        try {
+                            const errorJson = JSON.parse(errorText);
+                            throw new Error(errorJson.error || `API Error ${response.status}: ${errorText}`);
+                        } catch {
+                            throw new Error(`API Error ${response.status}: ${errorText}`);
+                        }
                     }
                     return response.json();
                 } catch (error) {
@@ -597,7 +603,9 @@
                         break;
                     case 'panel':
                         $panelSection.classList.remove('hidden');
-                        loadUsers('EU-MENA');
+                        // Load the user's default server or EU-MENA upon entering the panel
+                        const defaultServer = USER_SESSION ? USER_SESSION.server : 'EU-MENA';
+                        loadUsers(defaultServer);
                         break;
                     case 'account':
                         $accountSection.classList.remove('hidden');
@@ -643,7 +651,6 @@
             const data = { username, lastOnline: new Date().toISOString() };
             // --- CLOUDFLARE API: POST /api/last-online ---
             try {
-                // This is a crucial API call that runs silently upon login.
                 await fetchWithBackoff(`${API_BASE}/api/last-online`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -652,6 +659,7 @@
                 console.log('Last online timestamp updated.');
             } catch (error) {
                 console.error('Failed to update last online:', error.message);
+                // We don't block the user if this non-critical function fails
             }
             // --- END CLOUDFLARE API ---
         }
@@ -675,27 +683,22 @@
 
             // --- CLOUDFLARE API: POST /api/register ---
             try {
-                // NOTE: API should return the newly created user object upon success
-                // const result = await fetchWithBackoff(`${API_BASE}/api/register`, { ... });
-                
-                // SIMULATE SUCCESS: Wait a moment and show success message
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                const newUser = await fetchWithBackoff(`${API_BASE}/api/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
                 
                 $authMessage.textContent = 'Registration successful! Logging in...';
                 
-                // After registration, automatically log in and fetch updated data (Requirement 5)
-                await handleLoginSuccess({ 
-                    username: data.username, 
-                    email: data.email, 
-                    accountId: data.accountId, 
-                    server: data.server, 
-                    rank: data.rank,
-                    lastOnline: new Date().toISOString() 
-                }, data.username);
+                // After registration, automatically log in with the returned data
+                await handleLoginSuccess(newUser, newUser.username);
                 
             } catch (error) {
                 console.error('Registration failed:', error.message);
-                $authMessage.textContent = 'Registration failed. Please try again.';
+                $authMessage.textContent = error.message.includes('taken') 
+                    ? 'Registration failed: Username, Email, or Account ID is already taken.'
+                    : `Registration failed. Please check your data and try again.`;
                 $authMessage.style.color = '#ff6666';
             }
             // --- END CLOUDFLARE API ---
@@ -709,21 +712,20 @@
             $authMessage.textContent = 'Logging in...';
             $authMessage.style.color = 'var(--color-primary-accent)';
 
-            const identifier = document.getElementById('login-user-identifier').value;
             const data = {
-                identifier: identifier,
+                identifier: document.getElementById('login-user-identifier').value,
                 password: document.getElementById('login-password').value,
             };
 
             // --- CLOUDFLARE API: POST /api/login ---
             try {
-                // NOTE: API should return user details and a session token
-                // const result = await fetchWithBackoff(`${API_BASE}/api/login`, { ... });
+                const user = await fetchWithBackoff(`${API_BASE}/api/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
 
-                // SIMULATE SUCCESS 
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                const mockUser = { username: identifier, email: identifier + '@example.com', accountId: 'R4V3N-001', server: 'EU-MENA', rank: 'Mythic', lastOnline: new Date().toISOString() };
-                await handleLoginSuccess(mockUser, identifier);
+                await handleLoginSuccess(user, user.username);
 
             } catch (error) {
                 console.error('Login failed:', error.message);
@@ -765,34 +767,22 @@
             const $detailsContainer = document.getElementById('my-account-details');
             $detailsContainer.innerHTML = '<p style="text-align: center;">Loading profile details...</p>';
             
-            // --- CLOUDFLARE API: GET /api/me ---
-            try {
-                // Fetch current user data (can use USER_SESSION for quick display, or refetch for freshness)
-                /*
-                const user = await fetchWithBackoff(`${API_BASE}/api/me`, { 
-                    headers: { 'Authorization': `Bearer ${sessionToken}` } 
-                });
-                */
-                const user = USER_SESSION; // Use local session for simulation
-                await new Promise(resolve => setTimeout(resolve, 500));
+            // Since the user object is returned by login/register and contains all fields, 
+            // we can use the stored session data for display.
+            const user = USER_SESSION; 
 
-                if (user) {
-                    $detailsContainer.innerHTML = `
-                        <div><span>Username:</span><span>${user.username}</span></div>
-                        <div><span>Email:</span><span>${user.email}</span></div>
-                        <div><span>Account ID:</span><span>${user.accountId}</span></div>
-                        <div><span>Server Region:</span><span>${user.server}</span></div>
-                        <div><span>Rank:</span><span>${user.rank}</span></div>
-                    `;
-                    showView('account');
-                } else {
-                    $detailsContainer.innerHTML = '<p style="color: #ff6666;">Failed to load account information.</p>';
-                }
-            } catch (error) {
-                console.error('Failed to load user account:', error.message);
-                $detailsContainer.innerHTML = '<p style="color: #ff6666;">Connection error. Please try again.</p>';
+            if (user) {
+                $detailsContainer.innerHTML = `
+                    <div><span>Username:</span><span>${user.username}</span></div>
+                    <div><span>Email:</span><span>${user.email}</span></div>
+                    <div><span>Account ID:</span><span>${user.accountId}</span></div>
+                    <div><span>Server Region:</span><span>${user.server}</span></div>
+                    <div><span>Rank:</span><span>${user.rank}</span></div>
+                `;
+                showView('account');
+            } else {
+                $detailsContainer.innerHTML = '<p style="color: #ff6666;">Failed to load account information. Please log in again.</p>';
             }
-            // --- END CLOUDFLARE API ---
         }
         
         // --- PANEL LOGIC ---
@@ -801,7 +791,6 @@
          * Fetches users for a given server region and updates the UI.
          */
         async function loadUsers(serverRegion) {
-            // 6. Do not show any users by default until data is fetched
             $userList.innerHTML = ''; 
             $panelMessage.textContent = `Loading players for ${serverRegion}...`;
             
@@ -816,47 +805,10 @@
             // --- CLOUDFLARE API: GET /api/users?server=... ---
             let users = [];
             try {
-                // Fetch data from your Cloudflare Worker:
-                // users = await fetchWithBackoff(`${API_BASE}/api/users?server=${serverRegion}`, { ... });
-
-                // SIMULATE DATA: Generating mock data 
-                await new Promise(resolve => setTimeout(resolve, 800));
-                
-                const ranks = ['Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Master', 'Legend', 'Mythic'];
-                
-                // Add the current user to the list if they match the server
-                let mockUsers = [];
-                if (USER_SESSION && USER_SESSION.server === serverRegion) {
-                     mockUsers.push({
-                        username: USER_SESSION.username,
-                        accountId: USER_SESSION.accountId,
-                        server: USER_SESSION.server,
-                        rank: USER_SESSION.rank,
-                        lastOnline: USER_SESSION.lastOnline,
-                        isCurrentUser: true
-                     });
-                }
-
-                for (let i = 0; i < 10; i++) {
-                     // Simulate random last online time, mostly recent
-                    const lastOnlineDate = new Date();
-                    lastOnlineDate.setSeconds(lastOnlineDate.getSeconds() - (Math.random() * 600) - 1); // 1 to 600 seconds ago
-                    
-                    mockUsers.push({
-                        username: `${serverRegion}_Player_${i + 1}`,
-                        accountId: `RVP-${Math.floor(1000 + Math.random() * 8999)}`,
-                        server: serverRegion,
-                        rank: ranks[Math.floor(Math.random() * ranks.length)],
-                        lastOnline: lastOnlineDate.toISOString()
-                    });
-                }
-                
-                // Remove duplicates and set simulated users
-                users = [...new Map(mockUsers.map(item => [item.accountId, item])).values()];
-                
-                // Sort the current user to the top
-                users.sort((a, b) => (a.isCurrentUser === b.isCurrentUser) ? 0 : a.isCurrentUser ? -1 : 1);
-
+                users = await fetchWithBackoff(`${API_BASE}/api/users?server=${serverRegion}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' },
+                });
 
                 $panelMessage.textContent = ''; 
 
@@ -875,9 +827,16 @@
          * Renders the user list into the panel.
          */
         function renderUserCards(users) {
-            $userList.innerHTML = users.length === 0 
+            // Sort the current user to the top
+            const sortedUsers = users.sort((a, b) => {
+                const isACurrent = USER_SESSION && a.username === USER_SESSION.username;
+                const isBCurrent = USER_SESSION && b.username === USER_SESSION.username;
+                return (isACurrent === isBCurrent) ? 0 : isACurrent ? -1 : 1;
+            });
+            
+            $userList.innerHTML = sortedUsers.length === 0 
                 ? '<p style="grid-column: 1 / -1; text-align: center; color: var(--color-text-subtle);">No players found in this region.</p>'
-                : users.map(user => {
+                : sortedUsers.map(user => {
                 
                 // 11. Server color tags
                 const serverColor = {
@@ -895,11 +854,14 @@
                 
                 // 7. Display formatted last online time (Tehran Timezone)
                 const formattedTime = formatTehranDateTime(user.lastOnline);
+                
+                const isCurrentUser = USER_SESSION && user.username === USER_SESSION.username;
+                const cardClass = isCurrentUser ? 'user-card' : 'user-card';
 
                 return `
-                    <div class="user-card">
+                    <div class="${cardClass}" style="${isCurrentUser ? 'border-width: 3px; border-style: solid;' : ''}">
                         <h3>
-                            ${user.username}
+                            ${user.username} ${isCurrentUser ? '(You)' : ''}
                             ${onlineBadge}
                         </h3>
                         <p>Account ID: ${user.accountId}</p>
