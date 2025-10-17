@@ -38,7 +38,7 @@ class RavenPanel {
             { id: 'Mythic', name: 'Mythic', color: '#ff1493' }
         ];
 
-        this.apiBaseUrl = 'https://YOUR-WORKER-URL.workers.dev'; // Change this to your worker URL
+        this.apiBaseUrl = 'https://ravenshoppanel.bloodstrike.workers.dev/'; // Change this to your worker URL
         
         this.init();
     }
