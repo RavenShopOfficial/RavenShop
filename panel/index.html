@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Raven Panel - مدیریت حساب‌های بازی</title>
-    <!-- Tailwind فقط برای ظاهر سریع (اختیاری) -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -54,28 +53,27 @@
         .fade-in{animation:fadeIn .28s ease}
         @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
         .count-badge{background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:999px;font-weight:700}
+        .notification{
+            position:fixed;top:20px;left:20px;z-index:9999;padding:12px 20px;border-radius:8px;
+            color:white;font-weight:500;animation:slideIn 0.3s ease;max-width:300px;
+        }
+        .notification.success{background:#10b981}
+        .notification.error{background:#ef4444}
+        .notification.info{background:#3b82f6}
+        @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
         @media (max-width:960px){ .layout { padding:18px } }
     </style>
 </head>
 <body>
-<!--
-  Raven Panel - single file
-  NOTE: set your backend URL here:
-  const API_BASE = 'https://YOUR-WORKER-URL.workers.dev'
-  The frontend will call endpoints described in the API contract at the bottom of this file.
--->
 <div id="app"></div>
 
 <script>
 /* -----------------------
-   Raven Panel (vanilla JS)
-   - Fixed: submit disabled behavior
-   - Fixed: input/change handlers to update state immediately
-   - Fallback: localStorage when API unreachable
-   - API_BASE configurable below
+   Raven Panel - GitHub Pages + Cloudflare Workers + D1
    ----------------------- */
 
-const API_BASE = 'https://ravenshoppanel.bloodstrike.workers.dev/'; // <<-- set your worker URL here
+// Cloudflare Worker URL - این را با آدرس Worker خود جایگزین کنید
+const API_BASE = 'https://ravenshoppanel.bloodstrike.workers.dev/';
 
 class RavenPanel {
   constructor(){
@@ -88,6 +86,7 @@ class RavenPanel {
       selectedServer: 'all',
       selectedUser: null,
       loading: false,
+      token: localStorage.getItem('raven_token') || null,
       formData: {
         username: '',
         email: '',
@@ -111,36 +110,71 @@ class RavenPanel {
   }
 
   init(){
-    this.loadFromLocalStorage();
+    this.checkAuthStatus();
     this.render();
     this.setupEventListeners();
   }
 
-  /* ---------- storage ---------- */
-  loadFromLocalStorage(){
-    const s = localStorage.getItem('gameUsers');
-    if(s){
-      try{ this.state.users = JSON.parse(s); }catch(e){ this.state.users = []; }
-    } else {
-      const demo = [
-        { id: 1, username:'SkyStriker', email:'sky@example.com', gameId:'SKY001', server:'ASIA', level:47, rank:'Diamond', joinDate:'2023-01-15', lastActive:'2024-01-20', status:'online' },
-        { id: 2, username:'ShadowRaven', email:'shadow@example.com', gameId:'SHD002', server:'EU-MENA', level:41, rank:'Master', joinDate:'2023-02-20', lastActive:'2024-01-19', status:'offline' },
-        { id: 3, username:'GreenBlade', email:'green@example.com', gameId:'GRN003', server:'AMERICAS', level:44, rank:'Platinum', joinDate:'2023-03-10', lastActive:'2024-01-18', status:'online' }
-      ];
-      this.state.users = demo;
-      localStorage.setItem('gameUsers', JSON.stringify(demo));
+  /* ---------- authentication ---------- */
+  async checkAuthStatus(){
+    const token = this.state.token;
+    if(!token) return;
+
+    try {
+      const res = await this.apiCall('/api/auth/me', 'GET');
+      if(res.success){
+        this.state.currentUser = res.user;
+        this.state.isLoggedIn = true;
+        await this.fetchUsers();
+      } else {
+        localStorage.removeItem('raven_token');
+        this.state.token = null;
+      }
+    } catch(err){
+      console.warn('Token validation failed:', err);
+      localStorage.removeItem('raven_token');
+      this.state.token = null;
     }
   }
 
-  saveUsersToLocal(users){
-    try{
-      localStorage.setItem('gameUsers', JSON.stringify(users));
-    }catch(e){ console.warn('Could not save to localStorage', e); }
+  /* ---------- API calls ---------- */
+  async apiCall(endpoint, method = 'GET', data = null){
+    const config = {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    };
+
+    if(this.state.token){
+      config.headers['Authorization'] = `Bearer ${this.state.token}`;
+    }
+
+    if(data){
+      config.body = JSON.stringify(data);
+    }
+
+    const response = await fetch(`${API_BASE}${endpoint}`, config);
+    
+    if(response.status === 401){
+      localStorage.removeItem('raven_token');
+      this.state.token = null;
+      this.state.isLoggedIn = false;
+      this.state.currentUser = null;
+      this.render();
+      throw new Error('Unauthorized');
+    }
+
+    if(!response.ok){
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.error || error.message || `HTTP ${response.status}`);
+    }
+
+    return response.json();
   }
 
   /* ---------- events ---------- */
   setupEventListeners(){
-    // Delegated clicks for data-action
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-action]');
       if(!btn) return;
@@ -149,13 +183,13 @@ class RavenPanel {
       this.handleAction(action, e);
     });
 
-    // input (for text/number) and change (for select)
     document.addEventListener('input', (e) => {
       if(e.target && e.target.matches('[data-input]')) {
         const key = e.target.dataset.input;
         this.handleInput(key, e.target.value, e.target);
       }
     });
+    
     document.addEventListener('change', (e) => {
       if(e.target && e.target.matches('[data-input]')) {
         const key = e.target.dataset.input;
@@ -163,7 +197,6 @@ class RavenPanel {
       }
     });
 
-    // submit (form)
     document.addEventListener('submit', (e) => {
       if(e.target && e.target.matches('#auth-form')){
         e.preventDefault();
@@ -176,7 +209,6 @@ class RavenPanel {
     switch(action){
       case 'toggle-auth':
         this.state.isLogin = !this.state.isLogin;
-        // clear password when switching for safety
         this.state.formData.password = '';
         this.render();
         break;
@@ -185,9 +217,7 @@ class RavenPanel {
         this.render();
         break;
       case 'logout':
-        this.state.isLoggedIn = false;
-        this.state.currentUser = null;
-        this.render();
+        this.logout();
         break;
       case 'select-server':
         const srv = event.currentTarget.dataset.server;
@@ -219,141 +249,76 @@ class RavenPanel {
 
   /* ---------- submit (login/register) ---------- */
   async handleSubmit(){
-    // basic client validation
     if(!this.state.formData.username || !this.state.formData.password){
-      alert('لطفاً نام کاربری/ایمیل و رمز را وارد کنید.');
+      this.showNotification('لطفاً نام کاربری/ایمیل و رمز را وارد کنید.', 'error');
       return;
     }
     if(!this.state.isLogin && !this.validateEmail(this.state.formData.email)){
-      alert('لطفاً یک ایمیل معتبر وارد کنید.');
+      this.showNotification('لطفاً یک ایمیل معتبر وارد کنید.', 'error');
       return;
     }
     if(!this.state.isLogin && this.state.formData.password.length < 6){
-      alert('رمز عبور باید حداقل 6 کاراکتر باشد.');
+      this.showNotification('رمز عبور باید حداقل 6 کاراکتر باشد.', 'error');
       return;
     }
 
     this.state.loading = true;
     this.render();
 
-    const endpoint = this.state.isLogin ? '/api/login' : '/api/register';
-    const payload = this.state.isLogin
-      ? { identifier: this.state.formData.username, password: this.state.formData.password }
-      : {
-          username: this.state.formData.username,
-          email: this.state.formData.email,
-          accountId: this.state.formData.gameId,
-          server: this.state.formData.server,
-          password: this.state.formData.password
-        };
-
     try {
-      const res = await fetch(`${API_BASE}${endpoint}`, {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify(payload)
-      });
+      const endpoint = this.state.isLogin ? '/api/auth/login' : '/api/auth/register';
+      const payload = this.state.isLogin
+        ? { identifier: this.state.formData.username, password: this.state.formData.password }
+        : {
+            username: this.state.formData.username,
+            email: this.state.formData.email,
+            accountId: this.state.formData.gameId,
+            server: this.state.formData.server,
+            password: this.state.formData.password
+          };
 
-      if(!res.ok){
-        // try to read error JSON
-        let err = null;
-        try{ err = await res.json(); }catch(e){}
-        const msg = (err && (err.error || err.message)) ? (err.error||err.message) : `خطا: ${res.status}`;
-        alert(msg);
-        // if server unreachable (5xx) fallback to local
-        if(res.status >= 500) throw new Error('server error');
-        this.state.loading = false;
-        this.render();
-        return;
-      }
-
-      const data = await res.json();
-      if(data && data.success){
-        // store token if provided (demo: localStorage)
+      const data = await this.apiCall(endpoint, 'POST', payload);
+      
+      if(data.success){
         if(data.token){
+          this.state.token = data.token;
           localStorage.setItem('raven_token', data.token);
         }
-        // set current user from response or build from form
-        this.state.currentUser = data.user || {
-          id: Date.now(),
-          username: this.state.formData.username,
-          email: this.state.formData.email,
-          gameId: this.state.formData.gameId,
-          server: this.state.formData.server,
-          level: this.state.formData.level,
-          rank: this.state.formData.rank
-        };
+        
+        this.state.currentUser = data.user;
         this.state.isLoggedIn = true;
-        // if register, add to local fallback storage
-        if(!this.state.isLogin) this.addUserToLocalStorage();
+        this.showNotification(this.state.isLogin ? 'خوش آمدید!' : 'ثبت‌نام با موفقیت انجام شد!', 'success');
+        await this.fetchUsers();
       } else {
-        alert(data && (data.error || data.message) ? (data.error || data.message) : 'عملیات با خطا مواجه شد.');
+        this.showNotification(data.error || 'عملیات با خطا مواجه شد.', 'error');
       }
     } catch(err){
-      console.warn('API failed, using fallback local mode', err);
-      // fallback: add user locally and login
-      if(!this.state.isLogin) this.addUserToLocalStorage();
-      this.state.currentUser = {
-        id: Date.now(),
-        username: this.state.formData.username,
-        email: this.state.formData.email,
-        gameId: this.state.formData.gameId,
-        server: this.state.formData.server,
-        level: this.state.formData.level,
-        rank: this.state.formData.rank
-      };
-      this.state.isLoggedIn = true;
-      // TODO: provide a non-blocking UI notice to the user about offline mode
-      console.info('Running in offline/demo mode (localStorage).');
+      console.error('Auth error:', err);
+      this.showNotification(err.message || 'خطا در ارتباط با سرور', 'error');
     } finally {
       this.state.loading = false;
       this.render();
     }
   }
 
-  addUserToLocalStorage(){
-    const newUser = {
-      id: Date.now(),
-      username: this.state.formData.username,
-      email: this.state.formData.email || '',
-      gameId: this.state.formData.gameId || '',
-      server: this.state.formData.server || 'ASIA',
-      level: this.state.formData.level || 1,
-      rank: this.state.formData.rank || 'Bronze',
-      joinDate: new Date().toISOString().split('T')[0],
-      lastActive: new Date().toISOString().split('T')[0],
-      status: 'online'
-    };
-    const s = localStorage.getItem('gameUsers');
-    const all = s ? JSON.parse(s) : [];
-    all.unshift(newUser);
-    this.saveUsersToLocal(all);
-    this.state.users = all;
-  }
-
-  /* ---------- fetch users (with fallback) ---------- */
+  /* ---------- fetch users ---------- */
   async fetchUsers(){
     this.state.loading = true;
     this.render();
-    try{
-      const q = this.state.selectedServer && this.state.selectedServer !== 'all' ? `?server=${encodeURIComponent(this.state.selectedServer)}` : '';
-      const res = await fetch(`${API_BASE}/api/users${q}`, { headers:{ 'Content-Type':'application/json' }});
-      if(!res.ok) throw new Error('network');
-      const data = await res.json();
-      if(data && data.success){
-        this.state.users = data.users;
-      } else {
-        throw new Error('invalid response');
-      }
-    }catch(err){
-      console.warn('fetchUsers failed, using local fallback', err);
-      const s = localStorage.getItem('gameUsers');
-      const all = s ? JSON.parse(s) : [];
+    
+    try {
+      const params = new URLSearchParams();
       if(this.state.selectedServer && this.state.selectedServer !== 'all'){
-        this.state.users = all.filter(u => (u.server === this.state.selectedServer));
-      } else {
-        this.state.users = all;
+        params.append('server', this.state.selectedServer);
       }
+      
+      const data = await this.apiCall(`/api/users?${params}`);
+      if(data.success){
+        this.state.users = data.users;
+      }
+    } catch(err){
+      console.error('Fetch users error:', err);
+      this.showNotification('خطا در دریافت لیست کاربران', 'error');
     } finally {
       this.state.loading = false;
       this.render();
@@ -367,21 +332,40 @@ class RavenPanel {
       this.updateUserLastActive(id);
       this.render();
     } else {
-      alert('پروفایل پیدا نشد.');
+      this.showNotification('پروفایل پیدا نشد.', 'error');
     }
   }
 
-  updateUserLastActive(userId){
-    const s = localStorage.getItem('gameUsers');
-    if(!s) return;
-    let all = JSON.parse(s);
-    const idx = all.findIndex(x => parseInt(x.id) === parseInt(userId));
-    if(idx !== -1){
-      all[idx].lastActive = new Date().toISOString().split('T')[0];
-      all[idx].status = 'online';
-      this.saveUsersToLocal(all);
-      this.state.users = all;
+  async updateUserLastActive(userId){
+    try {
+      await this.apiCall(`/api/users/${userId}/last-active`, 'POST');
+    } catch(err){
+      console.warn('Failed to update last active:', err);
     }
+  }
+
+  logout(){
+    localStorage.removeItem('raven_token');
+    this.state.token = null;
+    this.state.isLoggedIn = false;
+    this.state.currentUser = null;
+    this.state.selectedUser = null;
+    this.state.users = [];
+    this.showNotification('با موفقیت خارج شدید.', 'success');
+    this.render();
+  }
+
+  /* ---------- notifications ---------- */
+  showNotification(message, type = 'info'){
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.style.animation = 'slideIn 0.3s ease reverse';
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
   }
 
   /* ---------- rendering ---------- */
@@ -399,10 +383,8 @@ class RavenPanel {
       app.innerHTML = this.renderAuth();
     }
 
-    // recreate icons
     if(typeof lucide !== 'undefined') lucide.createIcons();
 
-    // ensure submit button disabled state matches loading (safety)
     const submitBtn = document.querySelector('#app button[type="submit"]');
     if(submitBtn) submitBtn.disabled = !!this.state.loading;
   }
@@ -486,7 +468,6 @@ class RavenPanel {
   }
 
   renderRegisterFields(){
-    // build options with selected attribute for server and rank
     const serverOptions = this.servers.map(s => `<option value="${s.id}" ${ s.id === this.state.formData.server ? 'selected' : '' }>${s.name}</option>`).join('');
     const rankOptions = this.ranks.map(r => `<option value="${r}" ${ r === this.state.formData.rank ? 'selected' : '' }>${r}</option>`).join('');
     return `
@@ -590,9 +571,9 @@ class RavenPanel {
 
         <div style="display:flex;flex-direction:column;gap:.5rem">
           <div style="display:flex;justify-content:space-between;color:var(--text-muted)"><span>سرور:</span><span class="server-badge">${this.escapeHtml(user.server)}</span></div>
-          <div style="display:flex;justify-content:space-between;color:var(--text-muted)"><span>سطح:</span><span>Lv.${this.escapeHtml(user.level)}</span></div>
-          <div style="display:flex;justify-content:space-between;color:var(--text-muted)"><span>رنک:</span><span class="${rankClass}">${this.escapeHtml(user.rank)}</span></div>
-          <div style="display:flex;justify-content:space-between;color:var(--text-muted)"><span>آخرین فعالیت:</span><span>${this.escapeHtml(user.lastActive || '')}</span></div>
+          <div style="display:flex;justify-content:space-between;color:var(--text-muted)"><span>سطح:</span><span>Lv.${this.escapeHtml(user.level || 1)}</span></div>
+          <div style="display:flex;justify-content:space-between;color:var(--text-muted)"><span>رنک:</span><span class="${rankClass}">${this.escapeHtml(user.rank || 'Bronze')}</span></div>
+          <div style="display:flex;justify-content:space-between;color:var(--text-muted)"><span>آخرین فعالیت:</span><span>${this.escapeHtml(user.lastActive || 'نامشخص')}</span></div>
         </div>
 
         <button data-action="view-user" data-user-id="${user.id}" class="btn-primary w-full" style="margin-top:.8rem">مشاهده پروفایل</button>
@@ -634,16 +615,16 @@ class RavenPanel {
 
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem">
                 <div>
-                  <div style="color:var(--text-muted)">شناسه بازی</div><div style="font-weight:700">${this.escapeHtml(u.gameId)}</div>
+                  <div style="color:var(--text-muted)">شناسه بازی</div><div style="font-weight:700">${this.escapeHtml(u.accountId || '')}</div>
                 </div>
                 <div>
                   <div style="color:var(--text-muted)">سرور</div><div style="font-weight:700">${this.escapeHtml(u.server)}</div>
                 </div>
                 <div>
-                  <div style="color:var(--text-muted)">سطح</div><div style="font-weight:700">Lv.${this.escapeHtml(u.level)}</div>
+                  <div style="color:var(--text-muted)">سطح</div><div style="font-weight:700">Lv.${this.escapeHtml(u.level || 1)}</div>
                 </div>
                 <div>
-                  <div style="color:var(--text-muted)">رنک</div><div style="font-weight:700">${this.escapeHtml(u.rank)}</div>
+                  <div style="color:var(--text-muted)">رنک</div><div style="font-weight:700">${this.escapeHtml(u.rank || 'Bronze')}</div>
                 </div>
               </div>
             </div>
@@ -669,92 +650,5 @@ document.addEventListener('DOMContentLoaded', () => {
   new RavenPanel();
 });
 </script>
-
-<!--
-  --------------------------
-  API CONTRACT (copy this to your worker implementation)
-  --------------------------
-  Base: API_BASE (see top of script)
-
-  1) POST /api/register
-    Request JSON:
-      {
-        "username": "string",
-        "email": "string",
-        "accountId": "string",
-        "server": "EU-MENA|ASIA|AMERICAS",
-        "password": "string"
-      }
-    Responses:
-      201 Created
-      {
-        "success": true,
-        "user": {
-          "id":"string",
-          "username":"string",
-          "email":"string",
-          "accountId":"string",
-          "server":"string",
-          "createdAt":"ISO8601"
-        },
-        "token":"string" // optional
-      }
-      400 Bad Request -> { "success":false, "error":"validation message" }
-      409 Conflict -> { "success":false, "error":"username/email/accountId exists" }
-
-  2) POST /api/login
-    Request JSON:
-      {
-        "identifier": "username-or-email",
-        "password": "string"
-      }
-    Responses:
-      200 OK
-      {
-        "success": true,
-        "user": { "id":"", "username":"", "email":"", "accountId":"", "server":"", "createdAt":"" },
-        "token":"string"
-      }
-      401 Unauthorized -> { "success":false, "error":"invalid credentials" }
-
-  3) GET /api/users?server={server}&q={query}
-    Response 200:
-      {
-        "success": true,
-        "total": 123,
-        "users": [
-          { "id":"", "username":"", "email":"", "accountId":"", "server":"", "createdAt":"" }
-        ]
-      }
-
-  4) GET /api/users/{id}
-    200 -> { "success":true, "user":{...} }
-    404 -> { "success":false, "error":"not found" }
-
-  5) POST /api/logout
-    200 -> { "success": true }
-
-  SQL schema (D1 compatible):
-    CREATE TABLE users (
-      id TEXT PRIMARY KEY,
-      username TEXT UNIQUE NOT NULL,
-      email TEXT UNIQUE NOT NULL,
-      accountId TEXT UNIQUE NOT NULL,
-      server TEXT NOT NULL,
-      passwordHash TEXT NOT NULL,
-      createdAt TEXT NOT NULL
-    );
-
-  Example curl:
-    curl -X POST "$API_BASE/register" -H "Content-Type: application/json" -d '{"username":"Ali","email":"a@mail.test","accountId":"ALI01","server":"ASIA","password":"secret"}'
-    curl -X POST "$API_BASE/login" -H "Content-Type: application/json" -d '{"identifier":"Ali","password":"secret"}'
-    curl "$API_BASE/users?server=ASIA&q=ali"
-
-  Security notes:
-    - Hash passwords SERVER-SIDE (bcrypt) before storing in D1.
-    - Use HTTPS and prefer httpOnly secure cookies for tokens in production.
-    - Add CORS headers appropriate for your frontend origin.
--->
-
 </body>
 </html>
