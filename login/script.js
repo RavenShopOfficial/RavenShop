@@ -38,7 +38,7 @@ class RavenPanel {
             { id: 'Mythic', name: 'Mythic', color: '#ff1493' }
         ];
 
-        this.apiBaseUrl = 'https://ravenshoppanel.bloodstrike.workers.dev/'; // Change this to your worker URL
+        this.apiBaseUrl = 'https://YOUR-WORKER-URL.workers.dev'; // Change this to your worker URL
         
         this.init();
     }
@@ -101,6 +101,7 @@ class RavenPanel {
     setupEventListeners() {
         document.addEventListener('click', (e) => {
             if (e.target.matches('[data-action]')) {
+                e.preventDefault();
                 this.handleAction(e.target.dataset.action, e);
             }
         });
@@ -318,8 +319,8 @@ class RavenPanel {
                     <div class="glass-effect p-8">
                         <div class="flex mb-6 bg-gray-800 rounded-lg p-1">
                             <button 
-                                onclick="app.state.isLogin = true; app.render();"
-                                class="flex-1 py-2 px-4 rounded-md font-medium transition-all ${
+                                data-action="toggle-auth"
+                                class="flex-1 py-2 px-4 rounded-md font-medium transition-all cursor-pointer ${
                                     this.state.isLogin ? 'shadow-lg' : ''
                                 }"
                                 style="background-color: ${this.state.isLogin ? 'var(--primary)' : 'transparent'}; color: ${this.state.isLogin ? 'white' : 'var(--text-muted)'}"
@@ -327,8 +328,8 @@ class RavenPanel {
                                 ورود
                             </button>
                             <button 
-                                onclick="app.state.isLogin = false; app.render();"
-                                class="flex-1 py-2 px-4 rounded-md font-medium transition-all ${
+                                data-action="toggle-auth"
+                                class="flex-1 py-2 px-4 rounded-md font-medium transition-all cursor-pointer ${
                                     !this.state.isLogin ? 'shadow-lg' : ''
                                 }"
                                 style="background-color: ${!this.state.isLogin ? 'var(--primary)' : 'transparent'}; color: ${!this.state.isLogin ? 'white' : 'var(--text-muted)'}"
@@ -342,8 +343,10 @@ class RavenPanel {
                             
                             <div>
                                 <label class="block text-sm font-medium mb-2 text-gray-300">رمز عبور</label>
-                                <div class="input-wrapper">
-                                    <i data-lucide="lock" class="input-icon w-4 h-4"></i>
+                                <div class="relative">
+                                    <div class="absolute right-3 top-3 text-gray-400">
+                                        <i data-lucide="lock" class="w-4 h-4"></i>
+                                    </div>
                                     <input
                                         type="${this.state.showPassword ? 'text' : 'password'}"
                                         name="password"
@@ -355,7 +358,7 @@ class RavenPanel {
                                     />
                                     <button 
                                         type="button"
-                                        onclick="app.state.showPassword = !app.state.showPassword; app.render();"
+                                        data-action="toggle-password"
                                         class="absolute left-3 top-3 text-gray-400"
                                     >
                                         <i data-lucide="${this.state.showPassword ? 'eye-off' : 'eye'}" class="w-4 h-4"></i>
@@ -366,7 +369,7 @@ class RavenPanel {
                             <button
                                 type="submit"
                                 disabled="${this.state.loading}"
-                                class="btn-primary w-full flex items-center justify-center gap-2"
+                                class="btn-primary w-full flex items-center justify-center gap-2 cursor-pointer"
                             >
                                 ${this.state.loading ? '<div class="loading-spinner"></div>' : ''}
                                 ${this.state.isLogin ? 'ورود' : 'ثبت‌نام'}
@@ -378,8 +381,8 @@ class RavenPanel {
                             <p class="text-gray-400">
                                 ${this.state.isLogin ? 'حساب کاربری ندارید؟' : 'قبلاً ثبت‌نام کرده‌اید؟'}
                                 <button
-                                    onclick="app.state.isLogin = !app.state.isLogin; app.render();"
-                                    class="font-medium mr-2"
+                                    data-action="toggle-auth"
+                                    class="font-medium mr-2 cursor-pointer"
                                     style="color: var(--primary)"
                                 >
                                     ${this.state.isLogin ? 'ایجاد کنید' : 'وارد شوید'}
@@ -396,8 +399,10 @@ class RavenPanel {
         return `
             <div>
                 <label class="block text-sm font-medium mb-2 text-gray-300">ایمیل یا نام کاربری</label>
-                <div class="input-wrapper">
-                    <i data-lucide="user" class="input-icon w-4 h-4"></i>
+                <div class="relative">
+                    <div class="absolute right-3 top-3 text-gray-400">
+                        <i data-lucide="user" class="w-4 h-4"></i>
+                    </div>
                     <input
                         type="text"
                         name="username"
@@ -416,8 +421,10 @@ class RavenPanel {
         return `
             <div>
                 <label class="block text-sm font-medium mb-2 text-gray-300">نام کاربری</label>
-                <div class="input-wrapper">
-                    <i data-lucide="user" class="input-icon w-4 h-4"></i>
+                <div class="relative">
+                    <div class="absolute right-3 top-3 text-gray-400">
+                        <i data-lucide="user" class="w-4 h-4"></i>
+                    </div>
                     <input
                         type="text"
                         name="username"
@@ -432,8 +439,10 @@ class RavenPanel {
 
             <div>
                 <label class="block text-sm font-medium mb-2 text-gray-300">ایمیل</label>
-                <div class="input-wrapper">
-                    <i data-lucide="mail" class="input-icon w-4 h-4"></i>
+                <div class="relative">
+                    <div class="absolute right-3 top-3 text-gray-400">
+                        <i data-lucide="mail" class="w-4 h-4"></i>
+                    </div>
                     <input
                         type="email"
                         name="email"
@@ -448,8 +457,10 @@ class RavenPanel {
 
             <div>
                 <label class="block text-sm font-medium mb-2 text-gray-300">شناسه بازی</label>
-                <div class="input-wrapper">
-                    <i data-lucide="gamepad-2" class="input-icon w-4 h-4"></i>
+                <div class="relative">
+                    <div class="absolute right-3 top-3 text-gray-400">
+                        <i data-lucide="gamepad-2" class="w-4 h-4"></i>
+                    </div>
                     <input
                         type="text"
                         name="gameId"
@@ -464,8 +475,10 @@ class RavenPanel {
 
             <div>
                 <label class="block text-sm font-medium mb-2 text-gray-300">سرور</label>
-                <div class="input-wrapper">
-                    <i data-lucide="globe" class="input-icon w-4 h-4"></i>
+                <div class="relative">
+                    <div class="absolute right-3 top-3 text-gray-400">
+                        <i data-lucide="globe" class="w-4 h-4"></i>
+                    </div>
                     <select
                         name="server"
                         data-input="server"
@@ -480,8 +493,10 @@ class RavenPanel {
 
             <div>
                 <label class="block text-sm font-medium mb-2 text-gray-300">سطح شما (1-50)</label>
-                <div class="input-wrapper">
-                    <i data-lucide="star" class="input-icon w-4 h-4"></i>
+                <div class="relative">
+                    <div class="absolute right-3 top-3 text-gray-400">
+                        <i data-lucide="star" class="w-4 h-4"></i>
+                    </div>
                     <input
                         type="number"
                         name="level"
@@ -498,8 +513,10 @@ class RavenPanel {
 
             <div>
                 <label class="block text-sm font-medium mb-2 text-gray-300">رنک شما</label>
-                <div class="input-wrapper">
-                    <i data-lucide="shield" class="input-icon w-4 h-4"></i>
+                <div class="relative">
+                    <div class="absolute right-3 top-3 text-gray-400">
+                        <i data-lucide="shield" class="w-4 h-4"></i>
+                    </div>
                     <select
                         name="rank"
                         data-input="rank"
@@ -535,8 +552,8 @@ class RavenPanel {
                             </div>
                             
                             <button
-                                onclick="app.state.isLoggedIn = false; app.state.currentUser = null; app.render();"
-                                class="btn-primary"
+                                data-action="logout"
+                                class="btn-primary cursor-pointer"
                             >
                                 خروج
                             </button>
@@ -550,8 +567,9 @@ class RavenPanel {
                         </div>
                         
                         <button
-                            onclick="app.state.selectedServer = 'all'; app.fetchUsers();"
-                            class="px-6 py-2 rounded-lg font-medium transition-all ${
+                            data-action="select-server"
+                            data-server="all"
+                            class="px-6 py-2 rounded-lg font-medium transition-all cursor-pointer ${
                                 this.state.selectedServer === 'all' ? 'ring-2 ring-offset-2 ring-offset-slate-900' : ''
                             }"
                             style="background-color: ${this.state.selectedServer === 'all' ? 'var(--primary)' : 'var(--surface)'}; color: ${this.state.selectedServer === 'all' ? 'white' : 'var(--text)'}"
@@ -561,8 +579,9 @@ class RavenPanel {
                         
                         ${this.servers.map(server => `
                             <button
-                                onclick="app.state.selectedServer = '${server.id}'; app.fetchUsers();"
-                                class="px-6 py-2 rounded-lg font-medium transition-all ${
+                                data-action="select-server"
+                                data-server="${server.id}"
+                                class="px-6 py-2 rounded-lg font-medium transition-all cursor-pointer ${
                                     this.state.selectedServer === server.id ? 'ring-2 ring-offset-2 ring-offset-slate-900' : ''
                                 }"
                                 style="background-color: ${this.state.selectedServer === server.id ? 'var(--primary)' : 'var(--surface)'}; color: ${this.state.selectedServer === server.id ? 'white' : 'var(--text)'}"
@@ -591,7 +610,7 @@ class RavenPanel {
         const isCurrentUser = this.state.currentUser?.id === user.id;
         
         return `
-            <div class="user-card glass-effect p-6" onclick="app.viewUser(${user.id})">
+            <div class="user-card glass-effect p-6" data-action="view-user" data-user-id="${user.id}">
                 <div class="flex items-center justify-between mb-4">
                     <div class="flex items-center gap-3">
                         <div class="w-12 h-12 rounded-full flex items-center justify-center gradient-bg">
@@ -616,8 +635,9 @@ class RavenPanel {
                 <div class="flex items-center justify-between">
                     <span class="font-medium rank-${user.rank.toLowerCase()}">${user.rank}</span>
                     <button
-                        onclick="event.stopPropagation(); app.viewUser(${user.id});"
-                        class="btn-primary text-sm px-4 py-2"
+                        data-action="view-user"
+                        data-user-id="${user.id}"
+                        class="btn-primary text-sm px-4 py-2 cursor-pointer"
                     >
                         مشاهده
                     </button>
@@ -636,8 +656,8 @@ class RavenPanel {
                 <div class="w-full max-w-2xl">
                     <div class="glass-effect p-8">
                         <button
-                            onclick="app.state.selectedUser = null; app.render();"
-                            class="flex items-center gap-2 mb-6 px-4 py-2 rounded-lg transition-all hover:bg-opacity-80"
+                            data-action="back-to-users"
+                            class="flex items-center gap-2 mb-6 px-4 py-2 rounded-lg transition-all hover:bg-opacity-80 cursor-pointer"
                             style="background-color: var(--surface-hover)"
                         >
                             <i data-lucide="arrow-left" class="w-5 h-5 text-white"></i>
