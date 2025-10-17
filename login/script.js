@@ -38,7 +38,7 @@ class RavenPanel {
             { id: 'Mythic', name: 'Mythic', color: '#ff1493' }
         ];
 
-        this.apiBaseUrl = 'https://ravenshoppanel.bloodstrike.workers.dev/'; // Change this to your worker URL
+        this.apiBaseUrl = 'https://YOUR-WORKER-URL.workers.dev'; // Change this to your worker URL
         
         this.init();
     }
@@ -99,10 +99,26 @@ class RavenPanel {
     }
 
     setupEventListeners() {
+        console.log('Setting up event listeners...');
+        
         document.addEventListener('click', (e) => {
+            console.log('Click detected on:', e.target);
+            
+            // Check if clicked element has data-action
             if (e.target.matches('[data-action]')) {
+                console.log('Action found:', e.target.dataset.action);
                 e.preventDefault();
+                e.stopPropagation();
                 this.handleAction(e.target.dataset.action, e);
+            }
+            
+            // Check if clicked element is inside a button with data-action
+            const actionButton = e.target.closest('[data-action]');
+            if (actionButton && actionButton !== e.target) {
+                console.log('Action found in parent:', actionButton.dataset.action);
+                e.preventDefault();
+                e.stopPropagation();
+                this.handleAction(actionButton.dataset.action, e);
             }
         });
 
@@ -113,40 +129,53 @@ class RavenPanel {
         });
 
         document.addEventListener('submit', (e) => {
+            console.log('Submit detected on:', e.target);
             if (e.target.matches('#auth-form')) {
+                console.log('Form submit intercepted');
                 e.preventDefault();
+                e.stopPropagation();
                 this.handleSubmit();
             }
         });
     }
 
     handleAction(action, event) {
+        console.log('Handling action:', action);
+        
         switch (action) {
             case 'toggle-auth':
+                console.log('Toggling auth mode');
                 this.state.isLogin = !this.state.isLogin;
                 this.render();
                 break;
             case 'toggle-password':
+                console.log('Toggling password visibility');
                 this.state.showPassword = !this.state.showPassword;
                 this.render();
                 break;
             case 'logout':
+                console.log('Logging out');
                 this.state.isLoggedIn = false;
                 this.state.currentUser = null;
                 this.render();
                 break;
             case 'select-server':
+                console.log('Selecting server:', event.target.dataset.server);
                 this.state.selectedServer = event.target.dataset.server;
                 this.fetchUsers();
                 break;
             case 'view-user':
                 const userId = parseInt(event.target.dataset.userId);
+                console.log('Viewing user:', userId);
                 this.viewUser(userId);
                 break;
             case 'back-to-users':
+                console.log('Back to users list');
                 this.state.selectedUser = null;
                 this.render();
                 break;
+            default:
+                console.log('Unknown action:', action);
         }
     }
 
@@ -162,11 +191,17 @@ class RavenPanel {
     }
 
     async handleSubmit() {
+        console.log('Form submitted!');
+        console.log('Is login mode:', this.state.isLogin);
+        console.log('Form data:', this.state.formData);
+        
         this.state.loading = true;
         this.render();
 
         try {
             const endpoint = this.state.isLogin ? '/api/login' : '/api/register';
+            console.log('Calling API endpoint:', endpoint);
+            
             const response = await fetch(`${this.apiBaseUrl}${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -174,6 +209,8 @@ class RavenPanel {
             });
             
             const data = await response.json();
+            console.log('API response:', data);
+            
             if (data.success) {
                 if (!this.state.isLogin) {
                     this.addUserToLocalStorage();
@@ -189,11 +226,14 @@ class RavenPanel {
                     rank: this.state.formData.rank
                 };
                 this.state.isLoggedIn = true;
+                console.log('Login successful!');
             } else {
                 alert(data.message || 'Operation failed');
             }
         } catch (error) {
             console.error('Error:', error);
+            console.log('Using fallback mode for demo');
+            
             // Fallback for demo
             if (!this.state.isLogin) {
                 this.addUserToLocalStorage();
@@ -209,6 +249,7 @@ class RavenPanel {
                 rank: this.state.formData.rank
             };
             this.state.isLoggedIn = true;
+            console.log('Fallback login successful!');
         } finally {
             this.state.loading = false;
             this.render();
