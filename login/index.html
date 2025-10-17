@@ -3,262 +3,1112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ورود و ثبت‌نام | ریون شاپ</title>
+    <title>پنل کاربری جامعه بازی</title>
     <style>
-        body {
-            font-family: 'Vazirmatn', sans-serif;
-            background: linear-gradient(135deg, #0a0a0f 0%, #141421 100%);
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+        * {
             margin: 0;
-        }
-        .container {
-            background: rgba(20, 20, 30, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 2rem 3rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 215, 0, 0.2);
-            width: 100%;
-            max-width: 400px;
-            position: relative; /* برای موقعیت‌دهی به فرم‌ها */
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 1.5rem;
-            color: hsl(45deg, 93%, 47%);
-        }
-        .form-wrapper {
-            transition: opacity 0.4s ease-in-out;
-        }
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
-        input[type="text"], input[type="password"], input[type="email"] {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
-            font-size: 1rem;
+            padding: 0;
             box-sizing: border-box;
         }
-        input:focus {
-            outline: none;
-            border-color: hsl(45deg, 93%, 47%);
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-card: rgba(26, 26, 26, 0.8);
+            --accent-lime: #a6f34d;
+            --accent-lime-light: #c9ff7f;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --border-color: rgba(166, 243, 77, 0.2);
+            --error: #ff4444;
+            --success: #44ff44;
         }
-        button {
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .logo svg {
+            width: 50px;
+            height: 50px;
+            fill: var(--accent-lime);
+        }
+
+        .logo h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--accent-lime), var(--accent-lime-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .auth-section {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .auth-section.hidden {
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select {
             width: 100%;
-            padding: 0.75rem;
+            padding: 12px 15px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-lime);
+            box-shadow: 0 0 0 3px rgba(166, 243, 77, 0.1);
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
             border: none;
-            border-radius: 10px;
-            background: linear-gradient(135deg, hsl(45deg, 93%, 47%), hsl(45deg, 100%, 60%));
-            color: #000;
-            font-size: 1.1rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--accent-lime), var(--accent-lime-light));
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s ease;
+            width: 100%;
         }
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
-        }
-        #message {
-            text-align: center;
-            margin-top: 1rem;
-            padding: 0.75rem;
-            border-radius: 10px;
-            font-weight: 500;
-        }
-        .success { background-color: rgba(34, 197, 94, 0.2); border: 1px solid rgba(34, 197, 94, 0.5); color: #22c55e; }
-        .error { background-color: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); color: #ef4444; }
 
-        /* استایل برای لینک جابجایی */
-        .form-toggle {
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(166, 243, 77, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--accent-lime);
+            border: 1px solid var(--accent-lime);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-lime);
+            color: var(--bg-primary);
+        }
+
+        .toggle-link {
             text-align: center;
-            margin-top: 1.5rem;
+            margin-top: 20px;
+            color: var(--text-secondary);
         }
-        .form-toggle a {
-            color: hsl(45deg, 93%, 47%);
-            text-decoration: none;
-            font-weight: 500;
+
+        .toggle-link button {
+            background: none;
+            border: none;
+            color: var(--accent-lime);
             cursor: pointer;
-        }
-        .form-toggle a:hover {
             text-decoration: underline;
+            font-size: 0.9rem;
+        }
+
+        .dashboard-section {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 30px;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .welcome-pill {
+            background: linear-gradient(135deg, var(--accent-lime), var(--accent-lime-light));
+            color: var(--bg-primary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--accent-lime), var(--accent-lime-light));
+            color: var(--bg-primary);
+            border-color: var(--accent-lime);
+        }
+
+        .filter-btn .count {
+            background: var(--bg-primary);
+            color: var(--accent-lime);
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            margin-right: 5px;
+        }
+
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .users-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .users-grid::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+        }
+
+        .users-grid::-webkit-scrollbar-thumb {
+            background: var(--accent-lime);
+            border-radius: 4px;
+        }
+
+        .user-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .user-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(166, 243, 77, 0.2);
+            border-color: var(--accent-lime);
+        }
+
+        .user-card h3 {
+            color: var(--accent-lime);
+            margin-bottom: 10px;
+        }
+
+        .user-card .info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .user-card .info span {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .profile-view {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 30px;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .profile-info .info-item {
+            background: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .profile-info .info-item label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .profile-info .info-item span {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .error-message,
+        .success-message,
+        .info-message {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .error-message {
+            background: rgba(255, 68, 68, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        .success-message {
+            background: rgba(68, 255, 68, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .info-message {
+            background: rgba(166, 243, 77, 0.1);
+            border: 1px solid var(--accent-lime);
+            color: var(--accent-lime);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .server-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: var(--bg-primary);
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: var(--accent-lime);
+            border: 1px solid var(--accent-lime);
         }
     </style>
 </head>
 <body>
-
     <div class="container">
-        <!-- فرم ثبت‌نام -->
-        <div id="register-wrapper" class="form-wrapper">
-            <h2>ثبت‌نام کاربر جدید</h2>
-            <form onsubmit="return false;">
-                <div class="form-group">
-                    <label for="reg-username">نام کاربری:</label>
-                    <input type="text" id="reg-username" required>
-                </div>
-                <div class="form-group">
-                    <label for="reg-email">ایمیل:</label>
-                    <input type="email" id="reg-email" required>
-                </div>
-                <div class="form-group">
-                    <label for="reg-password">رمز عبور:</label>
-                    <input type="password" id="reg-password" required>
-                </div>
-                <button onclick="registerUser()">ثبت‌نام کن</button>
-            </form>
-            <div class="form-toggle">
-                قبلاً حساب کاربری دارید؟ <a onclick="showLoginForm()">وارد شوید</a>
+        <header class="header">
+            <div class="logo">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 10 L60 30 L80 25 L70 40 L85 55 L65 50 L60 70 L50 55 L40 70 L35 50 L15 55 L30 40 L20 25 L40 30 Z"/>
+                    <circle cx="50" cy="50" r="8" fill="#0a0a0a"/>
+                </svg>
+                <h1>جامعه بازی</h1>
             </div>
+        </header>
+
+        <div class="main-layout">
+            <!-- Authentication Section -->
+            <section class="auth-section" id="authSection">
+                <div id="messageContainer"></div>
+                
+                <!-- Login Form -->
+                <div id="loginForm" class="auth-form">
+                    <h2 style="margin-bottom: 20px; color: var(--accent-lime);">ورود</h2>
+                    <form id="loginFormElement">
+                        <div class="form-group">
+                            <label for="loginIdentifier">نام کاربری یا ایمیل</label>
+                            <input type="text" id="loginIdentifier" name="identifier" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">رمز عبور</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="loginPassword" name="password" required>
+                                <button type="button" class="password-toggle" onclick="togglePassword('loginPassword', this)">👁️</button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn">ورود</button>
+                    </form>
+                    <div class="toggle-link">
+                        حساب کاربری نداری؟ <button onclick="toggleForm('register')">ثبت‌نام کن</button>
+                    </div>
+                </div>
+
+                <!-- Register Form -->
+                <div id="registerForm" class="auth-form hidden">
+                    <h2 style="margin-bottom: 20px; color: var(--accent-lime);">ثبت‌نام</h2>
+                    <form id="registerFormElement">
+                        <div class="form-group">
+                            <label for="registerUsername">نام کاربری</label>
+                            <input type="text" id="registerUsername" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerEmail">ایمیل</label>
+                            <input type="email" id="registerEmail" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerAccountId">شناسه حساب</label>
+                            <input type="text" id="registerAccountId" name="accountId" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerServer">سرور</label>
+                            <select id="registerServer" name="server" required>
+                                <option value="">انتخاب سرور</option>
+                                <option value="EU-MENA">EU-MENA</option>
+                                <option value="ASIA">ASIA</option>
+                                <option value="AMERICAS">AMERICAS</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword">رمز عبور</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="registerPassword" name="password" required>
+                                <button type="button" class="password-toggle" onclick="togglePassword('registerPassword', this)">👁️</button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn">ثبت‌نام</button>
+                    </form>
+                    <div class="toggle-link">
+                        قبلا حساب داری؟ <button onclick="toggleForm('login')">وارد شو</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dashboard Section -->
+            <section class="dashboard-section" id="dashboardSection">
+                <div class="dashboard-header">
+                    <div>
+                        <div class="welcome-pill hidden" id="welcomePill">خوش آمدی</div>
+                        <button class="btn btn-secondary hidden" id="logoutBtn" onclick="logout()" style="margin-top: 10px; width: auto;">خروج</button>
+                        <button class="btn btn-secondary hidden" id="accountBtn" onclick="showMyProfile()" style="margin-top: 10px; width: auto; margin-right: 10px;">حساب کاربری</button>
+                    </div>
+                    <div class="filter-buttons" id="filterButtons">
+                        <button class="filter-btn active" data-server="ALL" onclick="filterUsers('ALL')">
+                            <span class="count" id="countALL">0</span>همه
+                        </button>
+                        <button class="filter-btn" data-server="EU-MENA" onclick="filterUsers('EU-MENA')">
+                            <span class="count" id="countEU-MENA">0</span>EU-MENA
+                        </button>
+                        <button class="filter-btn" data-server="ASIA" onclick="filterUsers('ASIA')">
+                            <span class="count" id="countASIA">0</span>ASIA
+                        </button>
+                        <button class="filter-btn" data-server="AMERICAS" onclick="filterUsers('AMERICAS')">
+                            <span class="count" id="countAMERICAS">0</span>AMERICAS
+                        </button>
+                    </div>
+                </div>
+                <div id="dashboardMessage"></div>
+                <div class="users-grid" id="usersGrid">
+                    <!-- User cards will be inserted here -->
+                </div>
+            </section>
         </div>
 
-        <!-- فرم ورود -->
-        <div id="login-wrapper" class="form-wrapper" style="display: none;">
-            <h2>ورود به حساب کاربری</h2>
-            <form onsubmit="return false;">
-                <div class="form-group">
-                    <label for="login-username">نام کاربری:</label>
-                    <input type="text" id="login-username" required>
-                </div>
-                <div class="form-group">
-                    <label for="login-password">رمز عبور:</label>
-                    <input type="password" id="login-password" required>
-                </div>
-                <button onclick="loginUser()">ورود</button>
-            </form>
-            <div class="form-toggle">
-                حساب کاربری ندارید؟ <a onclick="showRegisterForm()">یکی بسازید</a>
+        <!-- Profile View Section -->
+        <section class="profile-view hidden" id="profileView">
+            <div class="profile-header">
+                <h2 style="color: var(--accent-lime);">پروفایل کاربر</h2>
+                <button class="btn btn-secondary" onclick="backToDashboard()">بازگشت</button>
             </div>
-        </div>
-
-        <!-- اینجا پیام‌های موفقیت یا خطا نمایش داده می‌شه -->
-        <div id="message"></div>
+            <div id="profileMessage"></div>
+            <div class="profile-info" id="profileInfo">
+                <!-- Profile information will be inserted here -->
+            </div>
+        </section>
     </div>
 
     <script>
-        const API_URL = 'https://ravenshoplogin.bloodstrike.workers.dev';
+        // ==================== CONFIGURATION ====================
+        const API_BASE = 'https://ravenshoppanel.bloodstrike.workers.dev/'; // set your API base URL here
+        // Example: const API_BASE = 'https://your-worker.your-subdomain.workers.dev';
+        
+        // ==================== STATE MANAGEMENT ====================
+        let currentUser = null;
+        let authToken = null;
+        let allUsers = [];
+        let currentFilter = 'ALL';
+        let isOfflineMode = false;
 
-        // تابع برای نمایش فرم ورود و مخفی کردن فرم ثبت‌نام
-        function showLoginForm() {
-            const registerWrapper = document.getElementById('register-wrapper');
-            const loginWrapper = document.getElementById('login-wrapper');
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for existing session
+            const savedToken = localStorage.getItem('authToken');
+            const savedUser = localStorage.getItem('currentUser');
             
-            registerWrapper.style.opacity = '0';
-            setTimeout(() => {
-                registerWrapper.style.display = 'none';
-                loginWrapper.style.display = 'block';
-                setTimeout(() => {
-                    loginWrapper.style.opacity = '1';
-                }, 50); // تاخیر کوچک برای اجرای انیمیشن
-            }, 400);
-            clearMessage();
+            if (savedToken && savedUser) {
+                authToken = savedToken;
+                currentUser = JSON.parse(savedUser);
+                showDashboard();
+            }
+
+            // Setup form listeners
+            document.getElementById('loginFormElement').addEventListener('submit', handleLogin);
+            document.getElementById('registerFormElement').addEventListener('submit', handleRegister);
+
+            // Load initial users
+            loadUsers();
+        });
+
+        // ==================== AUTHENTICATION FUNCTIONS ====================
+        function toggleForm(formType) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const messageContainer = document.getElementById('messageContainer');
+            
+            messageContainer.innerHTML = '';
+            
+            if (formType === 'register') {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                registerForm.classList.add('fade-in');
+            } else {
+                registerForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+                loginForm.classList.add('fade-in');
+            }
         }
 
-        // تابع برای نمایش فرم ثبت‌نام و مخفی کردن فرم ورود
-        function showRegisterForm() {
-            const registerWrapper = document.getElementById('register-wrapper');
-            const loginWrapper = document.getElementById('login-wrapper');
-
-            loginWrapper.style.opacity = '0';
-            setTimeout(() => {
-                loginWrapper.style.display = 'none';
-                registerWrapper.style.display = 'block';
-                setTimeout(() => {
-                    registerWrapper.style.opacity = '1';
-                }, 50);
-            }, 400);
-            clearMessage();
+        function togglePassword(inputId, button) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                button.textContent = '👁️';
+            }
         }
 
-        // تابع برای پاک کردن پیام‌ها
-        function clearMessage() {
-            document.getElementById('message').innerText = '';
-            document.getElementById('message').className = '';
-        }
+        async function handleLogin(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            clearMessages();
+            
+            // Client-side validation
+            if (!data.identifier || !data.password) {
+                showMessage('لطفاً تمام فیلدها را پر کنید', 'error', 'messageContainer');
+                return;
+            }
 
-        // تابع برای نمایش پیام به کاربر
-        function showMessage(text, type) {
-            const messageEl = document.getElementById('message');
-            messageEl.innerText = text;
-            messageEl.className = type; // 'success' یا 'error'
-        }
-
-        // تابع ثبت‌نام کاربر
-        async function registerUser() {
-            const username = document.getElementById('reg-username').value;
-            const email = document.getElementById('reg-email').value;
-            const password = document.getElementById('reg-password').value;
-
-            if (!username || !email || !password) {
-                showMessage('لطفا تمام فیلدها را پر کنید.', 'error');
+            if (data.password.length < 6) {
+                showMessage('رمز عبور باید حداقل ۶ کاراکتر باشد', 'error', 'messageContainer');
                 return;
             }
 
             try {
-                const response = await fetch(`${API_URL}/api/register`, {
+                const response = await fetch(`${API_BASE}/api/login`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, email, password }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
                 });
 
-                const data = await response.json();
+                const result = await response.json();
 
-                if (response.ok) {
-                    showMessage(data.message, 'success');
-                    // بعد از ثبت‌نام موفق، فرم ورود رو نمایش بده
-                    setTimeout(showLoginForm, 1500); 
+                if (response.ok && result.success) {
+                    // Store auth data
+                    authToken = result.token;
+                    currentUser = result.user;
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    
+                    showMessage('ورود با موفقیت انجام شد!', 'success', 'messageContainer');
+                    
+                    setTimeout(() => {
+                        showDashboard();
+                        loadUsers();
+                    }, 1000);
                 } else {
-                    showMessage(data.error, 'error');
+                    showMessage(result.error || 'خطا در ورود', 'error', 'messageContainer');
                 }
             } catch (error) {
-                showMessage('خطا در ارتباط با سرور. لطفا دوباره تلاش کنید.', 'error');
+                console.error('Login error:', error);
+                // Fallback to localStorage demo mode
+                fallbackLogin(data);
             }
         }
 
-        // تابع ورود کاربر
-        async function loginUser() {
-            const username = document.getElementById('login-username').value;
-            const password = document.getElementById('login-password').value;
+        async function handleRegister(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            clearMessages();
+            
+            // Client-side validation
+            if (!data.username || !data.email || !data.accountId || !data.server || !data.password) {
+                showMessage('لطفاً تمام فیلدها را پر کنید', 'error', 'messageContainer');
+                return;
+            }
 
-            if (!username || !password) {
-                showMessage('لطفا نام کاربری و رمز عبور را وارد کنید.', 'error');
+            if (!validateEmail(data.email)) {
+                showMessage('ایمیل معتبر نیست', 'error', 'messageContainer');
+                return;
+            }
+
+            if (data.password.length < 6) {
+                showMessage('رمز عبور باید حداقل ۶ کاراکتر باشد', 'error', 'messageContainer');
                 return;
             }
 
             try {
-                const response = await fetch(`${API_URL}/api/login`, {
+                const response = await fetch(`${API_BASE}/api/register`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
                 });
 
-                const data = await response.json();
+                const result = await response.json();
 
-                if (response.ok) {
-                    showMessage(data.message, 'success');
-                    // در اینجا می‌تونید کاربر رو به صفحه دیگری هدایت کنید
-                    // مثلا: window.location.href = '/dashboard.html';
+                if (response.ok && result.success) {
+                    // Store auth data
+                    authToken = result.token;
+                    currentUser = result.user;
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    
+                    showMessage('ثبت‌نام با موفقیت انجام شد!', 'success', 'messageContainer');
+                    
+                    setTimeout(() => {
+                        showDashboard();
+                        loadUsers();
+                    }, 1000);
                 } else {
-                    showMessage(data.error, 'error');
+                    showMessage(result.error || 'خطا در ثبت‌نام', 'error', 'messageContainer');
                 }
             } catch (error) {
-                showMessage('خطا در ارتباط با سرور. لطفا دوباره تلاش کنید.', 'error');
+                console.error('Register error:', error);
+                // Fallback to localStorage demo mode
+                fallbackRegister(data);
             }
+        }
+
+        function logout() {
+            // Call logout API if available
+            if (authToken && !isOfflineMode) {
+                fetch(`${API_BASE}/api/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json',
+                    }
+                }).catch(error => console.log('Logout API call failed:', error));
+            }
+            
+            // Clear local data
+            authToken = null;
+            currentUser = null;
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            
+            // Reset UI
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('welcomePill').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+            document.getElementById('accountBtn').classList.add('hidden');
+            document.getElementById('usersGrid').innerHTML = '';
+            
+            // Reset forms
+            document.getElementById('loginFormElement').reset();
+            document.getElementById('registerFormElement').reset();
+            
+            showMessage('با موفقیت خارج شدید', 'info', 'dashboardMessage');
+        }
+
+        // ==================== DASHBOARD FUNCTIONS ====================
+        function showDashboard() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('welcomePill').textContent = `خوش آمدی — ${currentUser.username}`;
+            document.getElementById('welcomePill').classList.remove('hidden');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+            document.getElementById('accountBtn').classList.remove('hidden');
+        }
+
+        async function loadUsers() {
+            try {
+                const url = `${API_BASE}/api/users${currentFilter !== 'ALL' ? '?server=' + currentFilter : ''}`;
+                const headers = authToken ? { 'Authorization': `Bearer ${authToken}` } : {};
+                
+                const response = await fetch(url, { headers });
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    allUsers = result.users;
+                    isOfflineMode = false;
+                } else {
+                    throw new Error('API call failed');
+                }
+            } catch (error) {
+                console.error('Load users error:', error);
+                // Fallback to localStorage
+                allUsers = getUsersFromStorage();
+                isOfflineMode = true;
+                showMessage('حالت آفلاین/دمو: داده‌ها از localStorage بارگذاری شدند', 'info', 'dashboardMessage');
+            }
+            
+            displayUsers();
+            updateFilterCounts();
+        }
+
+        function displayUsers() {
+            const grid = document.getElementById('usersGrid');
+            const filteredUsers = currentFilter === 'ALL' 
+                ? allUsers 
+                : allUsers.filter(user => user.server === currentFilter);
+            
+            if (filteredUsers.length === 0) {
+                grid.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">کاربری یافت نشد</p>';
+                return;
+            }
+
+            grid.innerHTML = filteredUsers.map(user => `
+                <div class="user-card fade-in">
+                    <h3>${user.username}</h3>
+                    <div class="info">
+                        <span>📧 ${user.email}</span>
+                        <span>🎮 ${user.accountId}</span>
+                        <span>🌍 <span class="server-badge">${user.server}</span></span>
+                        <span>📅 ${new Date(user.createdAt).toLocaleString('fa-IR')}</span>
+                    </div>
+                    <button class="btn btn-secondary" onclick="showUserProfile('${user.id}')">نمایش</button>
+                </div>
+            `).join('');
+        }
+
+        function filterUsers(server) {
+            currentFilter = server;
+            
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.server === server) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            displayUsers();
+        }
+
+        function updateFilterCounts() {
+            const counts = {
+                'ALL': allUsers.length,
+                'EU-MENA': allUsers.filter(u => u.server === 'EU-MENA').length,
+                'ASIA': allUsers.filter(u => u.server === 'ASIA').length,
+                'AMERICAS': allUsers.filter(u => u.server === 'AMERICAS').length
+            };
+
+            Object.keys(counts).forEach(server => {
+                const element = document.getElementById(`count${server}`);
+                if (element) {
+                    element.textContent = counts[server];
+                }
+            });
+        }
+
+        // ==================== PROFILE FUNCTIONS ====================
+        function showUserProfile(userId) {
+            const user = allUsers.find(u => u.id === userId);
+            if (!user) {
+                showMessage('کاربر یافت نشد', 'error', 'profileMessage');
+                return;
+            }
+
+            document.getElementById('dashboardSection').classList.add('hidden');
+            document.getElementById('profileView').classList.remove('hidden');
+            
+            document.getElementById('profileInfo').innerHTML = `
+                <div class="info-item">
+                    <label>نام کاربری</label>
+                    <span>${user.username}</span>
+                </div>
+                <div class="info-item">
+                    <label>ایمیل</label>
+                    <span>${user.email}</span>
+                </div>
+                <div class="info-item">
+                    <label>شناسه حساب</label>
+                    <span>${user.accountId}</span>
+                </div>
+                <div class="info-item">
+                    <label>سرور</label>
+                    <span class="server-badge">${user.server}</span>
+                </div>
+                <div class="info-item">
+                    <label>تاریخ عضویت</label>
+                    <span>${new Date(user.createdAt).toLocaleString('fa-IR')}</span>
+                </div>
+            `;
+        }
+
+        function showMyProfile() {
+            if (!currentUser) {
+                showMessage('لطفاً ابتدا وارد شوید', 'error', 'dashboardMessage');
+                return;
+            }
+            showUserProfile(currentUser.id);
+        }
+
+        function backToDashboard() {
+            document.getElementById('profileView').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            clearMessages();
+        }
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function showMessage(message, type, containerId) {
+            const container = document.getElementById(containerId);
+            const messageClass = type === 'error' ? 'error-message' : 
+                               type === 'success' ? 'success-message' : 'info-message';
+            
+            container.innerHTML = `<div class="${messageClass} fade-in">${message}</div>`;
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                const msg = container.querySelector(`.${messageClass}`);
+                if (msg) msg.remove();
+            }, 5000);
+        }
+
+        function clearMessages() {
+            document.getElementById('messageContainer').innerHTML = '';
+            document.getElementById('dashboardMessage').innerHTML = '';
+            document.getElementById('profileMessage').innerHTML = '';
+        }
+
+        // ==================== LOCALSTORAGE FALLBACK FUNCTIONS ====================
+        function getUsersFromStorage() {
+            const users = localStorage.getItem('demoUsers');
+            return users ? JSON.parse(users) : getDemoUsers();
+        }
+
+        function saveUsersToStorage(users) {
+            localStorage.setItem('demoUsers', JSON.stringify(users));
+        }
+
+        function getDemoUsers() {
+            const demoUsers = [
+                {
+                    id: 'u_demo1',
+                    username: 'ShadowRaven',
+                    email: 'raven@mail.test',
+                    accountId: 'RVN001',
+                    server: 'EU-MENA',
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: 'u_demo2',
+                    username: 'SkyStriker',
+                    email: 'sky@mail.test',
+                    accountId: 'SKY22',
+                    server: 'ASIA',
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: 'u_demo3',
+                    username: 'GreenBlade',
+                    email: 'blade@mail.test',
+                    accountId: 'GB999',
+                    server: 'AMERICAS',
+                    createdAt: new Date().toISOString()
+                }
+            ];
+            saveUsersToStorage(demoUsers);
+            return demoUsers;
+        }
+
+        function fallbackLogin(data) {
+            const users = getUsersFromStorage();
+            const user = users.find(u => 
+                (u.username === data.identifier || u.email === data.identifier)
+            );
+            
+            if (user) {
+                // In demo mode, accept any password
+                authToken = 'demo-token-' + Date.now();
+                currentUser = user;
+                localStorage.setItem('authToken', authToken);
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                
+                showMessage('ورود با موفقیت انجام شد (حالت دمو)!', 'success', 'messageContainer');
+                isOfflineMode = true;
+                
+                setTimeout(() => {
+                    showDashboard();
+                    loadUsers();
+                }, 1000);
+            } else {
+                showMessage('کاربری با این اطلاعات یافت نشد', 'error', 'messageContainer');
+            }
+        }
+
+        function fallbackRegister(data) {
+            const users = getUsersFromStorage();
+            
+            // Check for duplicates
+            if (users.find(u => u.username === data.username || 
+                              u.email === data.email || 
+                              u.accountId === data.accountId)) {
+                showMessage('نام کاربری، ایمیل یا شناسه حساب تکراری است', 'error', 'messageContainer');
+                return;
+            }
+            
+            // Create new user
+            const newUser = {
+                id: 'u_' + Date.now(),
+                username: data.username,
+                email: data.email,
+                accountId: data.accountId,
+                server: data.server,
+                createdAt: new Date().toISOString()
+            };
+            
+            users.push(newUser);
+            saveUsersToStorage(users);
+            
+            authToken = 'demo-token-' + Date.now();
+            currentUser = newUser;
+            localStorage.setItem('authToken', authToken);
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            showMessage('ثبت‌نام با موفقیت انجام شد (حالت دمو)!', 'success', 'messageContainer');
+            isOfflineMode = true;
+            
+            setTimeout(() => {
+                showDashboard();
+                loadUsers();
+            }, 1000);
         }
     </script>
 
+    <!-- ==================== API CONTRACT DOCUMENTATION ====================
+         IMPORTANT: This is the exact API contract that your Cloudflare Worker 
+         must implement. The frontend expects these exact endpoints and response formats.
+         
+         Replace API_BASE at the top of the script with your Worker URL.
+         
+         SECURITY NOTES:
+         - Passwords MUST be hashed server-side with bcrypt (never on client)
+         - Use HTTPS for all API calls in production
+         - Consider httpOnly secure cookies for tokens instead of localStorage
+         - Implement proper rate limiting and input validation
+    -->
+
+    <!-- 
+        ==================== API ENDPOINTS ====================
+        
+        1) POST /api/register
+        Request:
+        {
+          "username": "string",
+          "email": "string", 
+          "accountId": "string",
+          "server": "EU-MENA|ASIA|AMERICAS",
+          "password": "string"
+        }
+        
+        Responses:
+        201 Created
+        {
+          "success": true,
+          "user": {
+            "id": "string",
+            "username": "string", 
+            "email": "string",
+            "accountId": "string",
+            "server": "string",
+            "createdAt": "ISO8601"
+          },
+          "token": "string"
+        }
+        
+        400 Bad Request
+        { "success": false, "error": "validation message" }
+        
+        409 Conflict
+        { "success": false, "error": "username/email/accountId exists" }
+        
+        Example curl:
+        curl -X POST "$API_BASE/api/register" \
+          -H "Content-Type: application/json" \
+          -d '{"username":"Ali","email":"a@mail.test","accountId":"ALI01","server":"ASIA","password":"secret"}'
+        
+        2) POST /api/login
+        Request:
+        {
+          "identifier": "username-or-email",
+          "password": "string"
+        }
+        
+        Responses:
+        200 OK
+        {
+          "success": true,
+          "user": { "id":"","username":"","email":"","accountId":"","server":"","createdAt":"" },
+          "token": "string"
+        }
+        
+        401 Unauthorized
+        { "success": false, "error": "invalid credentials" }
+        
+        Example curl:
+        curl -X POST "$API_BASE/api/login" \
+          -H "Content-Type: application/json" \
+          -d '{"identifier":"Ali","password":"secret"}'
+        
+        3) GET /api/users?server={server}&q={query}
+        Query params:
+        - server: EU-MENA|ASIA|AMERICAS|ALL (default ALL)
+        - q: search by username/accountId/email partial match (optional)
+        
+        Response 200 OK:
+        {
+          "success": true,
+          "total": 123,
+          "users": [
+            { "id":"","username":"","email":"","accountId":"","server":"","createdAt":"" }
+          ]
+        }
+        
+        Example curl:
+        curl "$API_BASE/api/users?server=ASIA&q=ali"
+        
+        4) GET /api/users/{id}
+        Response 200 OK:
+        { "success": true, "user": { ... } }
+        
+        404 Not Found:
+        { "success": false, "error": "user not found" }
+        
+        5) POST /api/logout
+        200 OK:
+        { "success": true }
+        
+        ==================== SQL SCHEMA FOR D1 ====================
+        
+        CREATE TABLE users (
+          id TEXT PRIMARY KEY,
+          username TEXT UNIQUE NOT NULL,
+          email TEXT UNIQUE NOT NULL, 
+          accountId TEXT UNIQUE NOT NULL,
+          server TEXT NOT NULL,
+          passwordHash TEXT NOT NULL,
+          createdAt TEXT NOT NULL
+        );
+        
+        ==================== SAMPLE SEED DATA ====================
+        
+        INSERT INTO users (id, username, email, accountId, server, passwordHash, createdAt) VALUES
+        ('u_demo1', 'ShadowRaven', 'raven@mail.test', 'RVN001', 'EU-MENA', '', datetime('now')),
+        ('u_demo2', 'SkyStriker', 'sky@mail.test', 'SKY22', 'ASIA', '', datetime('now')),
+        ('u_demo3', 'GreenBlade', 'blade@mail.test', 'GB999', 'AMERICAS', '', datetime('now'));
+        
+        Note: passwordHash left empty for demo; server-side worker must enforce hashing with bcrypt.
+        
+        ==================== CORS HEADERS ====================
+        
+        All responses must include:
+        Content-Type: application/json
+        Access-Control-Allow-Origin: * (or your specific domain)
+        Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS
+        Access-Control-Allow-Headers: Content-Type, Authorization
+    -->
 </body>
 </html>
