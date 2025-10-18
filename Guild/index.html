@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raven Guild | Blood Strike Community Portal</title>
+    <title>Raven Guild | Blood Strike Guild Portal</title>
     <!-- Using Inter font for modern aesthetic -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -29,13 +29,18 @@
             background-color: var(--color-dark-bg);
             color: var(--color-text-light);
             min-height: 100vh;
-            /* CRITICAL FIX: PERFECT VERTICAL AND HORIZONTAL CENTERING */
             display: flex;
-            justify-content: center;
+            flex-direction: column; /* Allow content to flow top-down */
+            justify-content: flex-start; /* Start content from the top */
             align-items: center;
-            padding: 10px; /* Reduced padding for mobile */
+            padding: 10px; 
             overflow-x: hidden;
             transition: background-color var(--transition-speed);
+        }
+        
+        /* New style to center only the auth section when visible */
+        body.is-auth {
+            justify-content: center;
         }
 
         /* --- UTILITY CLASSES --- */
@@ -52,18 +57,20 @@
         .container {
             width: 100%;
             max-width: 1200px;
-            padding: 10px; /* Reduced padding for mobile */
+            padding: 10px;
+            /* CRITICAL FIX: Ensure container stretches when content is long */
+            min-height: 100%; 
         }
 
         /* --- AUTH CONTAINER (Login/Register Box) --- */
         #auth-section {
             background-color: var(--color-card-bg);
-            padding: 25px; /* Reduced padding for mobile */
+            padding: 25px; 
             border-radius: 16px;
             backdrop-filter: blur(5px);
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(0, 255, 102, 0.2);
-            max-width: 450px; /* Slightly smaller max width */
+            max-width: 450px; 
             width: 100%;
             transition: all 0.5s ease-in-out;
             opacity: 1;
@@ -76,7 +83,7 @@
         }
 
         .raven-logo {
-            font-size: 2.5rem; /* Smaller logo text for mobile */
+            font-size: 2.5rem; 
             text-align: center;
             color: var(--color-primary-accent);
             text-shadow: 0 0 10px var(--color-primary-glow);
@@ -86,23 +93,23 @@
 
         h2 {
             text-align: center;
-            margin-bottom: 20px; /* Reduced margin */
+            margin-bottom: 20px; 
             color: var(--color-primary-accent);
             font-weight: 800;
-            font-size: 1.4rem; /* Smaller H2 for mobile */
+            font-size: 1.4rem; 
             text-shadow: 0 0 5px rgba(0, 255, 102, 0.5);
         }
 
         /* --- FORM STYLING --- */
         .form-group {
-            margin-bottom: 15px; /* Reduced margin */
+            margin-bottom: 15px; 
             position: relative;
-            font-size: 0.9rem; /* Smaller font for labels/input text */
+            font-size: 0.9rem; 
         }
 
         input, select {
             width: 100%;
-            padding: 12px; /* Reduced padding */
+            padding: 12px; 
             border: 1px solid #333;
             background-color: #1a1a24;
             color: var(--color-text-light);
@@ -127,7 +134,7 @@
             transform: translateY(15%);
             cursor: pointer;
             color: var(--color-text-subtle);
-            font-size: 1em; /* Smaller icon */
+            font-size: 1em; 
             transition: color var(--transition-speed);
         }
 
@@ -139,21 +146,21 @@
         .btn {
             display: block;
             width: 100%;
-            padding: 12px; /* Reduced padding */
+            padding: 12px; 
             border: none;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             text-align: center;
             transition: all var(--transition-speed) ease;
-            font-size: 1em; /* Mobile button font size */
+            font-size: 1em; 
         }
 
         .btn-primary {
             background-color: var(--color-primary-accent);
             color: var(--color-dark-bg);
-            margin-top: 20px; /* Reduced margin */
-            box-shadow: 0 6px 20px var(--color-primary-glow); /* Reduced shadow for mobile */
+            margin-top: 20px; 
+            box-shadow: 0 6px 20px var(--color-primary-glow); 
         }
 
         .btn-primary:hover {
@@ -165,7 +172,7 @@
         .btn-link {
             background: none;
             color: var(--color-primary-accent);
-            font-size: 0.85em; /* Smaller link text for mobile */
+            font-size: 0.85em; 
             margin-top: 15px;
             opacity: 0.9;
         }
@@ -180,22 +187,27 @@
             width: 100%;
             transition: opacity 0.8s ease-out, transform 0.8s ease-out;
             animation: fadeIn 0.8s ease-out;
+            /* Added padding-top to prevent content from touching the very top edge */
+            padding-top: 20px; 
         }
 
         .panel-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px; /* Reduced margin */
-            padding: 15px 20px; /* Reduced padding for mobile */
+            margin-bottom: 20px; 
+            padding: 15px 20px; 
             background-color: var(--color-card-bg);
             border-radius: 12px;
             border-bottom: 3px solid var(--color-primary-accent);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            position: sticky; /* Keep header visible when scrolling */
+            top: 0;
+            z-index: 10;
         }
 
         .panel-header h1 {
-            font-size: 1.5em; /* Smaller header title for mobile */
+            font-size: 1.5em; 
             font-weight: 800;
             display: flex;
             align-items: center;
@@ -204,13 +216,13 @@
         .raven-mark {
             font-size: 1.2em;
             color: var(--color-primary-accent);
-            margin-right: 8px; /* Space between mark and text in LTR */
+            margin-right: 8px; 
             text-shadow: 0 0 8px var(--color-primary-glow);
         }
         
         /* Subtitle for header */
         .panel-header h1 span:last-child {
-            font-size: 0.7em; /* Smaller subtitle */
+            font-size: 0.7em; 
             margin-left: 8px;
         }
 
@@ -219,8 +231,8 @@
             background: none;
             border: 2px solid var(--color-primary-accent);
             color: var(--color-primary-accent);
-            padding: 8px 15px; /* Smaller padding for mobile button */
-            font-size: 0.9em; /* Smaller font for mobile button */
+            padding: 8px 15px; 
+            font-size: 0.9em; 
             border-radius: 8px;
         }
 
@@ -235,13 +247,13 @@
         .filter-buttons {
             display: flex;
             justify-content: center;
-            gap: 10px; /* Reduced gap */
+            gap: 10px; 
             margin-bottom: 20px;
         }
 
         .filter-buttons .btn {
             width: auto;
-            padding: 8px 15px; /* Smaller button size */
+            padding: 8px 15px; 
             font-size: 0.9em;
             background-color: #222233;
             color: var(--color-text-subtle);
@@ -269,36 +281,35 @@
         /* --- USER LIST & CARDS --- */
         #user-list {
             display: grid;
-            /* CRITICAL FIX: Smaller min-width for mobile cards */
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-            gap: 15px; /* Reduced gap for mobile */
+            gap: 15px; 
         }
 
         .user-card {
             background-color: var(--color-card-bg);
-            padding: 20px; /* Reduced padding */
-            border-radius: 10px; /* Reduced border radius */
+            padding: 20px; 
+            border-radius: 10px; 
             border: 1px solid #333;
             transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
             position: relative;
         }
 
         .user-card:hover {
-            transform: translateY(-4px); /* Reduced hover lift */
+            transform: translateY(-4px); 
             border-color: var(--color-primary-accent);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7), 0 0 15px var(--color-primary-glow);
         }
 
         .user-card h3 {
             color: var(--color-primary-accent);
-            font-size: 1.1em; /* Smaller name size for mobile */
+            font-size: 1.1em; 
             margin-bottom: 5px;
             display: flex;
             align-items: center;
         }
         
         .online-badge {
-            width: 8px; /* Smaller badge */
+            width: 8px; 
             height: 8px;
             border-radius: 50%;
             background-color: var(--color-primary-accent);
@@ -308,17 +319,17 @@
         }
 
         .user-card p {
-            font-size: 0.85em; /* Smaller paragraph text */
+            font-size: 0.85em; 
             color: var(--color-text-subtle);
             margin-bottom: 5px;
         }
         
         .server-tag {
             display: inline-block;
-            padding: 4px 10px; /* Reduced padding */
+            padding: 4px 10px; 
             margin-top: 10px;
             border-radius: 5px;
-            font-size: 0.75em; /* Smaller tag font */
+            font-size: 0.75em; 
             font-weight: 600;
             color: var(--color-dark-bg);
             text-shadow: 0 0 2px var(--color-dark-bg);
@@ -327,7 +338,7 @@
         /* --- MY ACCOUNT SECTION --- */
         #account-section {
             background-color: var(--color-card-bg);
-            padding: 30px; /* Reduced padding */
+            padding: 30px; 
             border-radius: 16px;
             max-width: 500px;
             width: 100%;
@@ -367,20 +378,19 @@
         }
 
         /* --- RESPONSIVENESS (Desktop/Tablet Adjustments) --- */
-        /* Changes apply for screens 640px and wider */
         @media (min-width: 640px) {
              /* Auth Section */
             #auth-section {
                 padding: 40px; 
             }
             .raven-logo {
-                font-size: 3rem; /* Return to original large size */
+                font-size: 3rem; 
             }
             h2 {
                 font-size: 1.75rem; 
             }
             input, select, .btn {
-                padding: 14px; /* Return to original large padding */
+                padding: 14px; 
                 font-size: 1.05em;
             }
             .form-group {
@@ -396,10 +406,10 @@
                 padding: 20px 30px;
             }
             .panel-header h1 {
-                font-size: 2.5em; /* Return to original large size */
+                font-size: 2.5em; 
             }
             .panel-header h1 span:last-child {
-                font-size: 0.5em; /* Original subtitle size */
+                font-size: 0.5em; 
             }
             .panel-header .btn-icon {
                 padding: 10px 20px;
@@ -417,7 +427,7 @@
 
             /* User Cards */
             #user-list {
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Larger min-width for cards */
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
                 gap: 25px;
             }
             .user-card {
@@ -427,7 +437,7 @@
                 font-size: 1.3em; 
             }
             .online-badge {
-                width: 10px; /* Larger badge */
+                width: 10px; 
                 height: 10px;
             }
             .user-card p {
@@ -440,11 +450,11 @@
         }
     </style>
 </head>
-<body>
+<body class="is-auth">
 
     <div class="container" id="main-content">
 
-        <!-- 1. LOGIN / REGISTER SECTION (Perfectly Centered) -->
+        <!-- 1. LOGIN / REGISTER SECTION (Perfectly Centered when visible) -->
         <section id="auth-section">
             <div class="raven-logo">
                 <span class="raven-mark">𝕽</span>
@@ -483,7 +493,37 @@
                     <input type="number" id="register-account-id" required>
                 </div>
 
-                <!-- Server and Rank Dropdowns -->
+                <!-- NEW LAYOUT FOR RANKS (BR Rank and SF Rank) -->
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label for="register-br-rank">BR Rank</label>
+                        <select id="register-br-rank" required>
+                            <option value="Bronze">Bronze</option>
+                            <option value="Silver">Silver</option>
+                            <option value="Gold">Gold</option>
+                            <option value="Platinum">Platinum</option>
+                            <option value="Diamond">Diamond</option>
+                            <option value="Master">Master</option>
+                            <option value="Legend">Legend</option>
+                            <option value="Mythic">Mythic</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label for="register-sf-rank">SF Rank</label>
+                        <select id="register-sf-rank" required>
+                            <option value="Bronze">Bronze</option>
+                            <option value="Silver">Silver</option>
+                            <option value="Gold">Gold</option>
+                            <option value="Platinum">Platinum</option>
+                            <option value="Diamond">Diamond</option>
+                            <option value="Master">Master</option>
+                            <option value="Legend">Legend</option>
+                            <!-- Mythic is intentionally excluded for SF Rank as requested -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- NEW LAYOUT FOR SERVER AND LEVEL -->
                 <div style="display: flex; gap: 10px; margin-bottom: 15px;">
                     <div class="form-group" style="flex: 1; margin-bottom: 0;">
                         <label for="register-server">Server</label>
@@ -494,16 +534,9 @@
                         </select>
                     </div>
                     <div class="form-group" style="flex: 1; margin-bottom: 0;">
-                        <label for="register-rank">Current Rank</label>
-                        <select id="register-rank" required>
-                            <option value="Bronze">Bronze</option>
-                            <option value="Silver">Silver</option>
-                            <option value="Gold">Gold</option>
-                            <option value="Platinum">Platinum</option>
-                            <option value="Diamond">Diamond</option>
-                            <option value="Master">Master</option>
-                            <option value="Legend">Legend</option>
-                            <option value="Mythic">Mythic</option>
+                        <label for="register-level">Level</label>
+                        <select id="register-level" required>
+                            <!-- Generate Level options 1 to 50 using JavaScript later -->
                         </select>
                     </div>
                 </div>
@@ -579,6 +612,7 @@
         let USER_SESSION = null; 
         const ONLINE_THRESHOLD_MS = 30000; // 30 seconds for "Online Now" status
 
+        const $body = document.body;
         const $authSection = document.getElementById('auth-section');
         const $panelSection = document.getElementById('panel-section');
         const $accountSection = document.getElementById('account-section');
@@ -592,6 +626,29 @@
 
         // --- UTILITY FUNCTIONS ---
         
+        /**
+         * Populates the Level select input with options 1 to 50.
+         */
+        function populateLevelOptions() {
+            const $select = document.getElementById('register-level');
+            if (!$select) return;
+            
+            // Add a default placeholder option
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = 'Select Level';
+            placeholder.disabled = true;
+            placeholder.selected = true;
+            $select.appendChild(placeholder);
+
+            for (let i = 1; i <= 50; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                $select.appendChild(option);
+            }
+        }
+
         /**
          * Converts a standard Date object to the required Tehran timezone format.
          * Displays in English (en-US locale) but with the specified time zone.
@@ -657,6 +714,9 @@
          * @param {string} viewId - 'login', 'panel', or 'account'
          */
         function showView(viewId) {
+            // Adjust body class for layout adherence (center auth, top-align panel)
+            $body.classList.remove('is-auth');
+
             // Apply fade-out class to current visible section before hiding
             if (viewId === 'panel' && !$authSection.classList.contains('hidden')) {
                 $authSection.classList.add('fade-out');
@@ -674,15 +734,15 @@
                 // Show current view
                 switch (viewId) {
                     case 'login':
+                        $body.classList.add('is-auth');
                         $authSection.classList.remove('hidden');
-                        $authSection.classList.remove('fade-out'); // Ensure it's ready for login view
+                        $authSection.classList.remove('fade-out'); 
                         $loginForm.classList.remove('hidden');
                         $registerForm.classList.add('hidden');
                         $authToggleBtn.textContent = "Don't have an account? Register Here";
                         break;
                     case 'panel':
                         $panelSection.classList.remove('hidden');
-                        // Load the user's default server or EU-MENA upon entering the panel
                         const defaultServer = USER_SESSION ? USER_SESSION.server : 'EU-MENA';
                         loadUsers(defaultServer);
                         break;
@@ -755,10 +815,21 @@
                 username: document.getElementById('register-username').value,
                 email: document.getElementById('register-email').value,
                 accountId: document.getElementById('register-account-id').value,
+                // --- NEW FIELDS ---
+                brRank: document.getElementById('register-br-rank').value,
+                sfRank: document.getElementById('register-sf-rank').value,
                 server: document.getElementById('register-server').value,
-                rank: document.getElementById('register-rank').value,
+                level: document.getElementById('register-level').value,
+                // --- END NEW FIELDS ---
                 password: document.getElementById('register-password').value,
             };
+
+            // Basic validation for new fields (Level/Rank)
+            if (!data.brRank || !data.sfRank || !data.level) {
+                 $authMessage.textContent = 'Please select all required rank and level fields.';
+                 $authMessage.style.color = '#ff6666';
+                 return;
+            }
 
             // --- CLOUDFLARE API: POST /api/register ---
             try {
@@ -821,7 +892,7 @@
             USER_SESSION = userData;
             IS_LOGGED_IN = true;
             
-            // Update last online timestamp (Requirement 7)
+            // Update last online timestamp
             await updateLastOnline(username);
             
             $authMessage.textContent = ''; 
@@ -846,8 +917,6 @@
             const $detailsContainer = document.getElementById('my-account-details');
             $detailsContainer.innerHTML = '<p style="text-align: center;">Loading profile details...</p>';
             
-            // Since the user object is returned by login/register and contains all fields, 
-            // we can use the stored session data for display.
             const user = USER_SESSION; 
 
             if (user) {
@@ -855,8 +924,10 @@
                     <div><span>Username:</span><span>${user.username}</span></div>
                     <div><span>Email:</span><span>${user.email}</span></div>
                     <div><span>Account ID:</span><span>${user.accountId}</span></div>
+                    <div><span>Level:</span><span>${user.level}</span></div>
+                    <div><span>BR Rank:</span><span>${user.brRank}</span></div>
+                    <div><span>SF Rank:</span><span>${user.sfRank}</span></div>
                     <div><span>Server Region:</span><span>${user.server}</span></div>
-                    <div><span>Rank:</span><span>${user.rank}</span></div>
                 `;
                 showView('account');
             } else {
@@ -873,7 +944,7 @@
             $userList.innerHTML = ''; 
             $panelMessage.textContent = `Loading players for ${serverRegion}...`;
             
-            // 10. Highlight the active filter button
+            // Highlight the active filter button
             document.querySelectorAll('#server-filters .btn').forEach(btn => {
                 btn.classList.remove('active');
                 if (btn.dataset.server === serverRegion) {
@@ -917,7 +988,7 @@
                 ? '<p style="grid-column: 1 / -1; text-align: center; color: var(--color-text-subtle);">No players found in this region.</p>'
                 : sortedUsers.map(user => {
                 
-                // 11. Server color tags
+                // Server color tags
                 const serverColor = {
                     'EU-MENA': '#00ff66',  // Lime
                     'ASIA': '#66ccff',     // Cyan
@@ -928,33 +999,40 @@
                 const currentTime = new Date().getTime();
                 const isOnline = (currentTime - lastOnlineTime) <= ONLINE_THRESHOLD_MS;
                 
-                // 8. Add glowing "online now" badge
+                // Add glowing "online now" badge
                 const onlineBadge = isOnline ? '<div class="online-badge" title="Online Now"></div>' : '';
                 
-                // 7. Display formatted last online time (Tehran Timezone)
+                // Display formatted last online time (Tehran Timezone)
                 const formattedTime = formatTehranDateTime(user.lastOnline);
                 
                 const isCurrentUser = USER_SESSION && user.username === USER_SESSION.username;
                 const cardClass = isCurrentUser ? 'user-card' : 'user-card';
 
+                // --- UPDATED CARD LAYOUT ---
                 return `
                     <div class="${cardClass}" style="${isCurrentUser ? 'border-width: 3px; border-style: solid;' : ''}">
                         <h3>
                             ${user.username} ${isCurrentUser ? '(You)' : ''}
                             ${onlineBadge}
                         </h3>
-                        <p>Account ID: ${user.accountId}</p>
-                        <p>Rank: <span style="font-weight: 600; color: ${serverColor};">${user.rank}</span></p>
+                        <p>Account ID: ${user.accountId || 'N/A'}</p>
+                        <p>Level: <span style="font-weight: 600; color: ${serverColor};">${user.level || '1'}</span></p>
+                        <p>BR Rank: <span style="font-weight: 600; color: ${serverColor};">${user.brRank || 'N/A'}</span></p>
+                        <p>SF Rank: <span style="font-weight: 600; color: ${serverColor};">${user.sfRank || 'N/A'}</span></p>
                         <p style="font-size: 0.8em; color: #aaa;">Last Online (Tehran Time): ${formattedTime}</p>
                         <span class="server-tag" style="background-color: ${serverColor}; color: var(--color-dark-bg); box-shadow: 0 0 5px ${serverColor}70;">${user.server}</span>
                     </div>
                 `;
+                // --- END UPDATED CARD LAYOUT ---
             }).join('');
         }
 
         // --- INITIALIZATION ---
 
         window.onload = function() {
+            // Populate the Level dropdown (1-50)
+            populateLevelOptions();
+
             // Set up form submission handlers
             $loginForm.addEventListener('submit', handleLogin);
             $registerForm.addEventListener('submit', handleRegister);
