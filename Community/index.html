@@ -33,7 +33,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 10px; /* Reduced padding for mobile */
             overflow-x: hidden;
             transition: background-color var(--transition-speed);
         }
@@ -52,18 +52,18 @@
         .container {
             width: 100%;
             max-width: 1200px;
-            padding: 20px;
+            padding: 10px; /* Reduced padding for mobile */
         }
 
         /* --- AUTH CONTAINER (Login/Register Box) --- */
         #auth-section {
             background-color: var(--color-card-bg);
-            padding: 40px;
+            padding: 25px; /* Reduced padding for mobile */
             border-radius: 16px;
             backdrop-filter: blur(5px);
             box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(0, 255, 102, 0.2);
-            max-width: 480px;
+            max-width: 450px; /* Slightly smaller max width */
             width: 100%;
             transition: all 0.5s ease-in-out;
             opacity: 1;
@@ -76,30 +76,33 @@
         }
 
         .raven-logo {
-            font-size: 3rem;
+            font-size: 2.5rem; /* Smaller logo text for mobile */
             text-align: center;
             color: var(--color-primary-accent);
-            text-shadow: 0 0 15px var(--color-primary-glow);
-            margin-bottom: 25px;
+            text-shadow: 0 0 10px var(--color-primary-glow);
+            margin-bottom: 20px;
+            font-weight: 800;
         }
 
         h2 {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px; /* Reduced margin */
             color: var(--color-primary-accent);
             font-weight: 800;
+            font-size: 1.4rem; /* Smaller H2 for mobile */
             text-shadow: 0 0 5px rgba(0, 255, 102, 0.5);
         }
 
         /* --- FORM STYLING --- */
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px; /* Reduced margin */
             position: relative;
+            font-size: 0.9rem; /* Smaller font for labels/input text */
         }
 
         input, select {
             width: 100%;
-            padding: 14px;
+            padding: 12px; /* Reduced padding */
             border: 1px solid #333;
             background-color: #1a1a24;
             color: var(--color-text-light);
@@ -107,6 +110,7 @@
             transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
             -webkit-appearance: none;
             appearance: none;
+            font-size: 1em;
         }
 
         input:focus, select:focus {
@@ -118,12 +122,12 @@
         /* Password Toggle Icon positioning for LTR */
         .password-toggle {
             position: absolute;
-            right: 12px; /* Position on the right for LTR */
+            right: 12px;
             top: 50%;
             transform: translateY(15%);
             cursor: pointer;
             color: var(--color-text-subtle);
-            font-size: 1.1em;
+            font-size: 1em; /* Smaller icon */
             transition: color var(--transition-speed);
         }
 
@@ -135,33 +139,34 @@
         .btn {
             display: block;
             width: 100%;
-            padding: 14px;
+            padding: 12px; /* Reduced padding */
             border: none;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             text-align: center;
             transition: all var(--transition-speed) ease;
+            font-size: 1em; /* Mobile button font size */
         }
 
         .btn-primary {
             background-color: var(--color-primary-accent);
             color: var(--color-dark-bg);
-            margin-top: 25px;
-            box-shadow: 0 8px 30px var(--color-primary-glow);
+            margin-top: 20px; /* Reduced margin */
+            box-shadow: 0 6px 20px var(--color-primary-glow); /* Reduced shadow for mobile */
         }
 
         .btn-primary:hover {
             background-color: #33ff99;
-            box-shadow: 0 10px 40px var(--color-primary-glow);
-            transform: translateY(-3px);
+            box-shadow: 0 8px 30px var(--color-primary-glow);
+            transform: translateY(-2px);
         }
 
         .btn-link {
             background: none;
             color: var(--color-primary-accent);
-            font-size: 0.95em;
-            margin-top: 20px;
+            font-size: 0.85em; /* Smaller link text for mobile */
+            margin-top: 15px;
             opacity: 0.9;
         }
 
@@ -181,8 +186,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            padding: 20px 30px;
+            margin-bottom: 20px; /* Reduced margin */
+            padding: 15px 20px; /* Reduced padding for mobile */
             background-color: var(--color-card-bg);
             border-radius: 12px;
             border-bottom: 3px solid var(--color-primary-accent);
@@ -190,7 +195,7 @@
         }
 
         .panel-header h1 {
-            font-size: 2.5em;
+            font-size: 1.5em; /* Smaller header title for mobile */
             font-weight: 800;
             display: flex;
             align-items: center;
@@ -199,8 +204,14 @@
         .raven-mark {
             font-size: 1.2em;
             color: var(--color-primary-accent);
-            margin-right: 10px; /* Space between mark and text in LTR */
+            margin-right: 8px; /* Space between mark and text in LTR */
             text-shadow: 0 0 8px var(--color-primary-glow);
+        }
+        
+        /* Subtitle for header */
+        .panel-header h1 span:last-child {
+            font-size: 0.7em; /* Smaller subtitle */
+            margin-left: 8px;
         }
 
         .panel-header .btn-icon {
@@ -208,8 +219,8 @@
             background: none;
             border: 2px solid var(--color-primary-accent);
             color: var(--color-primary-accent);
-            padding: 10px 20px;
-            font-size: 1em;
+            padding: 8px 15px; /* Smaller padding for mobile button */
+            font-size: 0.9em; /* Smaller font for mobile button */
             border-radius: 8px;
         }
 
@@ -224,13 +235,14 @@
         .filter-buttons {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin-bottom: 30px;
+            gap: 10px; /* Reduced gap */
+            margin-bottom: 20px;
         }
 
         .filter-buttons .btn {
             width: auto;
-            padding: 10px 25px;
+            padding: 8px 15px; /* Smaller button size */
+            font-size: 0.9em;
             background-color: #222233;
             color: var(--color-text-subtle);
             border: 1px solid #444;
@@ -243,7 +255,7 @@
             color: var(--color-dark-bg);
             font-weight: 800;
             border-color: var(--color-primary-accent);
-            box-shadow: 0 0 15px var(--color-primary-glow);
+            box-shadow: 0 0 10px var(--color-primary-glow);
             transform: translateY(-2px);
         }
 
@@ -257,76 +269,81 @@
         /* --- USER LIST & CARDS --- */
         #user-list {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
+            /* CRITICAL FIX: Smaller min-width for mobile cards */
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 15px; /* Reduced gap for mobile */
         }
 
         .user-card {
             background-color: var(--color-card-bg);
-            padding: 25px;
-            border-radius: 12px;
+            padding: 20px; /* Reduced padding */
+            border-radius: 10px; /* Reduced border radius */
             border: 1px solid #333;
             transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
             position: relative;
         }
 
         .user-card:hover {
-            transform: translateY(-8px);
+            transform: translateY(-4px); /* Reduced hover lift */
             border-color: var(--color-primary-accent);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7), 0 0 20px var(--color-primary-glow);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7), 0 0 15px var(--color-primary-glow);
         }
 
         .user-card h3 {
             color: var(--color-primary-accent);
-            font-size: 1.3em;
-            margin-bottom: 8px;
+            font-size: 1.1em; /* Smaller name size for mobile */
+            margin-bottom: 5px;
             display: flex;
             align-items: center;
         }
         
         .online-badge {
-            width: 10px;
-            height: 10px;
+            width: 8px; /* Smaller badge */
+            height: 8px;
             border-radius: 50%;
             background-color: var(--color-primary-accent);
-            box-shadow: 0 0 8px var(--color-primary-glow);
-            margin-left: 10px; /* Position on the left of the name in LTR */
+            box-shadow: 0 0 5px var(--color-primary-glow);
+            margin-left: 8px; 
             animation: pulse 1.5s infinite;
         }
 
         .user-card p {
-            font-size: 0.95em;
+            font-size: 0.85em; /* Smaller paragraph text */
             color: var(--color-text-subtle);
-            margin-bottom: 7px;
+            margin-bottom: 5px;
         }
         
         .server-tag {
             display: inline-block;
-            padding: 6px 12px;
-            margin-top: 15px;
-            border-radius: 6px;
-            font-size: 0.85em;
+            padding: 4px 10px; /* Reduced padding */
+            margin-top: 10px;
+            border-radius: 5px;
+            font-size: 0.75em; /* Smaller tag font */
             font-weight: 600;
             color: var(--color-dark-bg);
             text-shadow: 0 0 2px var(--color-dark-bg);
-            /* Dynamic background set via JS */
         }
 
         /* --- MY ACCOUNT SECTION --- */
         #account-section {
             background-color: var(--color-card-bg);
-            padding: 40px;
+            padding: 30px; /* Reduced padding */
             border-radius: 16px;
-            max-width: 600px;
+            max-width: 500px;
             width: 100%;
             transition: all 0.5s ease-out;
             animation: fadeIn 0.5s ease-out;
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-            margin: 5vh auto; /* Center with margin for account view */
+            margin: 5vh auto;
+        }
+        
+        /* Smaller font for account details */
+        .account-info {
+            font-size: 0.9em;
         }
 
         .account-info div {
-            padding: 12px 0;
+            padding: 10px 0;
             border-bottom: 1px dashed #333;
             display: flex;
             justify-content: space-between;
@@ -345,18 +362,80 @@
         
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(0, 255, 102, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(0, 255, 102, 0); }
+            70% { box-shadow: 0 0 0 8px rgba(0, 255, 102, 0); }
             100% { box-shadow: 0 0 0 0 rgba(0, 255, 102, 0); }
         }
 
-        /* --- RESPONSIVENESS --- */
-        @media (min-width: 768px) {
-            .panel-header {
-                padding: 20px 50px;
+        /* --- RESPONSIVENESS (Desktop/Tablet Adjustments) --- */
+        /* Changes apply for screens 640px and wider */
+        @media (min-width: 640px) {
+             /* Auth Section */
+            #auth-section {
+                padding: 40px; 
+            }
+            .raven-logo {
+                font-size: 3rem; /* Return to original large size */
+            }
+            h2 {
+                font-size: 1.75rem; 
+            }
+            input, select, .btn {
+                padding: 14px; /* Return to original large padding */
+                font-size: 1.05em;
+            }
+            .form-group {
+                font-size: 1em;
+                margin-bottom: 20px;
+            }
+            .btn-link {
+                font-size: 0.95em;
             }
 
+            /* Panel Section */
+            .panel-header {
+                padding: 20px 30px;
+            }
+            .panel-header h1 {
+                font-size: 2.5em; /* Return to original large size */
+            }
+            .panel-header h1 span:last-child {
+                font-size: 0.5em; /* Original subtitle size */
+            }
+            .panel-header .btn-icon {
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+
+            /* Filter Buttons */
             .filter-buttons {
-                gap: 20px;
+                gap: 15px;
+            }
+            .filter-buttons .btn {
+                padding: 10px 25px;
+                font-size: 1em;
+            }
+
+            /* User Cards */
+            #user-list {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Larger min-width for cards */
+                gap: 25px;
+            }
+            .user-card {
+                padding: 25px;
+            }
+            .user-card h3 {
+                font-size: 1.3em; 
+            }
+            .online-badge {
+                width: 10px; /* Larger badge */
+                height: 10px;
+            }
+            .user-card p {
+                font-size: 0.95em;
+            }
+            .server-tag {
+                padding: 6px 12px;
+                font-size: 0.85em;
             }
         }
     </style>
