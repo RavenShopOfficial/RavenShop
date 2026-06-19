@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -215,40 +215,68 @@
                     <span class="font-bold text-xl tracking-wide text-white">Raven <span class="text-gaming-neon drop-shadow-[0_0_5px_rgba(0,255,85,0.5)]">Shop</span></span>
                 </div>
 
-                <div class="hidden md:flex items-center space-x-8 space-x-reverse">
-                    <a href="#" class="text-gray-300 hover:text-gaming-neon hover:drop-shadow-[0_0_5px_rgba(0,255,85,0.5)] transition-all duration-200 text-sm font-medium">خانه</a>
-                    <a href="https://admins.RavenShop.ir" class="text-gray-300 hover:text-gaming-neon hover:drop-shadow-[0_0_5px_rgba(0,255,85,0.5)] transition-all duration-200 text-sm font-medium">ادمین‌ها</a>
-                    <a href="https://Gold.RavenShop.ir" class="text-gray-300 hover:text-gaming-neon hover:drop-shadow-[0_0_5px_rgba(0,255,85,0.5)] transition-all duration-200 text-sm font-medium">خدمات</a>
-                    <a href="#faq-section" class="text-gray-300 hover:text-gaming-neon hover:drop-shadow-[0_0_5px_rgba(0,255,85,0.5)] transition-all duration-200 text-sm font-medium">سوالات متداول</a>
-                    <a href="#contact" class="text-gray-300 hover:text-gaming-neon hover:drop-shadow-[0_0_5px_rgba(0,255,85,0.5)] transition-all duration-200 text-sm font-medium">تماس</a>
+                <div class="hidden md:flex items-center gap-4 lg:gap-8">
+                    <a href="#" class="group relative px-2 py-2 text-sm font-bold text-gray-300 transition-all duration-300 hover:text-white flex items-center gap-2">
+                        <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-gaming-neon shadow-[0_0_10px_#00FF55] transition-all duration-300 group-hover:w-full"></span>
+                        <i class="fas fa-home text-gray-500 group-hover:text-gaming-neon transition-colors duration-300 group-hover:drop-shadow-[0_0_5px_rgba(0,255,85,0.8)]"></i>خانه
+                    </a>
+                    <a href="https://admins.RavenShop.ir" class="group relative px-2 py-2 text-sm font-bold text-gray-300 transition-all duration-300 hover:text-white flex items-center gap-2">
+                        <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-gaming-neon shadow-[0_0_10px_#00FF55] transition-all duration-300 group-hover:w-full"></span>
+                        <i class="fas fa-users text-gray-500 group-hover:text-gaming-neon transition-colors duration-300 group-hover:drop-shadow-[0_0_5px_rgba(0,255,85,0.8)]"></i>ادمین‌ها
+                    </a>
+                    <a href="https://Gold.RavenShop.ir" class="group relative px-2 py-2 text-sm font-bold text-gray-300 transition-all duration-300 hover:text-white flex items-center gap-2">
+                        <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-gaming-neon shadow-[0_0_10px_#00FF55] transition-all duration-300 group-hover:w-full"></span>
+                        <i class="fas fa-store text-gray-500 group-hover:text-gaming-neon transition-colors duration-300 group-hover:drop-shadow-[0_0_5px_rgba(0,255,85,0.8)]"></i>خدمات
+                    </a>
+                    <a href="#faq-section" class="group relative px-2 py-2 text-sm font-bold text-gray-300 transition-all duration-300 hover:text-white flex items-center gap-2">
+                        <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-gaming-neon shadow-[0_0_10px_#00FF55] transition-all duration-300 group-hover:w-full"></span>
+                        <i class="fas fa-question-circle text-gray-500 group-hover:text-gaming-neon transition-colors duration-300 group-hover:drop-shadow-[0_0_5px_rgba(0,255,85,0.8)]"></i>سوالات
+                    </a>
+                    <a href="#contact" class="group relative px-2 py-2 text-sm font-bold text-gray-300 transition-all duration-300 hover:text-white flex items-center gap-2">
+                        <span class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-gaming-neon shadow-[0_0_10px_#00FF55] transition-all duration-300 group-hover:w-full"></span>
+                        <i class="fas fa-headset text-gray-500 group-hover:text-gaming-neon transition-colors duration-300 group-hover:drop-shadow-[0_0_5px_rgba(0,255,85,0.8)]"></i>تماس
+                    </a>
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <div class="hidden md:flex relative">
-                        <input type="text" id="desktopSearch" placeholder="جستجو..." class="bg-[#0a0d0a] border border-gaming-neon/20 rounded-lg py-2 px-4 text-sm focus:outline-none focus:border-gaming-neon focus:ring-1 focus:ring-gaming-neon/50 transition-all w-48 text-right text-gray-300 placeholder-gray-600 shadow-inner">
-                        <button onclick="handleSearch('desktopSearch')" class="absolute left-2 top-2 text-gray-500 hover:text-gaming-neon transition-colors">
+                    <div class="hidden md:flex relative group">
+                        <div class="absolute -inset-0.5 bg-gradient-to-r from-gaming-neon to-gaming-accent rounded-lg blur opacity-10 group-hover:opacity-40 transition duration-300"></div>
+                        <input type="text" id="desktopSearch" placeholder="جستجو..." class="relative bg-[#0a0d0a] border border-gaming-neon/20 rounded-lg py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-gaming-neon focus:ring-1 focus:ring-gaming-neon/50 transition-all w-48 text-right text-gray-300 placeholder-gray-600">
+                        <button onclick="handleSearch('desktopSearch')" class="absolute left-0 top-0 h-full px-3 text-gray-500 hover:text-gaming-neon hover:drop-shadow-[0_0_5px_rgba(0,255,85,0.8)] transition-all z-10 flex items-center justify-center">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
 
-                    <button id="mobileMenuBtn" class="md:hidden text-gray-300 hover:text-gaming-neon p-2">
-                        <i class="fas fa-bars text-xl"></i>
+                    <button id="mobileMenuBtn" class="md:hidden relative group p-2">
+                        <div class="absolute inset-0 bg-gaming-neon/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-300"></div>
+                        <i class="fas fa-bars text-xl text-gray-300 group-hover:text-gaming-neon transition-colors relative z-10"></i>
                     </button>
                 </div>
             </div>
         </div>
 
-        <div id="mobileMenu" class="md:hidden hidden bg-[#050705] border-t border-gaming-neon/10">
-            <div class="px-4 pt-4 pb-6 space-y-3">
-                <a href="#" class="block text-gray-300 hover:text-gaming-neon hover:bg-gaming-neon/5 px-3 py-2 rounded-md">خانه</a>
-                <a href="Admins/index.html" class="block text-gray-300 hover:text-gaming-neon hover:bg-gaming-neon/5 px-3 py-2 rounded-md">ادمین‌ها</a>
-                <a href="#services" class="block text-gray-300 hover:text-gaming-neon hover:bg-gaming-neon/5 px-3 py-2 rounded-md">خدمات</a>
-                <a href="#faq-section" class="block text-gray-300 hover:text-gaming-neon hover:bg-gaming-neon/5 px-3 py-2 rounded-md">سوالات متداول</a>
-                <a href="#contact" class="block text-gray-300 hover:text-gaming-neon hover:bg-gaming-neon/5 px-3 py-2 rounded-md">تماس با ما</a>
+        <div id="mobileMenu" class="md:hidden hidden bg-[#050705] border-t border-gaming-neon/20 shadow-[0_10px_30px_rgba(0,0,0,0.8)] absolute w-full left-0">
+            <div class="px-4 pt-4 pb-6 space-y-2">
+                <a href="#" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-gaming-neon/10 px-4 py-3 rounded-lg border border-transparent hover:border-gaming-neon/30 transition-all">
+                    <i class="fas fa-home text-gaming-neon w-5 text-center"></i> <span class="font-bold">خانه</span>
+                </a>
+                <a href="Admins/index.html" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-gaming-neon/10 px-4 py-3 rounded-lg border border-transparent hover:border-gaming-neon/30 transition-all">
+                    <i class="fas fa-users text-gaming-neon w-5 text-center"></i> <span class="font-bold">ادمین‌ها</span>
+                </a>
+                <a href="#services" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-gaming-neon/10 px-4 py-3 rounded-lg border border-transparent hover:border-gaming-neon/30 transition-all">
+                    <i class="fas fa-store text-gaming-neon w-5 text-center"></i> <span class="font-bold">خدمات</span>
+                </a>
+                <a href="#faq-section" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-gaming-neon/10 px-4 py-3 rounded-lg border border-transparent hover:border-gaming-neon/30 transition-all">
+                    <i class="fas fa-question-circle text-gaming-neon w-5 text-center"></i> <span class="font-bold">سوالات متداول</span>
+                </a>
+                <a href="#contact" class="flex items-center gap-3 text-gray-300 hover:text-white hover:bg-gaming-neon/10 px-4 py-3 rounded-lg border border-transparent hover:border-gaming-neon/30 transition-all">
+                    <i class="fas fa-headset text-gaming-neon w-5 text-center"></i> <span class="font-bold">تماس با ما</span>
+                </a>
                 
-                <div class="relative mt-4">
-                    <input type="text" id="mobileSearch" placeholder="جستجو در سایت..." class="w-full bg-[#0a0d0a] border border-gaming-neon/20 rounded-lg py-2 px-4 text-sm focus:outline-none focus:border-gaming-neon">
-                    <button onclick="handleSearch('mobileSearch')" class="absolute left-3 top-2.5 text-gray-400">
+                <div class="relative mt-6 group">
+                    <div class="absolute -inset-0.5 bg-gaming-neon/20 rounded-lg blur opacity-50"></div>
+                    <input type="text" id="mobileSearch" placeholder="جستجو در سایت..." class="relative w-full bg-[#0a0d0a] border border-gaming-neon/30 rounded-lg py-3 pl-10 pr-4 text-sm focus:outline-none focus:border-gaming-neon text-white">
+                    <button onclick="handleSearch('mobileSearch')" class="absolute left-3 top-3.5 text-gaming-neon">
                         <i class="fas fa-search"></i>
                     </button>
                 </div>
@@ -579,21 +607,91 @@
             </a>
         </div>
 
-        <div class="flex justify-center gap-10 mb-10 text-2xl">
-            <a href="mailto:RavenShop2447@gmail.com" class="text-gray-600 hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-all transform hover:scale-110 duration-200"><i class="fas fa-envelope"></i></a>
-            <a href="https://t.me/RavenShopSupport" class="text-gray-600 hover:text-gaming-neon hover:drop-shadow-[0_0_8px_rgba(0,255,85,0.5)] transition-all transform hover:scale-110 duration-200"><i class="fab fa-telegram"></i></a>
-            <a href="https://instagram.com/RavenShopOfficial" class="text-gray-600 hover:text-pink-500 hover:drop-shadow-[0_0_8px_rgba(236,72,153,0.5)] transition-all transform hover:scale-110 duration-200"><i class="fab fa-instagram"></i></a>
-        </div>
-
     </main>
 
-    <footer class="border-t border-gaming-neon/10 bg-[#020302] py-10 mt-auto relative overflow-hidden">
-        <!-- Glow effect in footer -->
-        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-gaming-neon/5 rounded-full blur-[100px]"></div>
+    <footer class="bg-[#050705] pt-16 pb-6 mt-auto relative overflow-hidden border-t border-gaming-neon/20">
+        <!-- خط نئونی بالای فوتر -->
+        <div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-gaming-neon to-transparent shadow-[0_0_15px_rgba(0,255,85,0.8)]"></div>
         
-        <div class="max-w-7xl mx-auto px-4 text-center relative z-10">
-            <p class="text-gray-500 mb-2 font-sans text-sm tracking-wider" dir="ltr">&copy; 2025 RavenShop. All rights reserved.</p>
-            <p class="text-gray-700 text-xs">Designed with <i class="fas fa-heart text-red-900/40 animate-pulse"></i> by RavenTeam</p>
+        <!-- افکت درخشش پس زمینه -->
+        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-64 bg-gaming-neon/5 rounded-[100%] blur-[120px] pointer-events-none"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-12 mb-12">
+                
+                <!-- بخش برند و توضیحات -->
+                <div class="md:col-span-5 space-y-6 text-center md:text-right">
+                    <div class="flex items-center justify-center md:justify-start gap-3">
+                        <div class="bg-[#0a0d0a] p-3 rounded-xl border border-gaming-neon/30 shadow-[0_0_15px_rgba(0,255,85,0.2)]">
+                            <i class="fas fa-crow text-gaming-neon text-3xl drop-shadow-[0_0_5px_rgba(0,255,85,0.8)]"></i>
+                        </div>
+                        <span class="font-black text-3xl tracking-tight text-white">RAVEN <span class="text-gaming-neon drop-shadow-[0_0_8px_rgba(0,255,85,0.5)]">SHOP</span></span>
+                    </div>
+                    <p class="text-gray-400 text-sm leading-relaxed border-r-2 border-gaming-neon/50 pr-4">
+                        اولین و معتبرترین مرجع تخصصی معاملات بازی‌های آنلاین و بلاد استرایک در ایران. 
+                        با ضمانت ۱۰۰٪ امنیت، پشتیبانی ۲۴ ساعته و تیمی از حرفه‌ای‌ترین ادمین‌ها.
+                    </p>
+                    <div class="flex items-center justify-center md:justify-start gap-4 pt-2">
+                        <div class="flex items-center gap-2 bg-[#0a0d0a] border border-white/5 px-3 py-1.5 rounded-lg shadow-inner">
+                            <span class="relative flex h-3 w-3">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-gaming-neon opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-3 w-3 bg-gaming-neon shadow-[0_0_5px_#00FF55]"></span>
+                            </span>
+                            <span class="text-xs text-gray-300 font-bold">پشتیبانی آنلاین فعال</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- لینک های سریع -->
+                <div class="md:col-span-3 text-center md:text-right">
+                    <h3 class="text-white font-bold mb-6 text-lg relative inline-block">
+                        دسترسی سریع
+                        <span class="absolute -bottom-2 right-0 w-1/2 h-[2px] bg-gaming-neon shadow-[0_0_5px_#00FF55]"></span>
+                    </h3>
+                    <ul class="space-y-3">
+                        <li><a href="https://admins.RavenShop.ir" class="text-gray-400 hover:text-gaming-neon hover:pr-2 transition-all duration-300 text-sm flex items-center justify-center md:justify-start gap-2"><i class="fas fa-chevron-left text-[10px] text-gaming-neon/50"></i> لیست ادمین‌ها</a></li>
+                        <li><a href="https://Gold.RavenShop.ir" class="text-gray-400 hover:text-gaming-neon hover:pr-2 transition-all duration-300 text-sm flex items-center justify-center md:justify-start gap-2"><i class="fas fa-chevron-left text-[10px] text-gaming-neon/50"></i> خدمات و محصولات</a></li>
+                        <li><a href="#faq-section" class="text-gray-400 hover:text-gaming-neon hover:pr-2 transition-all duration-300 text-sm flex items-center justify-center md:justify-start gap-2"><i class="fas fa-chevron-left text-[10px] text-gaming-neon/50"></i> راهنمای اعتماد</a></li>
+                        <li><a href="#contact" class="text-gray-400 hover:text-gaming-neon hover:pr-2 transition-all duration-300 text-sm flex items-center justify-center md:justify-start gap-2"><i class="fas fa-chevron-left text-[10px] text-gaming-neon/50"></i> ارتباط با مدیریت</a></li>
+                    </ul>
+                </div>
+                
+                <!-- شبکه های اجتماعی -->
+                <div class="md:col-span-4 text-center md:text-right">
+                    <h3 class="text-white font-bold mb-6 text-lg relative inline-block">
+                        شبکه‌های اجتماعی
+                        <span class="absolute -bottom-2 right-0 w-1/2 h-[2px] bg-gaming-neon shadow-[0_0_5px_#00FF55]"></span>
+                    </h3>
+                    <p class="text-xs text-gray-400 mb-4">برای اطلاع از جدیدترین آگهی‌ها و تخفیف‌ها به کانال‌های ما بپیوندید:</p>
+                    
+                    <div class="flex flex-wrap justify-center md:justify-start gap-3">
+                        <a href="https://t.me/RavenShopOfficial" class="w-12 h-12 rounded-xl bg-[#0a0d0a] border border-gaming-neon/20 flex items-center justify-center text-gray-400 hover:text-white hover:border-[#229ED9] hover:bg-[#229ED9]/10 hover:shadow-[0_0_15px_rgba(34,158,217,0.4)] transition-all duration-300 transform hover:-translate-y-1 group relative overflow-hidden">
+                            <i class="fab fa-telegram text-2xl group-hover:scale-110 transition-transform relative z-10"></i>
+                        </a>
+                        <a href="https://instagram.com/RavenShopOfficial" class="w-12 h-12 rounded-xl bg-[#0a0d0a] border border-gaming-neon/20 flex items-center justify-center text-gray-400 hover:text-white hover:border-[#E1306C] hover:bg-[#E1306C]/10 hover:shadow-[0_0_15px_rgba(225,48,108,0.4)] transition-all duration-300 transform hover:-translate-y-1 group relative overflow-hidden">
+                            <i class="fab fa-instagram text-2xl group-hover:scale-110 transition-transform relative z-10"></i>
+                        </a>
+                        <a href="mailto:RavenShop2447@gmail.com" class="w-12 h-12 rounded-xl bg-[#0a0d0a] border border-gaming-neon/20 flex items-center justify-center text-gray-400 hover:text-white hover:border-gaming-neon hover:bg-gaming-neon/10 hover:shadow-[0_0_15px_rgba(0,255,85,0.4)] transition-all duration-300 transform hover:-translate-y-1 group relative overflow-hidden">
+                            <i class="fas fa-envelope text-xl group-hover:scale-110 transition-transform relative z-10"></i>
+                        </a>
+                        <a href="https://t.me/RavenShopSupport" class="w-12 h-12 rounded-xl bg-[#0a0d0a] border border-gaming-neon/20 flex items-center justify-center text-gray-400 hover:text-white hover:border-emerald-500 hover:bg-emerald-500/10 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all duration-300 transform hover:-translate-y-1 group relative overflow-hidden">
+                            <i class="fas fa-headset text-xl group-hover:scale-110 transition-transform relative z-10"></i>
+                        </a>
+                    </div>
+                </div>
+                
+            </div>
+            
+            <div class="pt-6 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
+                <p class="text-gray-500 font-sans text-sm tracking-widest font-bold" dir="ltr">
+                    &copy; 2025 <span class="text-gaming-neon/80 drop-shadow-[0_0_5px_rgba(0,255,85,0.3)]">RavenShop</span>. All rights reserved.
+                </p>
+                <div class="flex items-center gap-2 text-sm text-gray-400 bg-[#0a0d0a] px-4 py-2 rounded-full border border-white/5 shadow-inner">
+                    طراحی شده با 
+                    <i class="fas fa-heart text-red-500 animate-pulse drop-shadow-[0_0_8px_rgba(239,68,68,0.8)] mx-1"></i> 
+                    توسط <span class="font-bold text-white tracking-wider ml-1">RavenTeam</span>
+                </div>
+            </div>
         </div>
     </footer>
 
