@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -811,42 +811,106 @@
             }, 3000);
         }
 
-        // سیستم جستجو
-        function handleSearch(inputId) {
-            const input = document.getElementById(inputId);
-            const term = input.value.trim();
-            
-            if(!term) return;
-
-            if (window.find && window.getSelection) {
-                document.designMode = "on";
-                var sel = window.getSelection();
-                sel.collapse(document.body, 0);
-                
-                let found = false;
-                while (window.find(term)) {
-                    document.execCommand("HiliteColor", false, "rgba(0, 255, 85, 0.4)");
-                    sel.collapseToEnd();
-                    found = true;
-                }
-                document.designMode = "off";
-                
-                if (!found) {
-                    showToast("نتیجه‌ای یافت نشد.");
-                }
-            } else {
-                showToast("مرورگر شما از قابلیت جستجو پشتیبانی نمی‌کند. لطفاً Ctrl+F بزنید.");
-            }
-            
-            input.blur();
+        // سیستم جستجوی لحظه‌ای (Real-time Search)
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
 
-        document.getElementById('desktopSearch').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') handleSearch('desktopSearch');
-        });
-        document.getElementById('mobileSearch').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') handleSearch('mobileSearch');
-        });
+        function clearHighlights() {
+            const marks = document.querySelectorAll('.search-highlight');
+            marks.forEach(mark => {
+                const parent = mark.parentNode;
+                const text = document.createTextNode(mark.textContent);
+                parent.replaceChild(text, mark);
+                parent.normalize(); // ادغام متن‌های جدا شده به حالت اولیه
+            });
+        }
+
+        function highlightText(term) {
+            clearHighlights();
+            if (!term) return null;
+
+            const regex = new RegExp(`(${escapeRegExp(term)})`, 'gi');
+            
+            // TreeWalker برای پیدا کردن فقط متن‌ها (بدون خراب کردن ساختار HTML)
+            const walker = document.createTreeWalker(
+                document.body,
+                NodeFilter.SHOW_TEXT,
+                {
+                    acceptNode: function(node) {
+                        const parentTag = node.parentNode.tagName;
+                        if (['SCRIPT', 'STYLE', 'NOSCRIPT', 'CANVAS'].includes(parentTag) ||
+                            node.parentNode.classList.contains('search-highlight')) {
+                            return NodeFilter.FILTER_REJECT;
+                        }
+                        if (node.nodeValue.match(regex)) {
+                            return NodeFilter.FILTER_ACCEPT;
+                        }
+                        return NodeFilter.FILTER_SKIP;
+                    }
+                }
+            );
+
+            const nodes = [];
+            let node;
+            while (node = walker.nextNode()) nodes.push(node);
+
+            let firstMatch = null;
+
+            nodes.forEach(textNode => {
+                const parts = textNode.nodeValue.split(regex);
+                const fragment = document.createDocumentFragment();
+                
+                parts.forEach(part => {
+                    if (part.toLowerCase() === term.toLowerCase()) {
+                        const mark = document.createElement('mark');
+                        mark.className = 'search-highlight bg-gaming-neon/60 text-white rounded px-1 shadow-[0_0_8px_rgba(0,255,85,0.5)] transition-all';
+                        mark.textContent = part;
+                        fragment.appendChild(mark);
+                        if (!firstMatch) firstMatch = mark; // اولین مچ پیدا شده از بالا
+                    } else if (part) {
+                        fragment.appendChild(document.createTextNode(part));
+                    }
+                });
+                textNode.parentNode.replaceChild(fragment, textNode);
+            });
+
+            return firstMatch;
+        }
+
+        let searchTimeout;
+        function performSearch(e) {
+            clearTimeout(searchTimeout);
+            const input = e.target;
+            const term = input.value.trim();
+
+            // همگام‌سازی دو باکس جستجو (موبایل و دسکتاپ)
+            const desktopInput = document.getElementById('desktopSearch');
+            const mobileInput = document.getElementById('mobileSearch');
+            
+            if (input.id === 'desktopSearch') mobileInput.value = input.value;
+            if (input.id === 'mobileSearch') desktopInput.value = input.value;
+
+            // تاخیر کوتاه برای جلوگیری از پرش صفحه هنگام تایپ سریع
+            searchTimeout = setTimeout(() => {
+                const firstMatch = highlightText(term);
+                
+                if (term && firstMatch) {
+                    // اسکرول نرم به اولین نتیجه
+                    firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 300);
+        }
+
+        // جایگزینی فانکشن دکمه با ایونت تایپ (برای دکمه ذره‌بین)
+        function handleSearch(inputId) {
+            const input = document.getElementById(inputId);
+            input.dispatchEvent(new Event('input'));
+        }
+
+        // اعمال لیسنر روی تایپ کردن کاربر
+        document.getElementById('desktopSearch').addEventListener('input', performSearch);
+        document.getElementById('mobileSearch').addEventListener('input', performSearch);
 
         // اسکرول نرم
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
