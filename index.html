@@ -6,9 +6,8 @@
     <link rel="icon" type="image/x-icon" href="../images/RavenLogo.ico">
     
     <title>ریون شاپ | Raven Shop | مرجع تخصصی بازی‌های آنلاین</title>
-    <meta name="description" content="ریون شاپ، معتبرترین واسطه و شاپ تخصصی خرید و فروش اکانت بازی‌های آنلاین. بلاد استرایک، کالاف دیوتی، پابجی.">
-    <meta name="author" content="RavenShopOfficial">
-    <meta name="theme-color" content="#10B981">
+    <meta name="description" content="ریون شاپ، معتبرترین واسطه و شاپ تخصصی خرید و فروش اکانت بازی‌های آنلاین.">
+    <meta name="theme-color" content="#00FF55">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
@@ -24,25 +23,31 @@
                     },
                     colors: {
                         gaming: {
-                            dark: '#020202',      // مشکی خالص‌تر
-                            card: '#111111',      // رنگ پایه کارت
-                            gold: '#10B981',      // سبز زمردی (امرالد)
-                            accent: '#059669',    // سبز تیره‌تر برای گرادینت
-                            surface: '#18181b',   // خاکستری سطح
+                            dark: '#030504',      // مشکی با هاله بسیار محو سبز
+                            card: '#0a0d0a',      // رنگ پایه کارت متناسب با نئون
+                            neon: '#00FF55',      // سبز نئونی (گیمینگ خالص)
+                            accent: '#00B33C',    // سبز تیره‌تر برای گرادینت‌ها
+                            surface: '#111511',   // خاکستری متمایل به سبز
                         }
-                    },
-                    backgroundImage: {
-                        'sea-collision': 'linear-gradient(135deg, #18181b 40%, #064e3b 100%)', // برخورد خاکستری و سبز
-                        'card-collision': 'linear-gradient(160deg, rgba(24, 24, 27, 0.95) 0%, rgba(6, 78, 59, 0.15) 100%)', // گرادینت ملایم برای کارت‌ها
                     },
                     animation: {
                         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         'float': 'float 6s ease-in-out infinite',
+                        'wave': 'wave 3s linear infinite', // انیمیشن موج
+                        'ekg': 'ekgScan 3s linear infinite', // انیمیشن ضربان قلب
                     },
                     keyframes: {
                         float: {
                             '0%, 100%': { transform: 'translateY(0)' },
                             '50%': { transform: 'translateY(-10px)' },
+                        },
+                        wave: {
+                            '0%': { transform: 'translateX(0)' },
+                            '100%': { transform: 'translateX(-50%)' }, // نصف عرض به چپ میره تا لوپ شه
+                        },
+                        ekgScan: {
+                            '0%': { strokeDashoffset: '200' },
+                            '100%': { strokeDashoffset: '0' }
                         }
                     }
                 }
@@ -51,56 +56,60 @@
     </script>
 
     <style>
-        /* استایل‌های پایه و پس‌زمینه برخورد دریاها */
         body {
-            background-color: #000000;
-            /* ترکیب پترن نقطه‌ای با گرادینت سبز و دودی */
+            background-color: #030504;
+            /* پترن شبکه ای بسیار محو گیمینگ */
             background-image: 
-                radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
-                linear-gradient(to bottom, #020202, #0a0a0a);
+                linear-gradient(rgba(0, 255, 85, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 85, 0.02) 1px, transparent 1px),
+                radial-gradient(circle at 50% 0%, rgba(0, 255, 85, 0.05) 0%, transparent 60%);
+            background-size: 40px 40px, 40px 40px, 100% 100%;
+            background-position: center top;
+            background-attachment: fixed;
             color: #e5e7eb;
             overflow-x: hidden;
         }
 
-        /* کلاس مخصوص برای افکت برخورد دو دریا در کارت‌ها */
+        /* کارت های برخورد با استایل نئونی */
         .collision-card {
-            background: linear-gradient(145deg, #161618 50%, #063c2e 150%);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: linear-gradient(145deg, rgba(16, 20, 16, 0.9) 50%, rgba(0, 50, 15, 0.4) 150%);
+            border: 1px solid rgba(0, 255, 85, 0.05);
             box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
             transition: all 0.3s ease;
         }
 
         .collision-card:hover {
-            border-color: rgba(16, 185, 129, 0.4);
-            box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.15);
-            background: linear-gradient(145deg, #1a1a1c 40%, #064e3b 140%);
+            border-color: rgba(0, 255, 85, 0.5);
+            box-shadow: 0 10px 30px -10px rgba(0, 255, 85, 0.2);
+            background: linear-gradient(145deg, rgba(20, 25, 20, 0.9) 40%, rgba(0, 70, 25, 0.4) 140%);
         }
 
-        /* اسکرول بار سبز */
+        /* اسکرول بار گیمینگ */
         ::-webkit-scrollbar {
             width: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #0B0E14;
+            background: #030504;
         }
         ::-webkit-scrollbar-thumb {
-            background: #1f2937;
+            background: #111511;
             border-radius: 4px;
+            border: 1px solid rgba(0, 255, 85, 0.1);
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #10B981;
+            background: #00FF55;
+            box-shadow: 0 0 10px #00FF55;
         }
 
-        /* افکت شیشه‌ای نویگیشن */
+        /* پنل شیشه ای نویگیشن */
         .glass-panel {
-            background: rgba(5, 5, 5, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+            background: rgba(3, 5, 4, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(0, 255, 85, 0.1);
         }
 
-        /* انیمیشن لودینگ */
         .fade-in-up {
             animation: fadeInUp 0.8s ease-out forwards;
             opacity: 0;
@@ -108,16 +117,13 @@
         }
         
         @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* استایل اختصاصی FAQ مشابه NestSMM */
+        /* استایل اختصاصی FAQ */
         .faq-container {
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: linear-gradient(90deg, #121212 0%, #1a1a1a 100%);
+            border: 1px solid rgba(0, 255, 85, 0.08);
+            background: linear-gradient(90deg, rgba(15, 18, 15, 0.9) 0%, rgba(20, 25, 20, 0.9) 100%);
             border-radius: 12px;
             margin-bottom: 1rem;
             transition: all 0.3s ease;
@@ -125,7 +131,6 @@
             overflow: hidden;
         }
 
-        /* افکت سبز محو پشت سوالات */
         .faq-container::before {
             content: '';
             position: absolute;
@@ -133,19 +138,18 @@
             right: 0;
             width: 4px;
             height: 100%;
-            background: #10B981;
+            background: #00FF55;
+            box-shadow: 0 0 10px #00FF55;
             opacity: 0;
             transition: opacity 0.3s ease;
         }
 
         .faq-container.active {
-            border-color: rgba(16, 185, 129, 0.3);
-            background: linear-gradient(90deg, #141414 0%, #0f2922 100%);
+            border-color: rgba(0, 255, 85, 0.4);
+            background: linear-gradient(90deg, rgba(20, 25, 20, 0.9) 0%, rgba(0, 40, 15, 0.8) 100%);
         }
         
-        .faq-container.active::before {
-            opacity: 1;
-        }
+        .faq-container.active::before { opacity: 1; }
 
         .faq-content {
             max-height: 0;
@@ -159,65 +163,91 @@
         }
 
         .faq-icon-wrapper {
-            color: #10B981;
+            color: #00FF55;
             transition: transform 0.3s ease;
         }
         
         .faq-container.active .faq-icon-wrapper {
             transform: rotate(45deg);
-            color: #ef4444; /* قرمز شدن آیکون موقع بسته شدن */
+            color: #ef4444;
         }
 
         .delay-100 { animation-delay: 100ms; }
         .delay-200 { animation-delay: 200ms; }
         .delay-300 { animation-delay: 300ms; }
+
+        /* افکت ماسک برای محو شدن دو طرف موج */
+        .wave-mask {
+            mask-image: linear-gradient(90deg, transparent, #fff 20%, #fff 80%, transparent);
+            -webkit-mask-image: linear-gradient(90deg, transparent, #fff 20%, #fff 80%, transparent);
+        }
+
+        /* استایل متحرک خط ضربان قلب (ECG واقعی) */
+        .ekg-line-animated {
+            stroke-dasharray: 60 300; /* طول موج روشن و فاصله خاموشی */
+            stroke-dashoffset: 360;
+            animation: ekgBeat 2.5s linear infinite;
+        }
+
+        @keyframes ekgBeat {
+            to { stroke-dashoffset: 0; }
+        }
     </style>
 </head>
-<body class="antialiased min-h-screen flex flex-col font-sans">
+<body class="antialiased min-h-screen flex flex-col font-sans relative">
+
+    <!-- بوم نقاشی برای ذرات معلق (پارتیکل‌های بسیار سبک) -->
+    <canvas id="particles-bg" class="fixed inset-0 w-full h-full pointer-events-none z-[-1] opacity-60"></canvas>
+
+    <!-- Toast Notification (به جای Alert) -->
+    <div id="toast" class="fixed top-24 left-1/2 transform -translate-x-1/2 bg-red-500/90 text-white px-6 py-3 rounded-xl shadow-[0_0_15px_rgba(239,68,68,0.5)] opacity-0 transition-opacity duration-300 z-[100] pointer-events-none text-sm font-medium flex items-center gap-2 border border-red-400">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="toast-msg">پیام خطا</span>
+    </div>
 
     <nav class="sticky top-0 z-50 glass-panel transition-all duration-300" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <div class="flex items-center gap-3">
-                    <div class="bg-gaming-gold/10 p-2 rounded-lg border border-gaming-gold/20">
-                        <i class="fas fa-crow text-gaming-gold text-2xl animate-pulse-slow"></i>
+                    <div class="bg-gaming-neon/10 p-2 rounded-lg border border-gaming-neon/30 shadow-[0_0_10px_rgba(0,255,85,0.2)]">
+                        <i class="fas fa-crow text-gaming-neon text-2xl animate-pulse-slow drop-shadow-[0_0_5px_rgba(0,255,85,0.8)]"></i>
                     </div>
-                    <span class="font-bold text-xl tracking-wide text-white">Raven <span class="text-gaming-gold">Shop</span></span>
+                    <span class="font-bold text-xl tracking-wide text-white">Raven <span class="text-gaming-neon drop-shadow-[0_0_5px_rgba(0,255,85,0.5)]">Shop</span></span>
                 </div>
 
                 <div class="hidden md:flex items-center space-x-8 space-x-reverse">
-                    <a href="#" class="text-gray-300 hover:text-gaming-gold transition-colors duration-200 text-sm font-medium">خانه</a>
-                    <a href="https://admins.RavenShop.ir" class="text-gray-300 hover:text-gaming-gold transition-colors duration-200 text-sm font-medium">ادمین‌ها</a>
-                    <a href="https://Gold.RavenShop.ir" class="text-gray-300 hover:text-gaming-gold transition-colors duration-200 text-sm font-medium">خدمات</a>
-                    <a href="#faq-section" class="text-gray-300 hover:text-gaming-gold transition-colors duration-200 text-sm font-medium">سوالات متداول</a>
-                    <a href="#contact" class="text-gray-300 hover:text-gaming-gold transition-colors duration-200 text-sm font-medium">تماس</a>
+                    <a href="#" class="text-gray-300 hover:text-gaming-neon hover:drop-shadow-[0_0_5px_rgba(0,255,85,0.5)] transition-all duration-200 text-sm font-medium">خانه</a>
+                    <a href="https://admins.RavenShop.ir" class="text-gray-300 hover:text-gaming-neon hover:drop-shadow-[0_0_5px_rgba(0,255,85,0.5)] transition-all duration-200 text-sm font-medium">ادمین‌ها</a>
+                    <a href="https://Gold.RavenShop.ir" class="text-gray-300 hover:text-gaming-neon hover:drop-shadow-[0_0_5px_rgba(0,255,85,0.5)] transition-all duration-200 text-sm font-medium">خدمات</a>
+                    <a href="#faq-section" class="text-gray-300 hover:text-gaming-neon hover:drop-shadow-[0_0_5px_rgba(0,255,85,0.5)] transition-all duration-200 text-sm font-medium">سوالات متداول</a>
+                    <a href="#contact" class="text-gray-300 hover:text-gaming-neon hover:drop-shadow-[0_0_5px_rgba(0,255,85,0.5)] transition-all duration-200 text-sm font-medium">تماس</a>
                 </div>
 
                 <div class="flex items-center gap-4">
                     <div class="hidden md:flex relative">
-                        <input type="text" id="desktopSearch" placeholder="جستجو..." class="bg-[#121212] border border-white/10 rounded-lg py-2 px-4 text-sm focus:outline-none focus:border-gaming-gold focus:ring-1 focus:ring-gaming-gold/50 transition-all w-48 text-right text-gray-300 placeholder-gray-600">
-                        <button onclick="handleSearch('desktopSearch')" class="absolute left-2 top-2 text-gray-500 hover:text-gaming-gold">
+                        <input type="text" id="desktopSearch" placeholder="جستجو..." class="bg-[#0a0d0a] border border-gaming-neon/20 rounded-lg py-2 px-4 text-sm focus:outline-none focus:border-gaming-neon focus:ring-1 focus:ring-gaming-neon/50 transition-all w-48 text-right text-gray-300 placeholder-gray-600 shadow-inner">
+                        <button onclick="handleSearch('desktopSearch')" class="absolute left-2 top-2 text-gray-500 hover:text-gaming-neon transition-colors">
                             <i class="fas fa-search"></i>
                         </button>
                     </div>
 
-                    <button id="mobileMenuBtn" class="md:hidden text-gray-300 hover:text-white p-2">
+                    <button id="mobileMenuBtn" class="md:hidden text-gray-300 hover:text-gaming-neon p-2">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                 </div>
             </div>
         </div>
 
-        <div id="mobileMenu" class="md:hidden hidden bg-[#0a0a0a] border-t border-white/5">
+        <div id="mobileMenu" class="md:hidden hidden bg-[#050705] border-t border-gaming-neon/10">
             <div class="px-4 pt-4 pb-6 space-y-3">
-                <a href="#" class="block text-gray-300 hover:text-gaming-gold hover:bg-white/5 px-3 py-2 rounded-md">خانه</a>
-                <a href="Admins/index.html" class="block text-gray-300 hover:text-gaming-gold hover:bg-white/5 px-3 py-2 rounded-md">ادمین‌ها</a>
-                <a href="#services" class="block text-gray-300 hover:text-gaming-gold hover:bg-white/5 px-3 py-2 rounded-md">خدمات</a>
-                <a href="#faq-section" class="block text-gray-300 hover:text-gaming-gold hover:bg-white/5 px-3 py-2 rounded-md">سوالات متداول</a>
-                <a href="#contact" class="block text-gray-300 hover:text-gaming-gold hover:bg-white/5 px-3 py-2 rounded-md">تماس با ما</a>
+                <a href="#" class="block text-gray-300 hover:text-gaming-neon hover:bg-gaming-neon/5 px-3 py-2 rounded-md">خانه</a>
+                <a href="Admins/index.html" class="block text-gray-300 hover:text-gaming-neon hover:bg-gaming-neon/5 px-3 py-2 rounded-md">ادمین‌ها</a>
+                <a href="#services" class="block text-gray-300 hover:text-gaming-neon hover:bg-gaming-neon/5 px-3 py-2 rounded-md">خدمات</a>
+                <a href="#faq-section" class="block text-gray-300 hover:text-gaming-neon hover:bg-gaming-neon/5 px-3 py-2 rounded-md">سوالات متداول</a>
+                <a href="#contact" class="block text-gray-300 hover:text-gaming-neon hover:bg-gaming-neon/5 px-3 py-2 rounded-md">تماس با ما</a>
                 
                 <div class="relative mt-4">
-                    <input type="text" id="mobileSearch" placeholder="جستجو در سایت..." class="w-full bg-[#121212] border border-white/10 rounded-lg py-2 px-4 text-sm focus:outline-none focus:border-gaming-gold">
+                    <input type="text" id="mobileSearch" placeholder="جستجو در سایت..." class="w-full bg-[#0a0d0a] border border-gaming-neon/20 rounded-lg py-2 px-4 text-sm focus:outline-none focus:border-gaming-neon">
                     <button onclick="handleSearch('mobileSearch')" class="absolute left-3 top-2.5 text-gray-400">
                         <i class="fas fa-search"></i>
                     </button>
@@ -226,20 +256,32 @@
         </div>
     </nav>
 
-    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full" id="mainContent">
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full relative z-10" id="mainContent">
         
-        <!-- Header Section -->
         <div class="text-center mb-24 fade-in-up mt-8">
             <div class="relative inline-block group">
-                <div class="absolute -inset-1 bg-gradient-to-r from-gaming-gold to-gaming-accent rounded-full blur opacity-20 group-hover:opacity-60 transition duration-1000 group-hover:duration-200"></div>
-                <img src="images/RavenLogo.jpg" onerror="this.src='https://placehold.co/150x150/121212/10B981?text=Raven'" alt="Raven Shop Logo" class="relative w-32 h-32 md:w-44 md:h-44 rounded-full border-4 border-[#1a1a1a] shadow-2xl mx-auto mb-6 object-cover animate-float grayscale hover:grayscale-0 transition-all duration-500">
+                <div class="absolute -inset-1 bg-gradient-to-r from-gaming-neon to-gaming-accent rounded-full blur-[20px] opacity-30 group-hover:opacity-70 transition duration-1000 group-hover:duration-300"></div>
+                <img src="images/RavenLogo.jpg" onerror="this.src='https://placehold.co/150x150/030504/00FF55?text=Raven'" alt="Raven Shop Logo" class="relative w-32 h-32 md:w-44 md:h-44 rounded-full border-4 border-[#0a0d0a] shadow-[0_0_20px_rgba(0,255,85,0.2)] mx-auto mb-6 object-cover animate-float grayscale hover:grayscale-0 transition-all duration-500">
             </div>
             
-            <h1 class="text-4xl md:text-7xl font-black text-white mb-6 tracking-tight">
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-gaming-gold to-emerald-200 drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]">RAVEN</span> SHOP
+            <!-- موج سبز رنگ گیمینگ بالای اسم -->
+            <div dir="ltr" class="relative w-full max-w-[200px] md:max-w-[300px] mx-auto h-6 mb-2 overflow-hidden wave-mask opacity-80">
+                <div class="absolute w-[200%] h-full flex animate-wave items-center">
+                    <!-- دو موج پیوسته برای لوپ بی نهایت -->
+                    <svg class="w-1/2 h-full" viewBox="0 0 100 20" preserveAspectRatio="none">
+                        <path d="M0,10 Q12.5,0 25,10 T50,10 T75,10 T100,10" fill="none" stroke="#00FF55" stroke-width="1.5" style="filter: drop-shadow(0 0 3px #00FF55);"></path>
+                    </svg>
+                    <svg class="w-1/2 h-full" viewBox="0 0 100 20" preserveAspectRatio="none">
+                        <path d="M0,10 Q12.5,0 25,10 T50,10 T75,10 T100,10" fill="none" stroke="#00FF55" stroke-width="1.5" style="filter: drop-shadow(0 0 3px #00FF55);"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <h1 class="text-4xl md:text-7xl font-black text-white mb-6 tracking-tight drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-gaming-neon via-green-400 to-gaming-accent drop-shadow-[0_0_25px_rgba(0,255,85,0.4)]">RAVEN</span> SHOP
             </h1>
-            <p class="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed border-t border-white/5 pt-6">
-                قدیمی‌ترین و معتبرترین مرجع تخصصی <span class="text-gaming-gold font-bold">Blood Strike</span> و واسطه بازی‌های آنلاین در ایران
+            <p class="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed border-t border-gaming-neon/10 pt-6">
+                قدیمی‌ترین و معتبرترین مرجع تخصصی <span class="text-gaming-neon font-bold drop-shadow-[0_0_5px_rgba(0,255,85,0.4)]">Blood Strike</span> و واسطه بازی‌های آنلاین در ایران
             </p>
         </div>
 
@@ -247,25 +289,25 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24 fade-in-up delay-100">
             <!-- Card 1 -->
             <div class="collision-card rounded-2xl p-8 text-center group relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-24 h-24 bg-gaming-gold/5 rounded-bl-[100px] -mr-8 -mt-8 transition-all group-hover:bg-gaming-gold/10"></div>
-                <i class="fas fa-exchange-alt text-4xl text-gaming-gold mb-6 group-hover:scale-110 transition-transform drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"></i>
-                <div class="text-5xl font-black text-white mb-2 counter" data-target="3000">0</div>
+                <div class="absolute top-0 right-0 w-24 h-24 bg-gaming-neon/5 rounded-bl-[100px] -mr-8 -mt-8 transition-all group-hover:bg-gaming-neon/10"></div>
+                <i class="fas fa-exchange-alt text-4xl text-gaming-neon mb-6 group-hover:scale-110 transition-transform drop-shadow-[0_0_8px_rgba(0,255,85,0.6)]"></i>
+                <div class="text-5xl font-black text-white mb-2 counter drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]" data-target="3000">0</div>
                 <div class="text-sm font-medium text-gray-400 uppercase tracking-widest">معامله موفق</div>
             </div>
             
             <!-- Card 2 -->
             <div class="collision-card rounded-2xl p-8 text-center group relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-24 h-24 bg-gaming-gold/5 rounded-bl-[100px] -mr-8 -mt-8 transition-all group-hover:bg-gaming-gold/10"></div>
-                <i class="fas fa-calendar-check text-4xl text-gaming-gold mb-6 group-hover:scale-110 transition-transform drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"></i>
-                <div class="text-5xl font-black text-white mb-2 counter" data-target="6">0</div>
+                <div class="absolute top-0 right-0 w-24 h-24 bg-gaming-neon/5 rounded-bl-[100px] -mr-8 -mt-8 transition-all group-hover:bg-gaming-neon/10"></div>
+                <i class="fas fa-calendar-check text-4xl text-gaming-neon mb-6 group-hover:scale-110 transition-transform drop-shadow-[0_0_8px_rgba(0,255,85,0.6)]"></i>
+                <div class="text-5xl font-black text-white mb-2 counter drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]" data-target="6">0</div>
                 <div class="text-sm font-medium text-gray-400 uppercase tracking-widest">سال سابقه فعالیت</div>
             </div>
 
             <!-- Card 3 -->
             <div class="collision-card rounded-2xl p-8 text-center group relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-24 h-24 bg-gaming-gold/5 rounded-bl-[100px] -mr-8 -mt-8 transition-all group-hover:bg-gaming-gold/10"></div>
-                <i class="fas fa-gamepad text-4xl text-gaming-gold mb-6 group-hover:scale-110 transition-transform drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"></i>
-                <div class="text-5xl font-black text-white mb-2 counter" data-target="5">0</div>
+                <div class="absolute top-0 right-0 w-24 h-24 bg-gaming-neon/5 rounded-bl-[100px] -mr-8 -mt-8 transition-all group-hover:bg-gaming-neon/10"></div>
+                <i class="fas fa-gamepad text-4xl text-gaming-neon mb-6 group-hover:scale-110 transition-transform drop-shadow-[0_0_8px_rgba(0,255,85,0.6)]"></i>
+                <div class="text-5xl font-black text-white mb-2 counter drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]" data-target="5">0</div>
                 <div class="text-sm font-medium text-gray-400 uppercase tracking-widest">بازی تحت پوشش</div>
             </div>
         </div>
@@ -275,14 +317,14 @@
             <div class="flex items-center gap-3 mb-10 justify-center">
                 <h2 class="text-3xl font-black text-white relative">
                     چرا ریون شاپ؟
-                    <span class="absolute -bottom-3 right-0 w-full h-1 bg-gradient-to-l from-transparent via-gaming-gold to-transparent rounded-full"></span>
+                    <span class="absolute -bottom-3 right-0 w-full h-1 bg-gradient-to-l from-transparent via-gaming-neon to-transparent rounded-full shadow-[0_0_10px_rgba(0,255,85,0.5)]"></span>
                 </h2>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div class="collision-card p-6 rounded-2xl group">
                     <div class="flex items-start gap-4">
-                        <div class="bg-[#0f2922] p-3 rounded-lg text-gaming-gold border border-gaming-gold/20 group-hover:border-gaming-gold/50 transition-colors">
+                        <div class="bg-[#0a150a] p-3 rounded-lg text-gaming-neon border border-gaming-neon/20 group-hover:border-gaming-neon/50 group-hover:shadow-[0_0_15px_rgba(0,255,85,0.3)] transition-all">
                             <i class="fas fa-crown text-xl"></i>
                         </div>
                         <div>
@@ -294,7 +336,7 @@
 
                 <div class="collision-card p-6 rounded-2xl group">
                     <div class="flex items-start gap-4">
-                        <div class="bg-[#0f2922] p-3 rounded-lg text-gaming-gold border border-gaming-gold/20 group-hover:border-gaming-gold/50 transition-colors">
+                        <div class="bg-[#0a150a] p-3 rounded-lg text-gaming-neon border border-gaming-neon/20 group-hover:border-gaming-neon/50 group-hover:shadow-[0_0_15px_rgba(0,255,85,0.3)] transition-all">
                             <i class="fas fa-brain text-xl"></i>
                         </div>
                         <div>
@@ -306,7 +348,7 @@
 
                 <div class="collision-card p-6 rounded-2xl group">
                     <div class="flex items-start gap-4">
-                        <div class="bg-[#0f2922] p-3 rounded-lg text-gaming-gold border border-gaming-gold/20 group-hover:border-gaming-gold/50 transition-colors">
+                        <div class="bg-[#0a150a] p-3 rounded-lg text-gaming-neon border border-gaming-neon/20 group-hover:border-gaming-neon/50 group-hover:shadow-[0_0_15px_rgba(0,255,85,0.3)] transition-all">
                             <i class="fas fa-shield-alt text-xl"></i>
                         </div>
                         <div>
@@ -318,7 +360,7 @@
                 
                 <div class="collision-card p-6 rounded-2xl group">
                     <div class="flex items-start gap-4">
-                        <div class="bg-[#0f2922] p-3 rounded-lg text-gaming-gold border border-gaming-gold/20 group-hover:border-gaming-gold/50 transition-colors">
+                        <div class="bg-[#0a150a] p-3 rounded-lg text-gaming-neon border border-gaming-neon/20 group-hover:border-gaming-neon/50 group-hover:shadow-[0_0_15px_rgba(0,255,85,0.3)] transition-all">
                             <i class="fas fa-headset text-xl"></i>
                         </div>
                         <div>
@@ -328,11 +370,11 @@
                     </div>
                 </div>
                 
-                <div class="md:col-span-2 collision-card p-6 rounded-2xl flex items-center justify-center text-center border-gaming-gold/20">
+                <div class="md:col-span-2 collision-card p-6 rounded-2xl flex items-center justify-center text-center border-gaming-neon/20">
                     <div>
-                        <i class="fas fa-quote-right text-4xl text-gaming-gold/20 mb-3 block"></i>
+                        <i class="fas fa-quote-right text-4xl text-gaming-neon/20 mb-3 block"></i>
                         <p class="text-xl font-medium text-gray-200 italic">"اعتماد شما، اعتبار ماست"</p>
-                        <span class="text-sm text-gaming-gold mt-3 block font-bold">- تیم ریون شاپ</span>
+                        <span class="text-sm text-gaming-neon mt-3 block font-bold drop-shadow-[0_0_5px_rgba(0,255,85,0.4)]">- تیم ریون شاپ</span>
                     </div>
                 </div>
             </div>
@@ -343,81 +385,42 @@
              <div class="flex items-center gap-3 mb-10 justify-center">
                 <h2 class="text-3xl font-black text-white relative">
                     بازی‌های تحت پوشش
-                    <span class="absolute -bottom-3 right-0 w-full h-1 bg-gradient-to-l from-transparent via-gaming-gold to-transparent rounded-full"></span>
+                    <span class="absolute -bottom-3 right-0 w-full h-1 bg-gradient-to-l from-transparent via-gaming-neon to-transparent rounded-full shadow-[0_0_10px_rgba(0,255,85,0.5)]"></span>
                 </h2>
             </div>
             
             <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                 <!-- Game Card 1: Blood Strike (Active) -->
                 <div class="collision-card p-6 rounded-2xl text-center relative overflow-hidden group hover:-translate-y-2 transition-transform duration-300">
-                    <div class="absolute top-3 right-3 bg-gaming-gold/20 text-gaming-gold text-[10px] px-3 py-1 rounded-full border border-gaming-gold/30 font-bold shadow-[0_0_10px_rgba(16,185,129,0.3)]">فعالیت قوی</div>
-                    <div class="w-16 h-16 bg-[#18181b] rounded-full mx-auto mb-4 flex items-center justify-center border border-white/5 group-hover:border-red-500/50 transition-colors">
+                    <div class="absolute top-3 right-3 bg-gaming-neon/10 text-gaming-neon text-[10px] px-3 py-1 rounded-full border border-gaming-neon/30 font-bold shadow-[0_0_10px_rgba(0,255,85,0.3)]">فعالیت قوی</div>
+                    <div class="w-16 h-16 bg-[#111511] rounded-full mx-auto mb-4 flex items-center justify-center border border-white/5 group-hover:border-red-500/50 group-hover:shadow-[0_0_15px_rgba(239,68,68,0.3)] transition-all">
                          <i class="fas fa-skull text-3xl text-red-500 group-hover:animate-pulse"></i>
                     </div>
                     <span class="font-bold text-lg text-gray-200">Blood Strike</span>
                 </div>
 
                 <!-- Game Card 2: Call of Duty -->
-                <!-- 
-                !!! کد فعال سازی Call of Duty !!! 
-                هر زمان بازی فعال شد، کد کامنت شده زیر را از کامنت خارج کنید و کد "به زودی" پایین آن را حذف کنید:
-                
-                <div class="collision-card p-6 rounded-2xl text-center relative overflow-hidden group hover:-translate-y-2 transition-transform duration-300">
-                    <div class="absolute top-3 right-3 bg-emerald-500/20 text-emerald-500 text-[10px] px-3 py-1 rounded-full border border-emerald-500/30 font-bold shadow-[0_0_10px_rgba(16,185,129,0.3)]">فعال</div>
-                    <div class="w-16 h-16 bg-[#18181b] rounded-full mx-auto mb-4 flex items-center justify-center border border-white/5 group-hover:border-emerald-500/50 transition-colors">
-                        <i class="fas fa-mobile-alt text-3xl text-emerald-500 group-hover:animate-pulse"></i>
-                    </div>
-                    <span class="font-bold text-lg text-gray-200">Call of Duty</span>
-                </div>
-                -->
-                <!-- کد فعلی (به زودی) -->
                 <div class="collision-card p-6 rounded-2xl text-center relative overflow-hidden group hover:-translate-y-2 transition-transform duration-300 grayscale opacity-80 hover:grayscale-0 hover:opacity-100">
                     <div class="absolute top-3 right-3 bg-white/5 text-gray-400 text-[10px] px-3 py-1 rounded-full border border-white/10">به زودی</div>
-                    <div class="w-16 h-16 bg-[#18181b] rounded-full mx-auto mb-4 flex items-center justify-center border border-white/5 group-hover:border-emerald-500/50 transition-colors">
+                    <div class="w-16 h-16 bg-[#111511] rounded-full mx-auto mb-4 flex items-center justify-center border border-white/5 group-hover:border-emerald-500/50 transition-all">
                         <i class="fas fa-mobile-alt text-3xl text-emerald-500"></i>
                     </div>
                     <span class="font-bold text-lg text-gray-200">Call of Duty</span>
                 </div>
 
                 <!-- Game Card 3: PUBG Mobile -->
-                <!-- 
-                !!! کد فعال سازی PUBG Mobile !!! 
-                هر زمان بازی فعال شد، کد کامنت شده زیر را از کامنت خارج کنید و کد "به زودی" پایین آن را حذف کنید:
-                
-                <div class="collision-card p-6 rounded-2xl text-center relative overflow-hidden group hover:-translate-y-2 transition-transform duration-300">
-                    <div class="absolute top-3 right-3 bg-green-500/20 text-green-500 text-[10px] px-3 py-1 rounded-full border border-green-500/30 font-bold shadow-[0_0_10px_rgba(34,197,94,0.3)]">فعال</div>
-                    <div class="w-16 h-16 bg-[#18181b] rounded-full mx-auto mb-4 flex items-center justify-center border border-white/5 group-hover:border-green-500/50 transition-colors">
-                         <i class="fas fa-crosshairs text-3xl text-green-500 group-hover:animate-pulse"></i>
-                    </div>
-                    <span class="font-bold text-lg text-gray-200">PUBG Mobile</span>
-                </div>
-                -->
-                <!-- کد فعلی (به زودی) -->
                 <div class="collision-card p-6 rounded-2xl text-center relative overflow-hidden group hover:-translate-y-2 transition-transform duration-300 grayscale opacity-80 hover:grayscale-0 hover:opacity-100">
                     <div class="absolute top-3 right-3 bg-white/5 text-gray-400 text-[10px] px-3 py-1 rounded-full border border-white/10">به زودی</div>
-                    <div class="w-16 h-16 bg-[#18181b] rounded-full mx-auto mb-4 flex items-center justify-center border border-white/5 group-hover:border-green-500/50 transition-colors">
+                    <div class="w-16 h-16 bg-[#111511] rounded-full mx-auto mb-4 flex items-center justify-center border border-white/5 group-hover:border-green-500/50 transition-all">
                          <i class="fas fa-crosshairs text-3xl text-green-500"></i>
                     </div>
                     <span class="font-bold text-lg text-gray-200">PUBG Mobile</span>
                 </div>
 
                 <!-- Game Card 4: Delta Force -->
-                <!-- 
-                !!! کد فعال سازی Delta Force !!! 
-                هر زمان بازی فعال شد، کد کامنت شده زیر را از کامنت خارج کنید و کد "به زودی" پایین آن را حذف کنید:
-                
-                <div class="collision-card p-6 rounded-2xl text-center relative overflow-hidden group hover:-translate-y-2 transition-transform duration-300">
-                    <div class="absolute top-3 right-3 bg-teal-500/20 text-teal-500 text-[10px] px-3 py-1 rounded-full border border-teal-500/30 font-bold shadow-[0_0_10px_rgba(20,184,166,0.3)]">فعال</div>
-                    <div class="w-16 h-16 bg-[#18181b] rounded-full mx-auto mb-4 flex items-center justify-center border border-white/5 group-hover:border-teal-500/50 transition-colors">
-                        <i class="fas fa-bomb text-3xl text-teal-500 group-hover:animate-pulse"></i>
-                    </div>
-                    <span class="font-bold text-lg text-gray-200">Delta Force</span>
-                </div>
-                -->
-                <!-- کد فعلی (به زودی) -->
                 <div class="collision-card p-6 rounded-2xl text-center relative overflow-hidden group hover:-translate-y-2 transition-transform duration-300 grayscale opacity-80 hover:grayscale-0 hover:opacity-100">
                     <div class="absolute top-3 right-3 bg-white/5 text-gray-400 text-[10px] px-3 py-1 rounded-full border border-white/10">به زودی</div>
-                    <div class="w-16 h-16 bg-[#18181b] rounded-full mx-auto mb-4 flex items-center justify-center border border-white/5 group-hover:border-teal-500/50 transition-colors">
+                    <div class="w-16 h-16 bg-[#111511] rounded-full mx-auto mb-4 flex items-center justify-center border border-white/5 group-hover:border-teal-500/50 transition-all">
                         <i class="fas fa-bomb text-3xl text-teal-500"></i>
                     </div>
                     <span class="font-bold text-lg text-gray-200">Delta Force</span>
@@ -425,9 +428,20 @@
             </div>
         </div>
 
-        <!-- FAQ Section (Updated Design) -->
+        <!-- FAQ Section -->
         <div class="mb-24 fade-in-up delay-300" id="faq-section">
             <div class="flex flex-col items-center mb-10">
+                
+                <!-- انیمیشن ضربان قلب EKG (نسخه اصلاح شده و فوق جذاب) -->
+                <div class="w-full max-w-[280px] mx-auto h-16 mb-2 flex items-center justify-center relative overflow-hidden wave-mask">
+                    <svg class="w-full h-full" viewBox="0 0 200 40" preserveAspectRatio="none">
+                        <!-- خط پس زمینه خاموش -->
+                        <path d="M0,20 L50,20 L60,5 L70,35 L80,20 L90,20 L95,12 L100,28 L105,20 L200,20" fill="none" stroke="rgba(0, 255, 85, 0.15)" stroke-width="2.5"></path>
+                        <!-- خط نئونی درخشان که روی مسیر حرکت می کند -->
+                        <path d="M0,20 L50,20 L60,5 L70,35 L80,20 L90,20 L95,12 L100,28 L105,20 L200,20" fill="none" stroke="#00FF55" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="ekg-line-animated" style="filter: drop-shadow(0 0 6px #00FF55);"></path>
+                    </svg>
+                </div>
+
                 <h2 class="text-3xl font-black text-white relative mb-2">
                     سوالات متداول
                 </h2>
@@ -439,7 +453,7 @@
                 <!-- FAQ Item 1 -->
                 <div class="faq-container">
                     <button class="w-full px-6 py-5 text-right flex items-center justify-between focus:outline-none group" onclick="toggleFaq(this)">
-                        <span class="font-bold text-gray-200 group-hover:text-gaming-gold transition-colors">چگونه می‌توانم به ریون شاپ اعتماد کنم؟</span>
+                        <span class="font-bold text-gray-200 group-hover:text-gaming-neon transition-colors">چگونه می‌توانم به ریون شاپ اعتماد کنم؟</span>
                         <div class="faq-icon-wrapper rounded-full border border-white/10 p-1 w-8 h-8 flex items-center justify-center bg-white/5">
                             <i class="fas fa-plus text-sm"></i>
                         </div>
@@ -454,7 +468,7 @@
                 <!-- FAQ Item 2 -->
                 <div class="faq-container">
                     <button class="w-full px-6 py-5 text-right flex items-center justify-between focus:outline-none group" onclick="toggleFaq(this)">
-                        <span class="font-bold text-gray-200 group-hover:text-gaming-gold transition-colors">فرآیند واسطه‌گری چگونه انجام می‌شود؟</span>
+                        <span class="font-bold text-gray-200 group-hover:text-gaming-neon transition-colors">فرآیند واسطه‌گری چگونه انجام می‌شود؟</span>
                         <div class="faq-icon-wrapper rounded-full border border-white/10 p-1 w-8 h-8 flex items-center justify-center bg-white/5">
                             <i class="fas fa-plus text-sm"></i>
                         </div>
@@ -469,7 +483,7 @@
                 <!-- FAQ Item 3 -->
                 <div class="faq-container">
                     <button class="w-full px-6 py-5 text-right flex items-center justify-between focus:outline-none group" onclick="toggleFaq(this)">
-                        <span class="font-bold text-gray-200 group-hover:text-gaming-gold transition-colors">آیا اکانت‌های بلاد استرایک گارانتی دارند؟</span>
+                        <span class="font-bold text-gray-200 group-hover:text-gaming-neon transition-colors">آیا اکانت‌های بلاد استرایک گارانتی دارند؟</span>
                         <div class="faq-icon-wrapper rounded-full border border-white/10 p-1 w-8 h-8 flex items-center justify-center bg-white/5">
                             <i class="fas fa-plus text-sm"></i>
                         </div>
@@ -484,7 +498,7 @@
                 <!-- FAQ Item 4 -->
                 <div class="faq-container">
                     <button class="w-full px-6 py-5 text-right flex items-center justify-between focus:outline-none group" onclick="toggleFaq(this)">
-                        <span class="font-bold text-gray-200 group-hover:text-gaming-gold transition-colors">ساعات پاسخگویی پشتیبانی چه زمانی است؟</span>
+                        <span class="font-bold text-gray-200 group-hover:text-gaming-neon transition-colors">ساعات پاسخگویی پشتیبانی چه زمانی است؟</span>
                         <div class="faq-icon-wrapper rounded-full border border-white/10 p-1 w-8 h-8 flex items-center justify-center bg-white/5">
                             <i class="fas fa-plus text-sm"></i>
                         </div>
@@ -495,10 +509,11 @@
                         </div>
                     </div>
                 </div>
-                 <!-- FAQ Item 5 (Added to match style better) -->
+
+                <!-- FAQ Item 5 -->
                 <div class="faq-container">
                     <button class="w-full px-6 py-5 text-right flex items-center justify-between focus:outline-none group" onclick="toggleFaq(this)">
-                        <span class="font-bold text-gray-200 group-hover:text-gaming-gold transition-colors">آیا امکان بازگشت وجه وجود دارد؟</span>
+                        <span class="font-bold text-gray-200 group-hover:text-gaming-neon transition-colors">آیا امکان بازگشت وجه وجود دارد؟</span>
                         <div class="faq-icon-wrapper rounded-full border border-white/10 p-1 w-8 h-8 flex items-center justify-center bg-white/5">
                             <i class="fas fa-plus text-sm"></i>
                         </div>
@@ -516,7 +531,7 @@
         <!-- Contact Section -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-16 fade-in-up delay-300" id="contact">
             <a href="https://t.me/RavenShopOfficial" target="_blank" class="flex items-center justify-center gap-4 collision-card p-6 rounded-2xl hover:-translate-y-1 transition-transform group">
-                <i class="fab fa-telegram text-4xl text-[#229ED9]"></i>
+                <i class="fab fa-telegram text-4xl text-[#229ED9] group-hover:drop-shadow-[0_0_8px_rgba(34,158,217,0.6)]"></i>
                 <div class="text-right">
                     <span class="block font-bold text-lg text-white group-hover:text-[#229ED9] transition-colors">کانال اصلی تلگرام</span>
                     <span class="text-xs text-gray-400">اخبار و محصولات جدید</span>
@@ -524,15 +539,15 @@
             </a>
 
             <a href="https://t.me/RavenShopTrust" target="_blank" class="flex items-center justify-center gap-4 collision-card p-6 rounded-2xl hover:-translate-y-1 transition-transform group">
-                <i class="fas fa-shield-alt text-4xl text-gaming-gold"></i>
+                <i class="fas fa-shield-alt text-4xl text-gaming-neon group-hover:drop-shadow-[0_0_8px_rgba(0,255,85,0.6)]"></i>
                 <div class="text-right">
-                    <span class="block font-bold text-lg text-white group-hover:text-gaming-gold transition-colors">کانال اعتماد</span>
+                    <span class="block font-bold text-lg text-white group-hover:text-gaming-neon transition-colors">کانال اعتماد</span>
                     <span class="text-xs text-gray-400">سوابق و رضایت مشتریان</span>
                 </div>
             </a>
 
             <a href="https://t.me/RavenShopGuide" target="_blank" class="flex items-center justify-center gap-4 collision-card p-6 rounded-2xl hover:-translate-y-1 transition-transform group">
-                <i class="fas fa-book text-4xl text-teal-500"></i>
+                <i class="fas fa-book text-4xl text-teal-500 group-hover:drop-shadow-[0_0_8px_rgba(20,184,166,0.6)]"></i>
                 <div class="text-right">
                     <span class="block font-bold text-lg text-white group-hover:text-teal-500 transition-colors">کانال راهنما</span>
                     <span class="text-xs text-gray-400">آموزش‌ها و سوالات متداول</span>
@@ -540,7 +555,7 @@
             </a>
 
             <a href="https://t.me/RavenShopSupport" target="_blank" class="flex items-center justify-center gap-4 collision-card p-6 rounded-2xl hover:-translate-y-1 transition-transform group">
-                <i class="fas fa-headset text-4xl text-emerald-500"></i>
+                <i class="fas fa-headset text-4xl text-emerald-500 group-hover:drop-shadow-[0_0_8px_rgba(16,185,129,0.6)]"></i>
                 <div class="text-right">
                     <span class="block font-bold text-lg text-white group-hover:text-emerald-500 transition-colors">پشتیبانی آنلاین</span>
                     <span class="text-xs text-gray-400">پاسخگویی سریع</span>
@@ -548,7 +563,7 @@
             </a>
 
             <a href="https://Admins.RavenShop.ir" target="_blank" class="flex items-center justify-center gap-4 collision-card p-6 rounded-2xl hover:-translate-y-1 transition-transform group">
-                <i class="far fa-address-card text-4xl text-emerald-500"></i>
+                <i class="far fa-address-card text-4xl text-emerald-500 group-hover:drop-shadow-[0_0_8px_rgba(16,185,129,0.6)]"></i>
                 <div class="text-right">
                     <span class="block font-bold text-lg text-white group-hover:text-emerald-500 transition-colors">تنها ادمین های رسمی</span>
                     <span class="text-xs text-gray-400">لیست تنها ادمین های معتبر ریون شاپ</span>
@@ -556,7 +571,7 @@
             </a>
 
             <a href="https://Gold.RavenShop.ir" target="_blank" class="flex items-center justify-center gap-4 collision-card p-6 rounded-2xl hover:-translate-y-1 transition-transform group">
-                <i class="fa-solid fa-coins text-4xl text-emerald-500"></i>
+                <i class="fa-solid fa-coins text-4xl text-emerald-500 group-hover:drop-shadow-[0_0_8px_rgba(16,185,129,0.6)]"></i>
                 <div class="text-right">
                     <span class="block font-bold text-lg text-white group-hover:text-emerald-500 transition-colors">خدمات قابل خریداری</span>
                     <span class="text-xs text-gray-400">خدمات درون بازی قابل فروش توسط تیم ریون شاپ</span>
@@ -565,16 +580,16 @@
         </div>
 
         <div class="flex justify-center gap-10 mb-10 text-2xl">
-            <a href="mailto:RavenShop2447@gmail.com" class="text-gray-600 hover:text-white transition-colors transform hover:scale-110 duration-200"><i class="fas fa-envelope"></i></a>
-            <a href="https://t.me/RavenShopSupport" class="text-gray-600 hover:text-gaming-gold transition-colors transform hover:scale-110 duration-200"><i class="fab fa-telegram"></i></a>
-            <a href="https://instagram.com/RavenShopOfficial" class="text-gray-600 hover:text-pink-500 transition-colors transform hover:scale-110 duration-200"><i class="fab fa-instagram"></i></a>
+            <a href="mailto:RavenShop2447@gmail.com" class="text-gray-600 hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-all transform hover:scale-110 duration-200"><i class="fas fa-envelope"></i></a>
+            <a href="https://t.me/RavenShopSupport" class="text-gray-600 hover:text-gaming-neon hover:drop-shadow-[0_0_8px_rgba(0,255,85,0.5)] transition-all transform hover:scale-110 duration-200"><i class="fab fa-telegram"></i></a>
+            <a href="https://instagram.com/RavenShopOfficial" class="text-gray-600 hover:text-pink-500 hover:drop-shadow-[0_0_8px_rgba(236,72,153,0.5)] transition-all transform hover:scale-110 duration-200"><i class="fab fa-instagram"></i></a>
         </div>
 
     </main>
 
-    <footer class="border-t border-white/5 bg-[#050505] py-10 mt-auto relative overflow-hidden">
+    <footer class="border-t border-gaming-neon/10 bg-[#020302] py-10 mt-auto relative overflow-hidden">
         <!-- Glow effect in footer -->
-        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-gaming-gold/5 rounded-full blur-[100px]"></div>
+        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-gaming-neon/5 rounded-full blur-[100px]"></div>
         
         <div class="max-w-7xl mx-auto px-4 text-center relative z-10">
             <p class="text-gray-500 mb-2 font-sans text-sm tracking-wider" dir="ltr">&copy; 2025 RavenShop. All rights reserved.</p>
@@ -583,6 +598,60 @@
     </footer>
 
     <script>
+        // --- Lightweight Particle System (سیستم ذرات فوق سبک) ---
+        const canvas = document.getElementById('particles-bg');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+
+        function initCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', initCanvas);
+        initCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = Math.random() * 1.5 + 0.5; // ذرات بسیار ریز و شیک
+                this.speedY = Math.random() * -0.5 - 0.1; // حرکت آرام به سمت بالا
+                this.speedX = (Math.random() - 0.5) * 0.4;
+                this.opacity = Math.random() * 0.4 + 0.1;
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                if (this.y < 0) {
+                    this.y = height;
+                    this.x = Math.random() * width;
+                }
+            }
+            draw() {
+                ctx.fillStyle = `rgba(0, 255, 85, ${this.opacity})`; // رنگ سبز نئونی
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // ایجاد 80 ذره (تعداد بهینه برای جلوگیری از لگ)
+        for (let i = 0; i < 80; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, width, height);
+            particles.forEach(p => { 
+                p.update(); 
+                p.draw(); 
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+        // ----------------------------------------------------
+
         // منوی موبایل
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const mobileMenu = document.getElementById('mobileMenu');
@@ -629,6 +698,21 @@
         const observer = new IntersectionObserver(animateCounters, { threshold: 0.5 });
         counters.forEach(counter => observer.observe(counter));
 
+        // سیستم نمایش Toast به جای Alert
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const msgSpan = document.getElementById('toast-msg');
+            msgSpan.innerText = message;
+            
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 3000);
+        }
+
         // سیستم جستجو
         function handleSearch(inputId) {
             const input = document.getElementById(inputId);
@@ -641,13 +725,19 @@
                 var sel = window.getSelection();
                 sel.collapse(document.body, 0);
                 
+                let found = false;
                 while (window.find(term)) {
-                    document.execCommand("HiliteColor", false, "rgba(16, 185, 129, 0.5)");
+                    document.execCommand("HiliteColor", false, "rgba(0, 255, 85, 0.4)");
                     sel.collapseToEnd();
+                    found = true;
                 }
                 document.designMode = "off";
+                
+                if (!found) {
+                    showToast("نتیجه‌ای یافت نشد.");
+                }
             } else {
-                alert("مرورگر شما از قابلیت جستجو پشتیبانی نمی‌کند. لطفا کنترل+F بزنید.");
+                showToast("مرورگر شما از قابلیت جستجو پشتیبانی نمی‌کند. لطفاً Ctrl+F بزنید.");
             }
             
             input.blur();
@@ -671,11 +761,10 @@
             });
         });
 
-        // فانکشن جدید برای باز و بسته کردن FAQ با انیمیشن بهتر
+        // باز و بسته کردن FAQ با انیمیشن
         function toggleFaq(button) {
             const item = button.parentElement;
             
-            // بستن بقیه آیتم‌ها
             document.querySelectorAll('.faq-container').forEach(otherItem => {
                 if (otherItem !== item) {
                     otherItem.classList.remove('active');
