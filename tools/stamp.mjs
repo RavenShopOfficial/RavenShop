@@ -26,27 +26,41 @@ css = css.replace(
 );
 await writeFile(REPO + 'assets/styles.css', css);
 
-// 2. now the stylesheet and script hashes
-const cssHash = stamp(Buffer.from(css));
-const jsHash = stamp(await read('assets/app.js'));
+// 2. now hash everything index.html points at
+const assets = [
+  'assets/styles.css',
+  'assets/app.js',
+  'assets/fonts/Vazirmatn-subset.woff2',
+  'images/logo-256.webp',
+  'images/logo-352.webp',
+  'images/favicon-32.png',
+  'images/apple-touch-icon.png',
+  'images/og-cover.jpg',
+];
 
-// 3. rewrite the references in index.html, keeping its CRLF line endings
+const hashes = new Map([['assets/fonts/Vazirmatn-subset.woff2', fontHash]]);
+for (const rel of assets) {
+  if (!hashes.has(rel)) hashes.set(rel, stamp(await read(rel)));
+}
+
+// 3. rewrite every reference in index.html, keeping its CRLF line endings
 const raw = await readText('index.html');
 let html = raw.replace(/\r\n/g, '\n');
 
-const versions = [
-  ['assets/styles.css', cssHash],
-  ['assets/app.js', jsHash],
-  ['assets/fonts/Vazirmatn-subset.woff2', fontHash],
-];
-
-for (const [file, hash] of versions) {
+for (const rel of assets) {
+  const hash = hashes.get(rel);
+  // global: logo-352 appears in both src and srcset, og-cover in two meta tags
   const pattern = new RegExp(
-    '(' + file.replace(/[./]/g, (c) => '\\' + c) + ')(\\?v=[a-f0-9]+)?'
+    '(' + rel.replace(/[./]/g, (c) => '\\' + c) + ')(\\?v=[a-f0-9]+)?',
+    'g'
   );
-  if (!pattern.test(html)) throw new Error(`no reference to ${file} in index.html`);
+  const before = html;
   html = html.replace(pattern, `$1?v=${hash}`);
-  console.log(`  ${file.padEnd(38)} ?v=${hash}`);
+  if (html === before && !before.includes(`${rel}?v=${hash}`)) {
+    throw new Error(`no reference to ${rel} in index.html`);
+  }
+  const count = (html.match(pattern) || []).length;
+  console.log(`  ${rel.padEnd(38)} ?v=${hash}  (${count} ref${count === 1 ? '' : 's'})`);
 }
 
 await writeFile(REPO + 'index.html', html.replace(/\n/g, '\r\n'));
