@@ -1,0 +1,290 @@
+/* ---------------------------------------------------------------------------
+   RavenShop — source stylesheet.  Build with:  npm run build
+   Output (assets/styles.css) is committed so GitHub Pages serves it directly.
+
+   Custom rules deliberately sit between `components` and `utilities`: the old
+   Play CDN injected its stylesheet after the inline <style> block, so utility
+   classes won specificity ties. Keeping that order preserves the exact look.
+   --------------------------------------------------------------------------- */
+@tailwind base;
+@tailwind components;
+
+/* Self-hosted, subset variable Vazirmatn: one 52 KB file covering 400-900
+   instead of four ~50 KB static weights pulled from jsdelivr. */
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('fonts/Vazirmatn-subset.woff2') format('woff2');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  background-color: #030504;
+  color: #e5e7eb;
+  overflow-x: hidden;
+}
+
+/* Was `background-attachment: fixed` on <body>, which repainted three stacked
+   gradients on every scroll frame (and on every mobile URL-bar collapse).
+   A fixed pseudo-element looks identical and never repaints on scroll. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(0, 255, 85, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 85, 0.02) 1px, transparent 1px),
+    radial-gradient(circle at 50% 0%, rgba(0, 255, 85, 0.05) 0%, transparent 60%);
+  background-size: 40px 40px, 40px 40px, 100% 100%;
+  background-position: center top;
+}
+
+/* `backdrop-filter: blur(10px)` was removed here: the card background is ~90%
+   opaque over a near-black page, so the blur was invisible, but it forced a
+   separate compositing layer for each of the ~20 cards on the page. */
+.collision-card {
+  background: linear-gradient(145deg, rgba(16, 20, 16, 0.9) 50%, rgba(0, 50, 15, 0.4) 150%);
+  border: 1px solid rgba(0, 255, 85, 0.05);
+  box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.5);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.collision-card:hover {
+  border-color: rgba(0, 255, 85, 0.5);
+  box-shadow: 0 10px 30px -10px rgba(0, 255, 85, 0.2);
+  background: linear-gradient(145deg, rgba(20, 25, 20, 0.9) 40%, rgba(0, 70, 25, 0.4) 140%);
+}
+
+/* The one place a real blur earns its cost: the sticky glass navbar. */
+.glass-panel {
+  background: rgba(3, 5, 4, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0, 255, 85, 0.1);
+}
+
+/* Icons are inline SVG now (see the <symbol> sprite at the top of <body>).
+   height:1em + width:auto + vertical-align:-.125em reproduces how an icon-font
+   glyph sat on the text baseline, so every existing text-size, colour and
+   drop-shadow utility on the old <i> tags keeps working unchanged. */
+.icon {
+  display: inline-block;
+  height: 1em;
+  width: auto;
+  vertical-align: -0.125em;
+  fill: currentColor;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #030504; }
+::-webkit-scrollbar-thumb {
+  background: #111511;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 255, 85, 0.1);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00FF55;
+  box-shadow: 0 0 10px #00FF55;
+}
+
+/* Above-the-fold entrance: transform only, never opacity. An element at
+   `opacity: 0` is not counted for Largest Contentful Paint, so the old
+   fade pushed LCP out by the animation delay plus its 0.8s duration. */
+.rise-in {
+  animation: riseIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes riseIn {
+  from { transform: translateY(14px); }
+  to { transform: translateY(0); }
+}
+
+/* Below-the-fold sections keep the original fade, just a little quicker. */
+.fade-in-up {
+  animation: fadeInUp 0.55s ease-out forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+@keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+
+.faq-container {
+  border: 1px solid rgba(0, 255, 85, 0.08);
+  background: linear-gradient(90deg, rgba(15, 18, 15, 0.9) 0%, rgba(20, 25, 20, 0.9) 100%);
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  transition: border-color 0.3s ease, background 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.faq-container::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; width: 4px; height: 100%;
+  background: #00FF55; box-shadow: 0 0 10px #00FF55; opacity: 0; transition: opacity 0.3s ease;
+}
+.faq-container.active {
+  border-color: rgba(0, 255, 85, 0.4);
+  background: linear-gradient(90deg, rgba(20, 25, 20, 0.9) 0%, rgba(0, 40, 15, 0.8) 100%);
+}
+.faq-container.active::before { opacity: 1; }
+.faq-content {
+  max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0, 1, 0, 1);
+}
+.faq-container.active .faq-content {
+  max-height: 300px; transition: max-height 0.4s ease-in-out;
+}
+.faq-icon-wrapper { color: #00FF55; transition: transform 0.3s ease; }
+.faq-container.active .faq-icon-wrapper { transform: rotate(45deg); color: #ef4444; }
+
+.wave-mask {
+  mask-image: linear-gradient(90deg, transparent, #fff 20%, #fff 80%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #fff 20%, #fff 80%, transparent);
+}
+
+.ekg-line-animated {
+  stroke-dasharray: 60 300;
+  stroke-dashoffset: 360;
+  animation: ekgBeat 2.5s linear infinite;
+}
+@keyframes ekgBeat { to { stroke-dashoffset: 0; } }
+
+/* Replaces `w-3/4 h-64 bg-gaming-neon/5 rounded-[100%] blur-[120px]`. A 120px
+   filter blur on an element that wide is one of the most expensive paints on
+   the page; a radial gradient renders the same diffuse glow for free. */
+.footer-glow {
+  position: absolute;
+  bottom: -6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 75%;
+  height: 22rem;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 100%,
+    rgba(0, 255, 85, 0.07) 0%,
+    rgba(0, 255, 85, 0.03) 40%,
+    transparent 70%
+  );
+}
+
+/* --- GLITCH EFFECT --- */
+@keyframes cyber-glitch {
+  0% { transform: translate(0) skew(0deg); filter: drop-shadow(0 0 0 transparent); }
+  20% { transform: translate(-2px, 1px) skew(-3deg); filter: drop-shadow(3px 0 0 rgba(255,0,85,0.8)) drop-shadow(-3px 0 0 rgba(0,255,255,0.8)); }
+  40% { transform: translate(2px, -1px) skew(3deg); filter: drop-shadow(-3px 0 0 rgba(255,0,85,0.8)) drop-shadow(3px 0 0 rgba(0,255,255,0.8)); }
+  60% { transform: translate(-1px, -2px) skew(-1deg); filter: drop-shadow(2px 0 0 rgba(255,0,85,0.8)) drop-shadow(-2px 0 0 rgba(0,255,255,0.8)); }
+  80% { transform: translate(1px, 2px) skew(1deg); filter: drop-shadow(-2px 0 0 rgba(255,0,85,0.8)) drop-shadow(2px 0 0 rgba(0,255,255,0.8)); }
+  100% { transform: translate(0) skew(0deg); filter: drop-shadow(0 0 0 transparent); }
+}
+.hover-glitch {
+  display: inline-block;
+  transition: all 0.1s;
+}
+.hover-glitch:hover {
+  animation: cyber-glitch 0.2s infinite;
+}
+
+/* --- CUSTOM GAMING CURSOR (PC ONLY) --- */
+@media (pointer: fine) {
+  /* مخفی کردن موس پیش فرض روی تمام المان ها */
+  body, a, button, input, select, textarea, .hover-glitch, .collision-card {
+    cursor: none !important;
+  }
+
+  /* نشانه اسلحه (کراس‌هیر) — موقعیت با transform ست میشه نه left/top،
+     پس هر فریم فقط composite میشه و layout دوباره حساب نمیشه. */
+  .cursor-crosshair {
+    position: fixed;
+    top: 0; left: 0;
+    width: 24px; height: 24px;
+    pointer-events: none;
+    z-index: 99999;
+    will-change: transform;
+  }
+  /* اسکیل/چرخش روی لایه داخلی، تا transition اون روی موقعیت اثر نذاره */
+  .crosshair-inner {
+    position: absolute;
+    inset: 0;
+    transform: translate(-50%, -50%);
+    transition: transform 0.15s ease-out, opacity 0.2s;
+  }
+  .crosshair-x {
+    position: absolute; top: 50%; left: 0; right: 0; height: 2px;
+    background: #00FF55; transform: translateY(-50%);
+    box-shadow: 0 0 8px #00FF55;
+  }
+  .crosshair-y {
+    position: absolute; left: 50%; top: 0; bottom: 0; width: 2px;
+    background: #00FF55; transform: translateX(-50%);
+    box-shadow: 0 0 8px #00FF55;
+  }
+  .crosshair-center {
+    position: absolute; top: 50%; left: 50%; width: 4px; height: 4px;
+    background: #030504; border: 1px solid #00FF55; border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* هاله دنبال کننده */
+  .cursor-trail {
+    position: fixed;
+    top: 0; left: 0;
+    width: 40px; height: 40px;
+    margin: -20px 0 0 -20px;
+    border: 1px solid rgba(0, 255, 85, 0.4);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99998;
+    box-shadow: 0 0 15px rgba(0, 255, 85, 0.1);
+    will-change: transform;
+    transition: width 0.2s, height 0.2s, margin 0.2s, background-color 0.2s,
+                border-color 0.2s, box-shadow 0.2s;
+  }
+
+  /* حالت هاور روی دکمه ها */
+  .cursor-trail.hovering {
+    width: 60px; height: 60px;
+    margin: -30px 0 0 -30px;
+    background-color: rgba(0, 255, 85, 0.05);
+    border-color: rgba(0, 255, 85, 0.8);
+    box-shadow: 0 0 25px rgba(0, 255, 85, 0.3), inset 0 0 15px rgba(0, 255, 85, 0.2);
+  }
+
+  /* حالت هاور روی باکس سرچ */
+  .cursor-trail.hovering-text {
+    width: 4px; height: 28px;
+    margin: -14px 0 0 -2px;
+    border-radius: 2px;
+    background-color: #00FF55;
+    border: none;
+    box-shadow: 0 0 15px #00FF55;
+  }
+}
+
+/* Anyone who asked their OS to reduce motion gets a still page and their own
+   cursor back: no particles, no float, no glitch, no ping. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .cursor-crosshair, .cursor-trail { display: none !important; }
+  @media (pointer: fine) {
+    body, a, button, input, select, textarea, .hover-glitch, .collision-card {
+      cursor: auto !important;
+    }
+    a, button { cursor: pointer !important; }
+    input, textarea { cursor: text !important; }
+  }
+}
+
+@tailwind utilities;
