@@ -6,15 +6,82 @@
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---------------------------------------------------------------------
-     Custom gaming cursor (physical-pointer devices only)
-     Positions are written to `transform` instead of left/top so each move is
-     a compositor-only update, and the follower's rAF loop now stops as soon
-     as it catches up instead of spinning forever.
+     UI sounds, synthesized with oscillators so they cost zero bytes to
+     download. Off unless the visitor turns them on; choice is remembered.
      --------------------------------------------------------------------- */
+  var Sound = (function () {
+    var enabled = false;
+    var ctx = null;
+    var lastHoverAt = 0;
+
+    try { enabled = localStorage.getItem('rs-sound') === '1'; } catch (e) {}
+
+    var context = function () {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      if (!ctx) ctx = new AC();
+      if (ctx.state === 'suspended') ctx.resume();
+      return ctx;
+    };
+
+    var blip = function (from, to, ms, gain, type) {
+      if (!enabled) return;
+      var c = context();
+      if (!c) return;
+      var t = c.currentTime;
+      var osc = c.createOscillator();
+      var amp = c.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(from, t);
+      if (to) osc.frequency.exponentialRampToValueAtTime(to, t + ms / 1000);
+      amp.gain.setValueAtTime(0.0001, t);
+      amp.gain.exponentialRampToValueAtTime(gain, t + 0.006);
+      amp.gain.exponentialRampToValueAtTime(0.0001, t + ms / 1000);
+      osc.connect(amp).connect(c.destination);
+      osc.start(t);
+      osc.stop(t + ms / 1000 + 0.02);
+    };
+
+    return {
+      isOn: function () { return enabled; },
+      toggle: function () {
+        enabled = !enabled;
+        try { localStorage.setItem('rs-sound', enabled ? '1' : '0'); } catch (e) {}
+        if (enabled) blip(760, 1300, 90, 0.05, 'triangle');
+        return enabled;
+      },
+      hover: function () {
+        var now = Date.now();
+        if (now - lastHoverAt < 55) return;
+        lastHoverAt = now;
+        blip(1150, 0, 26, 0.02, 'sine');
+      },
+      click: function () { blip(520, 240, 70, 0.045, 'square'); },
+      lock: function () { blip(1780, 0, 24, 0.032, 'square'); },
+      granted: function () { blip(420, 1700, 280, 0.055, 'sawtooth'); },
+    };
+  })();
+
+  /* ---------------------------------------------------------------------
+     Custom gaming cursor + target lock-on (physical pointers only)
+
+     Three things were making the crosshair feel like it trailed the pointer,
+     all fixed here:
+       1. the hover handler wrote inline styles on *every* mouseover event, so
+          sweeping across a paragraph fired a style recalc per inline element,
+          on a promoted layer. State is diffed now and only written on change.
+       2. the position was written once per mousemove; a 500 Hz mouse fires
+          several of those per frame. Writes are coalesced into one rAF tick.
+       3. the particle canvas was doing full-resolution work every frame on the
+          same thread that positions the cursor (see the canvas block below).
+     --------------------------------------------------------------------- */
+  var setMatrix = null; // wired up by the particle block
+
   if (window.matchMedia('(pointer: fine)').matches && !reduceMotion) {
     var crosshair = document.getElementById('custom-cursor-crosshair');
     var inner = crosshair.querySelector('.crosshair-inner');
     var trail = document.getElementById('custom-cursor-trail');
+    var lockOn = document.getElementById('lock-on');
 
     crosshair.classList.remove('hidden');
     trail.classList.remove('hidden');
@@ -23,7 +90,11 @@
     var mouseY = window.innerHeight / 2;
     var trailX = mouseX;
     var trailY = mouseY;
-    var trailRaf = 0;
+    var cursorRaf = 0;
+    var mode = '';
+    var lastHit = null;
+    var lockTarget = null;
+    var lockScrollY = -1;
 
     var place = function (el, x, y) {
       el.style.transform = 'translate3d(' + x + 'px,' + y + 'px,0)';
@@ -31,45 +102,109 @@
     place(crosshair, mouseX, mouseY);
     place(trail, trailX, trailY);
 
-    var followTrail = function () {
+    var sizeLock = function () {
+      var r = lockTarget.getBoundingClientRect();
+      lockOn.style.width = r.width + 'px';
+      lockOn.style.height = r.height + 'px';
+      place(lockOn, r.left, r.top);
+    };
+
+    var tick = function () {
+      place(crosshair, mouseX, mouseY);
+
       var dx = mouseX - trailX;
       var dy = mouseY - trailY;
       trailX += dx * 0.4;
       trailY += dy * 0.4;
       place(trail, trailX, trailY);
-      trailRaf = Math.abs(dx) + Math.abs(dy) > 0.4 ? requestAnimationFrame(followTrail) : 0;
+
+      // keep the brackets on the card when the page scrolls under them
+      if (lockTarget && window.scrollY !== lockScrollY) {
+        lockScrollY = window.scrollY;
+        sizeLock();
+      }
+
+      cursorRaf = Math.abs(dx) + Math.abs(dy) > 0.4 ? requestAnimationFrame(tick) : 0;
+    };
+
+    var schedule = function () {
+      if (!cursorRaf) cursorRaf = requestAnimationFrame(tick);
     };
 
     document.addEventListener('mousemove', function (e) {
       mouseX = e.clientX;
       mouseY = e.clientY;
-      place(crosshair, mouseX, mouseY);
-      if (!trailRaf) trailRaf = requestAnimationFrame(followTrail);
+      schedule();
     }, { passive: true });
+
+    window.addEventListener('scroll', function () {
+      if (lockTarget) schedule();
+    }, { passive: true });
+
+    var applyMode = function (next) {
+      if (next === mode) return;
+      mode = next;
+      trail.classList.toggle('hovering', next === 'target');
+      trail.classList.toggle('hovering-text', next === 'text');
+      inner.style.opacity = next === 'text' ? '0' : '1';
+      inner.style.transform = next === 'target'
+        ? 'translate(-50%, -50%) scale(0.5) rotate(45deg)'
+        : 'translate(-50%, -50%) scale(1) rotate(0deg)';
+    };
+
+    var applyLock = function (card) {
+      if (card === lockTarget) return;
+      var wasLocked = !!lockTarget;
+      lockTarget = card;
+      if (!card) {
+        lockOn.classList.remove('locked');
+        return;
+      }
+      lockScrollY = window.scrollY;
+      // acquiring from nothing must not animate in from the last position
+      if (!wasLocked) lockOn.style.transition = 'none';
+      sizeLock();
+      if (!wasLocked) {
+        void lockOn.offsetWidth;
+        lockOn.style.transition = '';
+      }
+      lockOn.classList.add('locked');
+      Sound.lock();
+    };
 
     /* One delegated listener replaces the ~100 mouseenter/mouseleave handlers
        that used to be bound to every link, button and card. */
     document.addEventListener('mouseover', function (e) {
       var el = e.target;
-      var overText = el.closest && el.closest('input, textarea');
-      var overTarget = !overText && el.closest && el.closest('a, button, .collision-card');
-      trail.classList.toggle('hovering', !!overTarget);
-      trail.classList.toggle('hovering-text', !!overText);
-      inner.style.opacity = overText ? '0' : '1';
-      inner.style.transform = overTarget
-        ? 'translate(-50%, -50%) scale(0.5) rotate(45deg)'
-        : 'translate(-50%, -50%) scale(1) rotate(0deg)';
+      if (!el.closest) return;
+      var overText = el.closest('input, textarea');
+      var hit = overText ? null : el.closest('a, button, .collision-card');
+      applyMode(overText ? 'text' : hit ? 'target' : '');
+      applyLock(overText ? null : el.closest('.collision-card'));
+      if (hit !== lastHit) {
+        lastHit = hit;
+        if (hit) Sound.hover();
+      }
     }, { passive: true });
   }
 
+  document.addEventListener('click', function (e) {
+    if (e.target.closest && e.target.closest('a, button')) Sound.click();
+  }, { passive: true });
+
   /* ---------------------------------------------------------------------
-     Background particles
-     Changes vs. the old version: starts only once the browser is idle (so it
-     never competes with the first paint), draws all dots of a similar alpha in
-     a single batched path instead of one fill() per dot, halves the count on
-     phones, freezes while the tab is hidden, and debounces resize — that last
-     one matters because collapsing the mobile URL bar fires resize on every
-     scroll, which used to reallocate the canvas mid-scroll.
+     Background particles (and, if you know the code, matrix rain)
+
+     Starts only once the browser is idle so it never competes with the first
+     paint. Dots of a similar alpha share one batched path instead of a fill()
+     each. Half the count on phones, frozen while the tab is hidden, resize
+     debounced (a collapsing mobile URL bar fires resize on every scroll).
+
+     Two changes specifically to keep the main thread free for the cursor: the
+     backing store renders at half resolution — these are sub-pixel blurs at
+     60% opacity, so three quarters of the pixel work was invisible — and the
+     loop is capped near 32fps, which drifting dots cannot be told apart from
+     60. Matrix mode switches back to full resolution because it draws glyphs.
      --------------------------------------------------------------------- */
   var canvas = document.getElementById('particles-bg');
 
@@ -82,14 +217,20 @@
       FILLS.push('rgba(0, 255, 85, ' + (0.1 + (b + 0.5) * (0.4 / BUCKETS)).toFixed(3) + ')');
     }
 
-    var width = 0;
+    var width = 0;   // CSS pixels; the context is scaled to the backing store
     var height = 0;
     var buckets = [];
     var raf = 0;
+    var lastAt = 0;
+    var matrix = null;
 
     var sizeCanvas = function () {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      var scale = matrix ? 1 : 0.5;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = Math.round(width * scale);
+      canvas.height = Math.round(height * scale);
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
     };
 
     var seed = function () {
@@ -103,13 +244,14 @@
           x: Math.random() * width,
           y: Math.random() * height,
           size: Math.random() * 1.5 + 0.5,
-          speedY: Math.random() * -0.5 - 0.1,
-          speedX: (Math.random() - 0.5) * 0.4,
+          // doubled so apparent speed survives the halved frame rate
+          speedY: (Math.random() * -0.5 - 0.1) * 2,
+          speedX: (Math.random() - 0.5) * 0.4 * 2,
         });
       }
     };
 
-    var frame = function () {
+    var drawParticles = function () {
       ctx.clearRect(0, 0, width, height);
       for (var k = 0; k < BUCKETS; k++) {
         var list = buckets[k];
@@ -129,13 +271,42 @@
         }
         ctx.fill();
       }
+    };
+
+    var drawMatrix = function () {
+      ctx.fillStyle = 'rgba(3, 5, 4, 0.10)';
+      ctx.fillRect(0, 0, width, height);
+      ctx.font = '15px ui-monospace, monospace';
+      ctx.fillStyle = '#00FF55';
+      for (var i = 0; i < matrix.cols; i++) {
+        ctx.fillText(matrix.chars[(Math.random() * matrix.chars.length) | 0], i * 16, matrix.y[i]);
+        matrix.y[i] += 16;
+        if (matrix.y[i] > height && Math.random() > 0.975) matrix.y[i] = 0;
+      }
+    };
+
+    var frame = function (now) {
       raf = requestAnimationFrame(frame);
+      if (now - lastAt < (matrix ? 45 : 30)) return;
+      lastAt = now;
+      if (matrix) drawMatrix();
+      else drawParticles();
     };
 
     var start = function () {
       sizeCanvas();
       seed();
       if (!raf) raf = requestAnimationFrame(frame);
+    };
+
+    setMatrix = function (on) {
+      matrix = on ? { cols: 0, y: [], chars: 'アカサタナハマヤラワ0123456789RAVENSHOP<>/*' } : null;
+      sizeCanvas();
+      if (matrix) {
+        matrix.cols = Math.ceil(width / 16);
+        for (var i = 0; i < matrix.cols; i++) matrix.y[i] = Math.random() * -height;
+      }
+      ctx.clearRect(0, 0, width, height);
     };
 
     document.addEventListener('visibilitychange', function () {
@@ -154,6 +325,7 @@
         // Ignore the pure-height jitter a collapsing mobile toolbar produces.
         if (window.innerWidth === width && Math.abs(window.innerHeight - height) < 120) return;
         sizeCanvas();
+        if (matrix) setMatrix(true);
       }, 200);
     }, { passive: true });
 
@@ -317,4 +489,170 @@
 
   if (desktopInput) desktopInput.addEventListener('input', performSearch);
   if (mobileInput) mobileInput.addEventListener('input', performSearch);
+
+  /* --- sound toggle in the navbar --- */
+  var soundBtn = document.getElementById('soundToggle');
+  if (soundBtn) {
+    var paintSound = function () {
+      var on = Sound.isOn();
+      soundBtn.querySelector('use').setAttribute('href', on ? '#i-volume-high' : '#i-volume-xmark');
+      soundBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      soundBtn.setAttribute('aria-label', on ? 'خاموش کردن صدای رابط' : 'روشن کردن صدای رابط');
+      soundBtn.classList.toggle('text-gaming-neon', on);
+      soundBtn.classList.toggle('text-gray-500', !on);
+    };
+    paintSound();
+    soundBtn.addEventListener('click', function () {
+      Sound.toggle();
+      paintSound();
+    });
+  }
+
+  /* --- which section am I in: keep that nav underline lit --- */
+  var desktopNav = document.getElementById('desktopNav');
+  if (desktopNav && 'IntersectionObserver' in window) {
+    var linkFor = {};
+    [].forEach.call(desktopNav.querySelectorAll('a[href^="#"]'), function (a) {
+      linkFor[a.getAttribute('href')] = a;
+    });
+
+    var activeHref = null;
+    var setActive = function (href) {
+      if (href === activeHref) return;
+      activeHref = href;
+      for (var key in linkFor) linkFor[key].classList.toggle('nav-active', key === href);
+    };
+
+    var watched = Object.keys(linkFor).filter(function (h) { return h !== '#'; });
+    var onScreen = {};
+
+    var sectionObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) { onScreen['#' + entry.target.id] = entry.isIntersecting; });
+      var current = null;
+      watched.forEach(function (h) { if (onScreen[h]) current = h; });
+      setActive(current || (window.scrollY < 240 ? '#' : null));
+    }, { rootMargin: '-45% 0px -45% 0px' });
+
+    watched.forEach(function (h) {
+      var el = document.querySelector(h);
+      if (el) sectionObserver.observe(el);
+    });
+
+    window.addEventListener('scroll', function () {
+      if (window.scrollY < 240) setActive('#');
+    }, { passive: true });
+  }
+
+  /* ---------------------------------------------------------------------
+     Hero line decrypt: scramble every letter, then resolve left to right.
+     Spaces, ZWNJ and punctuation are never touched and the character count
+     never changes, so word boundaries hold. The box is pinned to its measured
+     height for the duration, because Persian glyph widths differ enough that a
+     scrambled line could otherwise wrap and shift everything below it.
+     --------------------------------------------------------------------- */
+  var heroLine = document.getElementById('heroLine');
+  if (heroLine && !reduceMotion) {
+    var FA_POOL = 'ابپتثجچحخدذرزژسشصضطظعغفقکگلمنوهی';
+    var EN_POOL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%&*/<>';
+
+    var parts = [];
+    var textWalker = document.createTreeWalker(heroLine, NodeFilter.SHOW_TEXT);
+    var textNode;
+    while ((textNode = textWalker.nextNode())) {
+      if (textNode.nodeValue.trim()) parts.push({ node: textNode, text: textNode.nodeValue });
+    }
+
+    var scramble = function (ch) {
+      if (ch >= '؀' && ch <= 'ۿ') return FA_POOL.charAt((Math.random() * FA_POOL.length) | 0);
+      if (/[A-Za-z0-9]/.test(ch)) return EN_POOL.charAt((Math.random() * EN_POOL.length) | 0);
+      return ch;
+    };
+
+    var totalChars = parts.reduce(function (sum, p) { return sum + p.text.length; }, 0);
+    var DECRYPT_MS = 900;
+    var startedAt = 0;
+
+    var restore = function () {
+      parts.forEach(function (p) { p.node.nodeValue = p.text; });
+      heroLine.classList.remove('decrypting');
+      heroLine.style.height = '';
+      heroLine.style.overflow = '';
+    };
+
+    var decryptFrame = function (now) {
+      if (!startedAt) startedAt = now;
+      var progress = Math.min(1, (now - startedAt) / DECRYPT_MS);
+      var settled = Math.floor(progress * totalChars);
+      var seen = 0;
+      for (var i = 0; i < parts.length; i++) {
+        var src = parts[i].text;
+        var out = '';
+        for (var j = 0; j < src.length; j++, seen++) {
+          out += seen < settled ? src.charAt(j) : scramble(src.charAt(j));
+        }
+        parts[i].node.nodeValue = out;
+      }
+      if (progress < 1) requestAnimationFrame(decryptFrame);
+      else restore();
+    };
+
+    if (parts.length) {
+      setTimeout(function () {
+        heroLine.style.height = heroLine.offsetHeight + 'px';
+        heroLine.style.overflow = 'hidden';
+        heroLine.classList.add('decrypting');
+        requestAnimationFrame(decryptFrame);
+      }, 260);
+    }
+  }
+
+  /* ---------------------------------------------------------------------
+     ↑↑↓↓←→←→BA — turns the particle canvas into matrix rain. Esc or 25s ends
+     it. Reuses the #toast element, which until now was markup nothing called.
+     --------------------------------------------------------------------- */
+  var toast = document.getElementById('toast');
+  var toastMsg = document.getElementById('toast-msg');
+  var toastTimer = 0;
+
+  var showToast = function (message, good) {
+    if (!toast) return;
+    toastMsg.textContent = message;
+    toast.classList.toggle('bg-red-500/90', !good);
+    toast.classList.toggle('border-red-400', !good);
+    toast.classList.toggle('bg-gaming-neon/20', !!good);
+    toast.classList.toggle('border-gaming-neon', !!good);
+    toast.classList.remove('opacity-0');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.add('opacity-0'); }, 2800);
+  };
+
+  var KONAMI = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
+  var keyPos = 0;
+  var matrixTimer = 0;
+
+  var exitMatrix = function () {
+    clearTimeout(matrixTimer);
+    if (!document.body.classList.contains('matrix-mode')) return;
+    document.body.classList.remove('matrix-mode');
+    if (setMatrix) setMatrix(false);
+  };
+
+  document.addEventListener('keydown', function (e) {
+    var key = (e.key || '').toLowerCase();
+
+    if (key === 'escape') { exitMatrix(); return; }
+    // don't hunt for the code while someone is typing in the search box
+    if (e.target && /^(input|textarea)$/i.test(e.target.tagName)) return;
+
+    keyPos = key === KONAMI[keyPos] ? keyPos + 1 : (key === KONAMI[0] ? 1 : 0);
+    if (keyPos < KONAMI.length) return;
+    keyPos = 0;
+
+    if (!setMatrix) return; // reduced motion, or no canvas
+    document.body.classList.add('matrix-mode');
+    setMatrix(true);
+    Sound.granted();
+    showToast('ACCESS GRANTED // RAVEN MODE', true);
+    matrixTimer = setTimeout(exitMatrix, 25000);
+  });
 })();

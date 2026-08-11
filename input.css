@@ -268,8 +268,114 @@ body::before {
   }
 }
 
+/* --- TARGET LOCK-ON -------------------------------------------------------
+   Four corner brackets that snap to whatever card the crosshair is over and
+   slide to the next one. Position/size come from JS; width and height are
+   transitioned rather than scaled so the bracket strokes stay 2px crisp. */
+.lock-on {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 99997;
+  opacity: 0;
+  contain: layout style;
+  will-change: transform, width, height;
+  transition: opacity 0.12s linear,
+              transform 0.13s cubic-bezier(0.22, 1, 0.36, 1),
+              width 0.13s cubic-bezier(0.22, 1, 0.36, 1),
+              height 0.13s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.lock-on.locked { opacity: 1; }
+.lock-on span {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border: 2px solid #00FF55;
+  box-shadow: 0 0 10px rgba(0, 255, 85, 0.7);
+}
+.lock-on.locked span { animation: lockSnap 0.18s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes lockSnap {
+  from { margin: -7px; opacity: 0.25; }
+  to { margin: 0; opacity: 1; }
+}
+.lock-on span:nth-child(1) { top: -3px; left: -3px; border-right: 0; border-bottom: 0; border-top-left-radius: 3px; }
+.lock-on span:nth-child(2) { top: -3px; right: -3px; border-left: 0; border-bottom: 0; border-top-right-radius: 3px; }
+.lock-on span:nth-child(3) { bottom: -3px; left: -3px; border-right: 0; border-top: 0; border-bottom-left-radius: 3px; }
+.lock-on span:nth-child(4) { bottom: -3px; right: -3px; border-left: 0; border-top: 0; border-bottom-right-radius: 3px; }
+
+/* --- ROTATING NEON RING AROUND THE LOGO ---------------------------------- */
+.logo-ring { pointer-events: none; }
+.logo-ring::before {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  border-radius: 9999px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 195deg,
+    rgba(0, 255, 85, 0.12) 250deg,
+    #00FF55 322deg,
+    #c4ffdb 350deg,
+    transparent 360deg
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  animation: ringSpin 3.6s linear infinite;
+}
+@keyframes ringSpin { to { transform: rotate(1turn); } }
+
+/* --- CRT SCANLINES --------------------------------------------------------
+   Deliberately near-invisible (3% alpha over a 4px pitch). Desktop only: at
+   phone pixel densities the lines vanish anyway and this saves a full-viewport
+   composited layer. Animated with transform, so it paints once. */
+@media (min-width: 768px) {
+  body::after {
+    content: '';
+    position: fixed;
+    inset: -4px 0 0 0;
+    z-index: 9998;
+    pointer-events: none;
+    background: repeating-linear-gradient(180deg, rgba(0, 255, 85, 0.03) 0 1px, transparent 1px 4px);
+    animation: scanDrift 1.6s linear infinite;
+  }
+}
+@keyframes scanDrift { to { transform: translateY(4px); } }
+
+/* --- SCROLL-DRIVEN REVEALS -----------------------------------------------
+   The time-based .fade-in-up above runs on load, so by the time you scroll to
+   a section it has already finished. Where the browser supports scroll-driven
+   animations this re-anchors the same reveal to the element entering the
+   viewport — no JS, no IntersectionObserver. Older browsers keep the fallback. */
+@supports (animation-timeline: view()) {
+  .fade-in-up {
+    animation-name: revealIn;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
+    animation-timeline: view();
+    animation-range: entry 5% cover 30%;
+  }
+  /* stagger delays are meaningless on a scroll timeline */
+  .fade-in-up.delay-100,
+  .fade-in-up.delay-200,
+  .fade-in-up.delay-300 { animation-delay: 0s; }
+}
+@keyframes revealIn {
+  from { opacity: 0; transform: translateY(28px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* nav underline stays full width for the section you are actually looking at */
+.nav-active > span:first-child { width: 100%; }
+
+/* while the hero line is still resolving its characters */
+.decrypting { text-shadow: 0 0 10px rgba(0, 255, 85, 0.45); }
+
+/* konami mode turns the particle canvas into matrix rain, so let it show */
+body.matrix-mode #particles-bg { opacity: 0.9; }
+
 /* Anyone who asked their OS to reduce motion gets a still page and their own
-   cursor back: no particles, no float, no glitch, no ping. */
+   cursor back: no particles, no float, no glitch, no ping, no scanlines. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -277,7 +383,15 @@ body::before {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  .cursor-crosshair, .cursor-trail { display: none !important; }
+  .cursor-crosshair, .cursor-trail, .lock-on { display: none !important; }
+  body::after { display: none; }
+  .logo-ring::before { animation: none; }
+  /* scroll-driven reveals have no duration to zero out, so switch them off */
+  .fade-in-up {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
   @media (pointer: fine) {
     body, a, button, input, select, textarea, .hover-glitch, .collision-card {
       cursor: auto !important;
