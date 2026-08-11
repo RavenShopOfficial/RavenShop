@@ -569,7 +569,7 @@
     };
 
     var totalChars = parts.reduce(function (sum, p) { return sum + p.text.length; }, 0);
-    var DECRYPT_MS = 900;
+    var DECRYPT_MS = 1300;
     var startedAt = 0;
 
     var restore = function () {

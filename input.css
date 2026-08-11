@@ -336,7 +336,7 @@ body::before {
     inset: -4px 0 0 0;
     z-index: 9998;
     pointer-events: none;
-    background: repeating-linear-gradient(180deg, rgba(0, 255, 85, 0.03) 0 1px, transparent 1px 4px);
+    background: repeating-linear-gradient(180deg, rgba(0, 255, 85, 0.055) 0 1px, transparent 1px 4px);
     animation: scanDrift 1.6s linear infinite;
   }
 }

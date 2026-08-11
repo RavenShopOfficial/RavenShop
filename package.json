@@ -4,7 +4,7 @@
   "private": true,
   "description": "RavenShop landing page. Tailwind is compiled locally and assets/styles.css is committed, so GitHub Pages can serve it as-is.",
   "scripts": {
-    "build": "tailwindcss -i ./input.css -o ./assets/styles.css --minify",
+    "build": "tailwindcss -i ./input.css -o ./assets/styles.css --minify && node tools/stamp.mjs",
     "watch": "tailwindcss -i ./input.css -o ./assets/styles.css --watch"
   },
   "devDependencies": {
