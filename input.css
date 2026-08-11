@@ -58,11 +58,13 @@ body::before {
   background: linear-gradient(145deg, rgba(20, 25, 20, 0.9) 40%, rgba(0, 70, 25, 0.4) 140%);
 }
 
-/* The one place a real blur earns its cost: the sticky glass navbar. */
+/* The one place a real blur earns its cost: the sticky glass navbar. 10px, not
+   16px — the panel is already 80% opaque so the difference is invisible, and a
+   backdrop-filter has to re-blur every frame that the rain changes behind it. */
 .glass-panel {
   background: rgba(3, 5, 4, 0.8);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(0, 255, 85, 0.1);
 }
 
@@ -326,21 +328,24 @@ body::before {
 @keyframes ringSpin { to { transform: rotate(1turn); } }
 
 /* --- CRT SCANLINES --------------------------------------------------------
-   Deliberately near-invisible (3% alpha over a 4px pitch). Desktop only: at
+   Deliberately near-invisible (5.5% alpha over a 4px pitch). Desktop only: at
    phone pixel densities the lines vanish anyway and this saves a full-viewport
-   composited layer. Animated with transform, so it paints once. */
+   composited layer.
+
+   Static, not animated. Drifting it meant the compositor re-blended a
+   full-viewport layer above the content on every frame, on top of the rain
+   already changing underneath — together that was enough to make the pointer
+   feel behind. A fixed pitch reads the same. */
 @media (min-width: 768px) {
   body::after {
     content: '';
     position: fixed;
-    inset: -4px 0 0 0;
+    inset: 0;
     z-index: 9998;
     pointer-events: none;
     background: repeating-linear-gradient(180deg, rgba(0, 255, 85, 0.055) 0 1px, transparent 1px 4px);
-    animation: scanDrift 1.6s linear infinite;
   }
 }
-@keyframes scanDrift { to { transform: translateY(4px); } }
 
 /* --- SCROLL-DRIVEN REVEALS -----------------------------------------------
    The time-based .fade-in-up above runs on load, so by the time you scroll to
@@ -374,10 +379,19 @@ body::before {
 /* Softens the rain into the top and bottom of the viewport instead of letting
    it stop dead at the edges. A compositor-side mask, so it costs no main
    thread work at all. */
-#particles-bg {
-  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.22) 0%, #000 15%, #000 86%, rgba(0, 0, 0, 0.18) 100%);
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.22) 0%, #000 15%, #000 86%, rgba(0, 0, 0, 0.18) 100%);
-}
+/* REMOVED: a mask on a layer whose pixels change every tick makes the
+   compositor re-apply it over the whole viewport every frame, which showed up
+   as pointer lag. The edges look fine without it. */
+
+/* Set by app.js from ?plain — strips every decorative layer so you can tell in
+   one reload whether an effect is what is costing frames on a given machine. */
+.rs-plain #particles-bg { display: none; }
+.rs-plain body::after { display: none; }
+.rs-plain .glass-panel { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(3, 5, 4, 0.94); }
+.rs-plain .logo-ring::before { display: none; }
+.rs-plain .hover-glitch:hover { animation: none; }
+.rs-plain .animate-float, .rs-plain .animate-wave, .rs-plain .animate-pulse-slow,
+.rs-plain .animate-ping, .rs-plain .ekg-line-animated { animation: none; }
 
 /* Anyone who asked their OS to reduce motion gets a still page and their own
    cursor back: no particles, no float, no glitch, no ping, no scanlines. */

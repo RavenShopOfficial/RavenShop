@@ -212,12 +212,24 @@
      --------------------------------------------------------------------- */
   var canvas = document.getElementById('particles-bg');
 
-  if (canvas && !reduceMotion) {
+  /* Switches for pinning down which layer costs what on a given machine:
+       ?norain  — background rain off
+       ?plain   — every decorative layer off (rain, scanlines, glass blur,
+                  logo ring, glitch), so the page is just markup and text
+     localStorage.setItem('rs-rain', '0') does the same as ?norain, but sticks. */
+  var query = location.search;
+  var plain = /[?&]plain\b/.test(query);
+  if (plain) document.documentElement.classList.add('rs-plain');
+
+  var rainOn = !plain && !/[?&]norain\b/.test(query);
+  try { if (localStorage.getItem('rs-rain') === '0') rainOn = false; } catch (e) {}
+
+  if (canvas && !reduceMotion && rainOn) {
     var ctx = canvas.getContext('2d', { alpha: true });
     var GLYPHS = 'アカサタナハマヤラワイキシチニヒミリヰウクスツヌフムユル0123456789RAVENSHOP';
     var CELL = 20;
-    var TICK = 40;      // 25fps: fast enough that no column has to clamp
-    var FADE = 0.085;   // per tick; tuned so a trail runs ~10-14 glyphs long
+    var TICK = 50;      // 20fps
+    var FADE = 0.105;   // per tick; tuned so a trail runs ~10-14 glyphs long
     var MONO = 'ui-monospace, SFMono-Regular, Menlo, monospace';
 
     // far -> near. rate is rows per second.
@@ -241,10 +253,15 @@
     var sizeCanvas = function () {
       width = window.innerWidth;
       height = window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
-      // resetting width clears all context state, so restore it here
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      // Render below CSS resolution and cap the backing store. Every tick the
+      // canvas changes, the compositor re-uploads this texture and everything
+      // stacked over it — the glass navbar's backdrop-filter above all — has to
+      // redo its work over the same area. Cutting pixels here is what keeps the
+      // pointer responsive; at 0.6 the glyphs only go a little softer.
+      var scale = Math.min(width < 768 ? 0.85 : 0.6, 1600 / width, 1000 / height);
+      canvas.width = Math.round(width * scale);
+      canvas.height = Math.round(height * scale);
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
       ctx.textBaseline = 'top';
       lastFont = '';
       rows = Math.ceil(height / CELL) + 1;
