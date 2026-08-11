@@ -626,8 +626,19 @@
     toastTimer = setTimeout(function () { toast.classList.add('opacity-0'); }, 2800);
   };
 
-  var KONAMI = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown', 'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
-  var keyPos = 0;
+  /* Matched on e.code — the physical key — not e.key. On a Persian layout the
+     "b" key reports e.key === 'ذ', so a key-based match could never finish the
+     code on the keyboard most of this site's visitors are using.
+     Two ways in: the classic code, or just typing "raven". */
+  var CODES = {
+    ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
+    KeyA: 'a', KeyB: 'b', KeyE: 'e', KeyN: 'n', KeyR: 'r', KeyV: 'v',
+  };
+  var SEQUENCES = [
+    ['up', 'up', 'down', 'down', 'left', 'right', 'left', 'right', 'b', 'a'],
+    ['r', 'a', 'v', 'e', 'n'],
+  ];
+  var progress = [0, 0];
   var matrixTimer = 0;
 
   var exitMatrix = function () {
@@ -637,22 +648,35 @@
     if (setMatrix) setMatrix(false);
   };
 
-  document.addEventListener('keydown', function (e) {
-    var key = (e.key || '').toLowerCase();
-
-    if (key === 'escape') { exitMatrix(); return; }
-    // don't hunt for the code while someone is typing in the search box
-    if (e.target && /^(input|textarea)$/i.test(e.target.tagName)) return;
-
-    keyPos = key === KONAMI[keyPos] ? keyPos + 1 : (key === KONAMI[0] ? 1 : 0);
-    if (keyPos < KONAMI.length) return;
-    keyPos = 0;
-
+  var enterMatrix = function () {
     if (!setMatrix) return; // reduced motion, or no canvas
     document.body.classList.add('matrix-mode');
     setMatrix(true);
     Sound.granted();
     showToast('ACCESS GRANTED // RAVEN MODE', true);
+    clearTimeout(matrixTimer);
     matrixTimer = setTimeout(exitMatrix, 25000);
+  };
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' || e.code === 'Escape') { exitMatrix(); return; }
+    // don't hunt for the code while someone is typing in the search box
+    if (e.target && /^(input|textarea)$/i.test(e.target.tagName)) return;
+
+    var token = CODES[e.code] || (e.key || '').toLowerCase().replace(/^arrow/, '');
+    if (!token) return;
+
+    for (var i = 0; i < SEQUENCES.length; i++) {
+      var seq = SEQUENCES[i];
+      var at = progress[i];
+      progress[i] = token === seq[at] ? at + 1 : (token === seq[0] ? 1 : 0);
+      if (progress[i] === seq.length) {
+        progress = [0, 0];
+        enterMatrix();
+        return;
+      }
+    }
+    // arrow keys are deliberately left alone: swallowing them mid-sequence would
+    // break keyboard scrolling for anyone pressing up twice in a row
   });
 })();
