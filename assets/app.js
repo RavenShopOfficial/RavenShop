@@ -197,12 +197,15 @@
      click. Cards are ~90% opaque, so it reads as depth behind them rather
      than noise on top of them.
 
-     Deliberately slow: each column advances one row every 1/rate seconds with
-     its own rate, so the cascade steps like the original instead of sliding.
-     The loop ticks at ~15fps, which is plenty for something this unhurried and
-     leaves the main thread free for the cursor.
+     Columns are dealt one of three depth tiers. A near column is bigger,
+     brighter and faster; a far one is small, dim and slow. That parallax is
+     what stops it reading as a flat grid, and it costs nothing but a few
+     per-column numbers. Each column also carries a 3-glyph memory so the head
+     can be repainted as a near-white glyph, the cell behind it bright green
+     and the one behind that plain green — a lit head with a gradient tail,
+     rather than one bright glyph and an abrupt fade.
 
-     The trail comes from fading the whole canvas each tick with
+     The trail itself comes from fading the whole canvas each tick with
      destination-out, which lowers existing alpha toward transparent. Painting
      a translucent dark rectangle instead — the usual trick — would accumulate
      opacity until the canvas became a solid sheet hiding the page's grid.
@@ -213,9 +216,17 @@
     var ctx = canvas.getContext('2d', { alpha: true });
     var GLYPHS = 'アカサタナハマヤラワイキシチニヒミリヰウクスツヌフムユル0123456789RAVENSHOP';
     var CELL = 20;
-    var TICK = 66;
-    var HEAD = 'rgba(198, 255, 222, 0.92)';
-    var TRAIL = 'rgba(0, 255, 85, 0.8)';
+    var TICK = 40;      // 25fps: fast enough that no column has to clamp
+    var FADE = 0.085;   // per tick; tuned so a trail runs ~10-14 glyphs long
+    var MONO = 'ui-monospace, SFMono-Regular, Menlo, monospace';
+
+    // far -> near. rate is rows per second.
+    var TIERS = [
+      { font: '12px ' + MONO, head: 'rgba(198,255,222,0.55)', hot: 'rgba(110,255,175,0.5)',  trail: 'rgba(0,255,85,0.32)', min: 6,  span: 4 },
+      { font: '15px ' + MONO, head: 'rgba(208,255,230,0.82)', hot: 'rgba(120,255,180,0.76)', trail: 'rgba(0,255,85,0.6)',  min: 9,  span: 6 },
+      { font: '18px ' + MONO, head: 'rgba(232,255,242,0.98)', hot: 'rgba(150,255,200,0.94)', trail: 'rgba(0,255,85,0.85)', min: 11, span: 8 },
+    ];
+    var FLASH = 'rgba(240,255,248,1)';
 
     var width = 0;
     var height = 0;
@@ -223,8 +234,9 @@
     var columns = [];
     var raf = 0;
     var lastAt = 0;
+    var lastFont = '';
 
-    var rate = function () { return 1.5 + Math.random() * 2.4; }; // rows / second
+    var glyph = function () { return GLYPHS.charAt((Math.random() * GLYPHS.length) | 0); };
 
     var sizeCanvas = function () {
       width = window.innerWidth;
@@ -233,8 +245,8 @@
       canvas.height = height;
       // resetting width clears all context state, so restore it here
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.font = '15px ui-monospace, SFMono-Regular, Menlo, monospace';
       ctx.textBaseline = 'top';
+      lastFont = '';
       rows = Math.ceil(height / CELL) + 1;
     };
 
@@ -242,46 +254,71 @@
       var count = Math.ceil(width / CELL);
       columns = [];
       for (var i = 0; i < count; i++) {
+        var tier = TIERS[(Math.random() * TIERS.length) | 0];
         columns.push({
+          tier: tier,
+          // a little jitter so the columns are not a perfect grid
+          x: i * CELL + ((Math.random() * 4) | 0),
           row: -Math.floor(Math.random() * rows), // stagger so it starts mid-fall
-          rate: rate(),
+          rate: tier.min + Math.random() * tier.span,
           due: 0,
-          glyph: '',
+          flash: false,
+          g0: '', g1: '', g2: '',
         });
       }
     };
 
+    var paint = function (x, y, ch, color) {
+      if (!ch || y < -CELL || y > height) return;
+      ctx.fillStyle = color;
+      ctx.fillText(ch, x, y);
+    };
+
+    var advance = function (col) {
+      col.g2 = col.g1;
+      col.g1 = col.g0;
+      col.g0 = glyph();
+      col.row++;
+
+      if (col.row > rows) {
+        col.row = -Math.floor(Math.random() * 14) - 1;
+        col.rate = col.tier.min + Math.random() * col.tier.span;
+        col.g0 = col.g1 = col.g2 = '';
+        return;
+      }
+
+      if (col.tier.font !== lastFont) {
+        ctx.font = col.tier.font;
+        lastFont = col.tier.font;
+      }
+      col.flash = Math.random() < 0.02;
+
+      var y = col.row * CELL;
+      paint(col.x, y - CELL * 2, col.g2, col.tier.trail);
+      paint(col.x, y - CELL, col.g1, col.tier.hot);
+      paint(col.x, y, col.g0, col.flash ? FLASH : col.tier.head);
+    };
+
     var draw = function (now) {
       ctx.globalCompositeOperation = 'destination-out';
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.055)';
+      ctx.fillStyle = 'rgba(0, 0, 0, ' + FADE + ')';
       ctx.fillRect(0, 0, width, height);
       ctx.globalCompositeOperation = 'source-over';
 
       for (var i = 0; i < columns.length; i++) {
         var col = columns[i];
         if (now < col.due) continue;
-        col.due = now + 1000 / col.rate;
-
-        var x = i * CELL;
-        var y = col.row * CELL;
-
-        // demote the previous head to plain green so the trail stays green
-        if (col.glyph && y - CELL >= 0 && y - CELL < height) {
-          ctx.fillStyle = TRAIL;
-          ctx.fillText(col.glyph, x, y - CELL);
+        var step = 1000 / col.rate;
+        var steps = 0;
+        // catch up rather than clamp, so the fast tier keeps its speed even if
+        // a tick ran late; bail out after a few so a backgrounded tab cannot
+        // come back and replay minutes of falling in one frame
+        while (now >= col.due && steps < 3) {
+          advance(col);
+          col.due += step;
+          steps++;
         }
-        if (y >= 0 && y < height) {
-          col.glyph = GLYPHS.charAt((Math.random() * GLYPHS.length) | 0);
-          ctx.fillStyle = HEAD;
-          ctx.fillText(col.glyph, x, y);
-        }
-
-        col.row++;
-        if (col.row > rows) {
-          col.row = -Math.floor(Math.random() * 14) - 1;
-          col.rate = rate();
-          col.glyph = '';
-        }
+        if (now >= col.due) col.due = now + step;
       }
     };
 
