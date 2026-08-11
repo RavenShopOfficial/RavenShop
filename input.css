@@ -371,9 +371,6 @@ body::before {
 /* while the hero line is still resolving its characters */
 .decrypting { text-shadow: 0 0 10px rgba(0, 255, 85, 0.45); }
 
-/* konami mode turns the particle canvas into matrix rain, so let it show */
-body.matrix-mode #particles-bg { opacity: 0.9; }
-
 /* Anyone who asked their OS to reduce motion gets a still page and their own
    cursor back: no particles, no float, no glitch, no ping, no scanlines. */
 @media (prefers-reduced-motion: reduce) {

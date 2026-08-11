@@ -58,7 +58,6 @@
       },
       click: function () { blip(520, 240, 70, 0.045, 'square'); },
       lock: function () { blip(1780, 0, 24, 0.032, 'square'); },
-      granted: function () { blip(420, 1700, 280, 0.055, 'sawtooth'); },
     };
   })();
 
@@ -75,8 +74,6 @@
        3. the particle canvas was doing full-resolution work every frame on the
           same thread that positions the cursor (see the canvas block below).
      --------------------------------------------------------------------- */
-  var setMatrix = null; // wired up by the particle block
-
   if (window.matchMedia('(pointer: fine)').matches && !reduceMotion) {
     var crosshair = document.getElementById('custom-cursor-crosshair');
     var inner = crosshair.querySelector('.crosshair-inner');
@@ -193,120 +190,112 @@
   }, { passive: true });
 
   /* ---------------------------------------------------------------------
-     Background particles (and, if you know the code, matrix rain)
+     Background rain
 
-     Starts only once the browser is idle so it never competes with the first
-     paint. Dots of a similar alpha share one batched path instead of a fill()
-     each. Half the count on phones, frozen while the tab is hidden, resize
-     debounced (a collapsing mobile URL bar fires resize on every scroll).
+     Sits on the same canvas the drifting dots used to: fixed, z-index -1 and
+     pointer-events:none, so it is always behind the text and never eats a
+     click. Cards are ~90% opaque, so it reads as depth behind them rather
+     than noise on top of them.
 
-     Two changes specifically to keep the main thread free for the cursor: the
-     backing store renders at half resolution — these are sub-pixel blurs at
-     60% opacity, so three quarters of the pixel work was invisible — and the
-     loop is capped near 32fps, which drifting dots cannot be told apart from
-     60. Matrix mode switches back to full resolution because it draws glyphs.
+     Deliberately slow: each column advances one row every 1/rate seconds with
+     its own rate, so the cascade steps like the original instead of sliding.
+     The loop ticks at ~15fps, which is plenty for something this unhurried and
+     leaves the main thread free for the cursor.
+
+     The trail comes from fading the whole canvas each tick with
+     destination-out, which lowers existing alpha toward transparent. Painting
+     a translucent dark rectangle instead — the usual trick — would accumulate
+     opacity until the canvas became a solid sheet hiding the page's grid.
      --------------------------------------------------------------------- */
   var canvas = document.getElementById('particles-bg');
 
   if (canvas && !reduceMotion) {
     var ctx = canvas.getContext('2d', { alpha: true });
-    var TAU = Math.PI * 2;
-    var BUCKETS = 5;
-    var FILLS = [];
-    for (var b = 0; b < BUCKETS; b++) {
-      FILLS.push('rgba(0, 255, 85, ' + (0.1 + (b + 0.5) * (0.4 / BUCKETS)).toFixed(3) + ')');
-    }
+    var GLYPHS = 'アカサタナハマヤラワイキシチニヒミリヰウクスツヌフムユル0123456789RAVENSHOP';
+    var CELL = 20;
+    var TICK = 66;
+    var HEAD = 'rgba(198, 255, 222, 0.92)';
+    var TRAIL = 'rgba(0, 255, 85, 0.8)';
 
-    var width = 0;   // CSS pixels; the context is scaled to the backing store
+    var width = 0;
     var height = 0;
-    var buckets = [];
+    var rows = 0;
+    var columns = [];
     var raf = 0;
     var lastAt = 0;
-    var matrix = null;
+
+    var rate = function () { return 1.5 + Math.random() * 2.4; }; // rows / second
 
     var sizeCanvas = function () {
-      var scale = matrix ? 1 : 0.5;
       width = window.innerWidth;
       height = window.innerHeight;
-      canvas.width = Math.round(width * scale);
-      canvas.height = Math.round(height * scale);
-      ctx.setTransform(scale, 0, 0, scale, 0, 0);
+      canvas.width = width;
+      canvas.height = height;
+      // resetting width clears all context state, so restore it here
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.font = '15px ui-monospace, SFMono-Regular, Menlo, monospace';
+      ctx.textBaseline = 'top';
+      rows = Math.ceil(height / CELL) + 1;
     };
 
     var seed = function () {
-      var count = window.innerWidth < 768 ? 30 : 60;
-      buckets = [];
-      for (var i = 0; i < BUCKETS; i++) buckets.push([]);
-      for (var j = 0; j < count; j++) {
-        var opacity = Math.random() * 0.4 + 0.1;
-        var bucket = Math.min(BUCKETS - 1, Math.floor(((opacity - 0.1) / 0.4) * BUCKETS));
-        buckets[bucket].push({
-          x: Math.random() * width,
-          y: Math.random() * height,
-          size: Math.random() * 1.5 + 0.5,
-          // doubled so apparent speed survives the halved frame rate
-          speedY: (Math.random() * -0.5 - 0.1) * 2,
-          speedX: (Math.random() - 0.5) * 0.4 * 2,
+      var count = Math.ceil(width / CELL);
+      columns = [];
+      for (var i = 0; i < count; i++) {
+        columns.push({
+          row: -Math.floor(Math.random() * rows), // stagger so it starts mid-fall
+          rate: rate(),
+          due: 0,
+          glyph: '',
         });
       }
     };
 
-    var drawParticles = function () {
-      ctx.clearRect(0, 0, width, height);
-      for (var k = 0; k < BUCKETS; k++) {
-        var list = buckets[k];
-        if (!list.length) continue;
-        ctx.fillStyle = FILLS[k];
-        ctx.beginPath();
-        for (var n = 0; n < list.length; n++) {
-          var p = list[n];
-          p.y += p.speedY;
-          p.x += p.speedX;
-          if (p.y < 0) {
-            p.y = height;
-            p.x = Math.random() * width;
-          }
-          ctx.moveTo(p.x + p.size, p.y);
-          ctx.arc(p.x, p.y, p.size, 0, TAU);
-        }
-        ctx.fill();
-      }
-    };
-
-    var drawMatrix = function () {
-      ctx.fillStyle = 'rgba(3, 5, 4, 0.10)';
+    var draw = function (now) {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.055)';
       ctx.fillRect(0, 0, width, height);
-      ctx.font = '15px ui-monospace, monospace';
-      ctx.fillStyle = '#00FF55';
-      for (var i = 0; i < matrix.cols; i++) {
-        ctx.fillText(matrix.chars[(Math.random() * matrix.chars.length) | 0], i * 16, matrix.y[i]);
-        matrix.y[i] += 16;
-        if (matrix.y[i] > height && Math.random() > 0.975) matrix.y[i] = 0;
+      ctx.globalCompositeOperation = 'source-over';
+
+      for (var i = 0; i < columns.length; i++) {
+        var col = columns[i];
+        if (now < col.due) continue;
+        col.due = now + 1000 / col.rate;
+
+        var x = i * CELL;
+        var y = col.row * CELL;
+
+        // demote the previous head to plain green so the trail stays green
+        if (col.glyph && y - CELL >= 0 && y - CELL < height) {
+          ctx.fillStyle = TRAIL;
+          ctx.fillText(col.glyph, x, y - CELL);
+        }
+        if (y >= 0 && y < height) {
+          col.glyph = GLYPHS.charAt((Math.random() * GLYPHS.length) | 0);
+          ctx.fillStyle = HEAD;
+          ctx.fillText(col.glyph, x, y);
+        }
+
+        col.row++;
+        if (col.row > rows) {
+          col.row = -Math.floor(Math.random() * 14) - 1;
+          col.rate = rate();
+          col.glyph = '';
+        }
       }
     };
 
     var frame = function (now) {
       raf = requestAnimationFrame(frame);
-      if (now - lastAt < (matrix ? 45 : 30)) return;
+      if (now - lastAt < TICK) return;
       lastAt = now;
-      if (matrix) drawMatrix();
-      else drawParticles();
+      draw(now);
     };
 
     var start = function () {
       sizeCanvas();
       seed();
       if (!raf) raf = requestAnimationFrame(frame);
-    };
-
-    setMatrix = function (on) {
-      matrix = on ? { cols: 0, y: [], chars: 'アカサタナハマヤラワ0123456789RAVENSHOP<>/*' } : null;
-      sizeCanvas();
-      if (matrix) {
-        matrix.cols = Math.ceil(width / 16);
-        for (var i = 0; i < matrix.cols; i++) matrix.y[i] = Math.random() * -height;
-      }
-      ctx.clearRect(0, 0, width, height);
     };
 
     document.addEventListener('visibilitychange', function () {
@@ -325,7 +314,7 @@
         // Ignore the pure-height jitter a collapsing mobile toolbar produces.
         if (window.innerWidth === width && Math.abs(window.innerHeight - height) < 120) return;
         sizeCanvas();
-        if (matrix) setMatrix(true);
+        seed();
       }, 200);
     }, { passive: true });
 
@@ -606,77 +595,4 @@
     }
   }
 
-  /* ---------------------------------------------------------------------
-     ↑↑↓↓←→←→BA — turns the particle canvas into matrix rain. Esc or 25s ends
-     it. Reuses the #toast element, which until now was markup nothing called.
-     --------------------------------------------------------------------- */
-  var toast = document.getElementById('toast');
-  var toastMsg = document.getElementById('toast-msg');
-  var toastTimer = 0;
-
-  var showToast = function (message, good) {
-    if (!toast) return;
-    toastMsg.textContent = message;
-    toast.classList.toggle('bg-red-500/90', !good);
-    toast.classList.toggle('border-red-400', !good);
-    toast.classList.toggle('bg-gaming-neon/20', !!good);
-    toast.classList.toggle('border-gaming-neon', !!good);
-    toast.classList.remove('opacity-0');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { toast.classList.add('opacity-0'); }, 2800);
-  };
-
-  /* Matched on e.code — the physical key — not e.key. On a Persian layout the
-     "b" key reports e.key === 'ذ', so a key-based match could never finish the
-     code on the keyboard most of this site's visitors are using.
-     Two ways in: the classic code, or just typing "raven". */
-  var CODES = {
-    ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right',
-    KeyA: 'a', KeyB: 'b', KeyE: 'e', KeyN: 'n', KeyR: 'r', KeyV: 'v',
-  };
-  var SEQUENCES = [
-    ['up', 'up', 'down', 'down', 'left', 'right', 'left', 'right', 'b', 'a'],
-    ['r', 'a', 'v', 'e', 'n'],
-  ];
-  var progress = [0, 0];
-  var matrixTimer = 0;
-
-  var exitMatrix = function () {
-    clearTimeout(matrixTimer);
-    if (!document.body.classList.contains('matrix-mode')) return;
-    document.body.classList.remove('matrix-mode');
-    if (setMatrix) setMatrix(false);
-  };
-
-  var enterMatrix = function () {
-    if (!setMatrix) return; // reduced motion, or no canvas
-    document.body.classList.add('matrix-mode');
-    setMatrix(true);
-    Sound.granted();
-    showToast('ACCESS GRANTED // RAVEN MODE', true);
-    clearTimeout(matrixTimer);
-    matrixTimer = setTimeout(exitMatrix, 25000);
-  };
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' || e.code === 'Escape') { exitMatrix(); return; }
-    // don't hunt for the code while someone is typing in the search box
-    if (e.target && /^(input|textarea)$/i.test(e.target.tagName)) return;
-
-    var token = CODES[e.code] || (e.key || '').toLowerCase().replace(/^arrow/, '');
-    if (!token) return;
-
-    for (var i = 0; i < SEQUENCES.length; i++) {
-      var seq = SEQUENCES[i];
-      var at = progress[i];
-      progress[i] = token === seq[at] ? at + 1 : (token === seq[0] ? 1 : 0);
-      if (progress[i] === seq.length) {
-        progress = [0, 0];
-        enterMatrix();
-        return;
-      }
-    }
-    // arrow keys are deliberately left alone: swallowing them mid-sequence would
-    // break keyboard scrolling for anyone pressing up twice in a row
-  });
 })();
