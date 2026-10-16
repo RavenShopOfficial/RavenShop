@@ -594,7 +594,11 @@
      scrambled line could otherwise wrap and shift everything below it.
      --------------------------------------------------------------------- */
   var heroLine = document.getElementById('heroLine');
-  if (heroLine && !reduceMotion) {
+  var coarsePointer = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+  var decryptSeen = false;
+  try { decryptSeen = !!sessionStorage.getItem('rs-decrypt-done'); } catch (e) {}
+  if (heroLine && !reduceMotion && !coarsePointer && !decryptSeen) {
+    try { sessionStorage.setItem('rs-decrypt-done', '1'); } catch (e) {}
     var FA_POOL = 'ابپتثجچحخدذرزژسشصضطظعغفقکگلمنوهی';
     var EN_POOL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%&*/<>';
 
@@ -612,8 +616,9 @@
     };
 
     var totalChars = parts.reduce(function (sum, p) { return sum + p.text.length; }, 0);
-    var DECRYPT_MS = 1300;
+    var DECRYPT_MS = 700;
     var startedAt = 0;
+    var lastPaint = 0;
 
     var restore = function () {
       parts.forEach(function (p) { p.node.nodeValue = p.text; });
@@ -625,6 +630,9 @@
     var decryptFrame = function (now) {
       if (!startedAt) startedAt = now;
       var progress = Math.min(1, (now - startedAt) / DECRYPT_MS);
+      /* ~20fps is plenty for a scramble; 60fps just rewrites the DOM. */
+      if (progress < 1 && now - lastPaint < 50) { requestAnimationFrame(decryptFrame); return; }
+      lastPaint = now;
       var settled = Math.floor(progress * totalChars);
       var seen = 0;
       for (var i = 0; i < parts.length; i++) {
@@ -648,5 +656,9 @@
       }, 260);
     }
   }
+
+  /* Footer copyright year: always current, no yearly edit needed. */
+  var yearEl = document.getElementById('copyright-year');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
 
 })();

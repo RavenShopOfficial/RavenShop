@@ -68,6 +68,15 @@ body::before {
   border-bottom: 1px solid rgba(0, 255, 85, 0.1);
 }
 
+/* Visible keyboard focus: the FAQ buttons remove the default outline, so
+   keyboard users get a neon ring instead. :focus-visible never matches mouse
+   focus, so mouse users see nothing new. */
+:focus-visible {
+  outline: 2px solid #00FF55;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
 /* Icons are inline SVG now (see the <symbol> sprite at the top of <body>).
    height:1em + width:auto + vertical-align:-.125em reproduces how an icon-font
    glyph sat on the text baseline, so every existing text-size, colour and
@@ -364,7 +373,7 @@ body::before {
 }
 @keyframes chipFloat {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-12px); }
+  50% { transform: translateY(-6px); }
 }
 
 /* --- CRT SCANLINES --------------------------------------------------------
