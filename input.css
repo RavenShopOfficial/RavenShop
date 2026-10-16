@@ -323,9 +323,49 @@ body::before {
   );
   -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
   mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
-  animation: ringSpin 3.6s linear infinite;
+  animation: ringSpin 8s linear infinite;
 }
 @keyframes ringSpin { to { transform: rotate(1turn); } }
+
+/* --- AURA PULSE + FLOATING GLASS CHIPS (tetalla-inspired hero motion) --------
+   Gentle perpetual motion around the hero logo: a breathing glow behind it and
+   staggered glass chips floating around it, like the price chips on
+   tetalla.bond. */
+.aura {
+  position: absolute;
+  inset: -44px;
+  border-radius: 9999px;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(0, 255, 85, 0.20) 0%, rgba(0, 255, 85, 0.06) 45%, transparent 70%);
+  animation: auraPulse 4s ease-in-out infinite alternate;
+}
+@keyframes auraPulse {
+  from { transform: scale(0.92); opacity: 0.55; }
+  to { transform: scale(1.08); opacity: 1; }
+}
+
+.glass-chip {
+  position: absolute;
+  z-index: 20;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(10, 13, 10, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 255, 85, 0.18);
+  border-radius: 16px;
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.6), 0 0 20px -5px rgba(0, 255, 85, 0.15);
+  padding: 0.6rem 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #e5e7eb;
+  white-space: nowrap;
+  animation: chipFloat 6s ease-in-out infinite;
+}
+@keyframes chipFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
 
 /* --- CRT SCANLINES --------------------------------------------------------
    Deliberately near-invisible (5.5% alpha over a 4px pitch). Desktop only: at
@@ -389,6 +429,8 @@ body::before {
 .rs-plain body::after { display: none; }
 .rs-plain .glass-panel { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(3, 5, 4, 0.94); }
 .rs-plain .logo-ring::before { display: none; }
+.rs-plain .aura { display: none; }
+.rs-plain .glass-chip { display: none; }
 .rs-plain .hover-glitch:hover { animation: none; }
 .rs-plain .animate-float, .rs-plain .animate-wave, .rs-plain .animate-pulse-slow,
 .rs-plain .animate-ping, .rs-plain .ekg-line-animated { animation: none; }
